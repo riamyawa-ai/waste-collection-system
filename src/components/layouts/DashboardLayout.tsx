@@ -2,12 +2,14 @@
 
 import { useState, useEffect, createContext } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
-import { Bell, Search, User, LogOut, ChevronDown } from "lucide-react";
+import { Search, User, LogOut, ChevronDown, Settings } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { signOut } from "@/lib/auth/actions";
+import { NotificationsCenter } from "@/components/shared/NotificationsCenter";
 
 // Context for sidebar state
 export const SidebarContext = createContext<{
@@ -146,11 +148,8 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
 
             {/* Actions */}
             <div className="flex items-center gap-3">
-              {/* Notifications */}
-              <button className="relative p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-500 rounded-full" />
-              </button>
+              {/* Notifications Center */}
+              <NotificationsCenter />
 
               <div className="h-8 w-px bg-neutral-200" />
 
@@ -195,13 +194,22 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                         <p className="text-xs text-neutral-500">{user?.email}</p>
                       </div>
                       <div className="py-1">
-                        <a
-                          href={`/${role}/settings`}
+                        <Link
+                          href={`/${role}/profile`}
                           className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+                          onClick={() => setShowUserMenu(false)}
                         >
                           <User className="w-4 h-4" />
                           Profile Settings
-                        </a>
+                        </Link>
+                        <Link
+                          href={`/${role}/notifications`}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <Settings className="w-4 h-4" />
+                          View All Notifications
+                        </Link>
                       </div>
                       <div className="border-t border-neutral-100 py-1">
                         <button

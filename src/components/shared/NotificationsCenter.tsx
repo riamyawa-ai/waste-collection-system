@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import {
     Bell,
     BellOff,
@@ -18,6 +19,7 @@ import {
     Filter,
     X,
     RefreshCw,
+    ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -270,7 +272,7 @@ export function NotificationsCenter({ className }: NotificationsCenterProps) {
                 </div>
 
                 {/* Notifications List */}
-                <ScrollArea className="h-[400px]">
+                <ScrollArea className="h-[350px]">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center py-12 text-center px-4">
                             <RefreshCw className="h-8 w-8 animate-spin text-primary-600 mb-3" />
@@ -347,8 +349,8 @@ export function NotificationsCenter({ className }: NotificationsCenterProps) {
                 </ScrollArea>
 
                 {/* Footer */}
-                {filteredNotifications.length > 0 && (
-                    <div className="flex items-center justify-between p-3 border-t bg-neutral-50">
+                <div className="flex items-center justify-between p-3 border-t bg-neutral-50">
+                    <div className="flex items-center gap-1">
                         <Button
                             variant="ghost"
                             size="sm"
@@ -369,7 +371,15 @@ export function NotificationsCenter({ className }: NotificationsCenterProps) {
                             Clear read
                         </Button>
                     </div>
-                )}
+                    <Link
+                        href="/client/notifications"
+                        className="text-xs font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        View All
+                        <ArrowRight className="h-3 w-3" />
+                    </Link>
+                </div>
             </PopoverContent>
         </Popover>
     );

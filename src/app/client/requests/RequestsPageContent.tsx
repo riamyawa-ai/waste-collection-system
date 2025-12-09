@@ -14,8 +14,9 @@ import {
     RequestPickupModal,
     RequestsTable,
     CancelRequestModal,
+    EditRequestModal,
 } from '@/components/client';
-import { getClientRequests } from '@/lib/actions/requests';
+import { getClientRequests, getRequestById } from '@/lib/actions/requests';
 import { PANABO_BARANGAYS } from '@/constants/barangays';
 import { PRIORITY_LEVELS } from '@/constants/status';
 import type { RequestStatus, PriorityLevel } from '@/constants/status';
@@ -54,6 +55,20 @@ export function RequestsPageContent() {
     const [cancelingRequest, setCancelingRequest] = useState<{
         id: string;
         number: string;
+    } | null>(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingRequest, setEditingRequest] = useState<{
+        id: string;
+        request_number: string;
+        barangay: string;
+        address: string;
+        priority: PriorityLevel;
+        preferred_date: string;
+        preferred_time_slot: string;
+        contact_number: string;
+        alt_contact_number?: string;
+        special_instructions?: string;
+        requester_name?: string;
     } | null>(null);
     const [showFilters, setShowFilters] = useState(false);
 
@@ -156,8 +171,33 @@ export function RequestsPageContent() {
         router.push(`/client/requests/${id}`);
     };
 
-    const handleEditRequest = (id: string) => {
-        router.push(`/client/requests/${id}/edit`);
+    const handleEditRequest = async (id: string) => {
+        // Fetch full request data and open the edit modal
+        const result = await getRequestById(id);
+        if (result.success && result.data) {
+            setEditingRequest({
+                id: result.data.id,
+                request_number: result.data.request_number,
+                barangay: result.data.barangay,
+                address: result.data.address,
+                priority: result.data.priority,
+                preferred_date: result.data.preferred_date,
+                preferred_time_slot: result.data.preferred_time_slot,
+                contact_number: result.data.contact_number,
+                alt_contact_number: result.data.alt_contact_number || undefined,
+                special_instructions: result.data.special_instructions || undefined,
+                requester_name: result.data.requester_name || undefined,
+            });
+            setShowEditModal(true);
+        } else {
+            console.error('Failed to fetch request for editing:', result.error);
+        }
+    };
+
+    const handleEditSuccess = () => {
+        setShowEditModal(false);
+        setEditingRequest(null);
+        fetchRequests();
     };
 
     const handleCancelRequest = (id: string) => {
@@ -360,6 +400,17 @@ export function RequestsPageContent() {
                     onSuccess={handleCancelSuccess}
                 />
             )}
+
+            {/* Edit Request Modal */}
+            <EditRequestModal
+                isOpen={showEditModal}
+                request={editingRequest}
+                onClose={() => {
+                    setShowEditModal(false);
+                    setEditingRequest(null);
+                }}
+                onSuccess={handleEditSuccess}
+            />
         </DashboardLayout>
     );
 }

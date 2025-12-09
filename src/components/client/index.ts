@@ -9,3 +9,4 @@ export { RequestForm } from './RequestForm';
 export { RequestPickupModal } from './RequestPickupModal';
 export { RequestsTable } from './RequestsTable';
 export { CancelRequestModal } from './CancelRequestModal';
+export { EditRequestModal } from './EditRequestModal';

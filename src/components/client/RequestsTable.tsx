@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import { format } from 'date-fns';
 import {
     Eye,
@@ -11,14 +9,19 @@ import {
     FileDown,
     ChevronLeft,
     ChevronRight,
-    Search,
-    SlidersHorizontal,
     MoreHorizontal,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { PriorityBadge } from '@/components/ui/priority-badge';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { RequestStatus } from '@/constants/status';
 import type { PriorityLevel } from '@/constants/status';
 
@@ -63,18 +66,12 @@ export function RequestsTable({
     onTrack,
     isLoading = false,
 }: RequestsTableProps) {
-    const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
-
     const canEdit = (status: RequestStatus) => status === 'pending';
     const canCancel = (status: RequestStatus) =>
         ['pending', 'accepted'].includes(status);
     const canTrack = (status: RequestStatus) =>
         ['assigned', 'accepted_by_collector', 'en_route', 'at_location', 'in_progress'].includes(status);
     const canDownload = (status: RequestStatus) => status === 'completed';
-
-    const toggleActionMenu = (id: string) => {
-        setOpenActionMenu(openActionMenu === id ? null : id);
-    };
 
     return (
         <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
@@ -194,91 +191,58 @@ export function RequestsTable({
                                                 <Eye className="w-4 h-4" />
                                             </button>
 
-                                            {/* More actions */}
-                                            <div className="relative">
-                                                <button
-                                                    onClick={() => toggleActionMenu(request.id)}
-                                                    className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-                                                >
-                                                    <MoreHorizontal className="w-4 h-4" />
-                                                </button>
+                                            {/* More actions dropdown - Uses portal to escape overflow */}
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <button
+                                                        className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                                                    >
+                                                        <MoreHorizontal className="w-4 h-4" />
+                                                    </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-48">
+                                                    <DropdownMenuItem onClick={() => onView(request.id)}>
+                                                        <Eye className="w-4 h-4 mr-2" />
+                                                        View Details
+                                                    </DropdownMenuItem>
 
-                                                {openActionMenu === request.id && (
-                                                    <>
-                                                        <div
-                                                            className="fixed inset-0 z-10"
-                                                            onClick={() => setOpenActionMenu(null)}
-                                                        />
-                                                        <div className="absolute right-0 top-full mt-1 z-20 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 py-1">
-                                                            <button
-                                                                onClick={() => {
-                                                                    onView(request.id);
-                                                                    setOpenActionMenu(null);
-                                                                }}
-                                                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+                                                    {canEdit(request.status) && onEdit && (
+                                                        <DropdownMenuItem onClick={() => onEdit(request.id)}>
+                                                            <Edit className="w-4 h-4 mr-2" />
+                                                            Edit Request
+                                                        </DropdownMenuItem>
+                                                    )}
+
+                                                    {canTrack(request.status) && onTrack && (
+                                                        <DropdownMenuItem onClick={() => onTrack(request.id)}>
+                                                            <MapPin className="w-4 h-4 mr-2" />
+                                                            Track Collector
+                                                        </DropdownMenuItem>
+                                                    )}
+
+                                                    {canDownload(request.status) && (
+                                                        <DropdownMenuItem onClick={() => {
+                                                            // TODO: Download receipt
+                                                        }}>
+                                                            <FileDown className="w-4 h-4 mr-2" />
+                                                            Download Receipt
+                                                        </DropdownMenuItem>
+                                                    )}
+
+                                                    {canCancel(request.status) && onCancel && (
+                                                        <>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                onClick={() => onCancel(request.id)}
+                                                                className="text-red-600 focus:text-red-600 focus:bg-red-50"
                                                             >
-                                                                <Eye className="w-4 h-4" />
-                                                                View Details
-                                                            </button>
-
-                                                            {canEdit(request.status) && onEdit && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        onEdit(request.id);
-                                                                        setOpenActionMenu(null);
-                                                                    }}
-                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
-                                                                >
-                                                                    <Edit className="w-4 h-4" />
-                                                                    Edit Request
-                                                                </button>
-                                                            )}
-
-                                                            {canTrack(request.status) && onTrack && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        onTrack(request.id);
-                                                                        setOpenActionMenu(null);
-                                                                    }}
-                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
-                                                                >
-                                                                    <MapPin className="w-4 h-4" />
-                                                                    Track Collector
-                                                                </button>
-                                                            )}
-
-                                                            {canDownload(request.status) && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        // TODO: Download receipt
-                                                                        setOpenActionMenu(null);
-                                                                    }}
-                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
-                                                                >
-                                                                    <FileDown className="w-4 h-4" />
-                                                                    Download Receipt
-                                                                </button>
-                                                            )}
-
-                                                            {canCancel(request.status) && onCancel && (
-                                                                <>
-                                                                    <div className="border-t border-neutral-100 my-1" />
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            onCancel(request.id);
-                                                                            setOpenActionMenu(null);
-                                                                        }}
-                                                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                                                                    >
-                                                                        <XCircle className="w-4 h-4" />
-                                                                        Cancel Request
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
+                                                                <XCircle className="w-4 h-4 mr-2" />
+                                                                Cancel Request
+                                                            </DropdownMenuItem>
+                                                        </>
+                                                    )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
                                     </td>
                                 </tr>
