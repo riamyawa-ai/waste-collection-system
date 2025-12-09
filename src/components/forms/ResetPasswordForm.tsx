@@ -9,6 +9,7 @@ import { AlertCircle, CheckCircle, Recycle, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordStrengthMeter } from "@/components/ui/password-strength";
 import { resetPasswordSchema, type ResetPasswordFormData } from "@/lib/validators/auth";
@@ -93,10 +94,10 @@ export function ResetPasswordForm() {
             <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
                 {/* Error Alert */}
                 {error && (
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <p className="text-sm">{error}</p>
-                    </div>
+                    <Alert variant="destructive">
+                        <AlertCircle className="w-4 h-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
                 )}
 
                 {/* Password Field */}

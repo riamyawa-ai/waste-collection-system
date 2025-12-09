@@ -9,6 +9,7 @@ import { Mail, ArrowLeft, AlertCircle, CheckCircle, Recycle } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validators/auth";
 import { forgotPassword, type AuthActionResult } from "@/lib/auth/actions";
 
@@ -96,10 +97,10 @@ export function ForgotPasswordForm() {
             <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
                 {/* Error Alert */}
                 {error && (
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <p className="text-sm">{error}</p>
-                    </div>
+                    <Alert variant="destructive">
+                        <AlertCircle className="w-4 h-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
                 )}
 
                 {/* Email Field */}

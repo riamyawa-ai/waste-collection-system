@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
@@ -121,10 +122,10 @@ export function PhotoUploader({
 
             {/* Error message */}
             {(uploadError || error) && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <p className="text-sm">{uploadError || error}</p>
-                </div>
+                <Alert variant="destructive">
+                    <AlertCircle className="w-4 h-4" />
+                    <AlertDescription>{uploadError || error}</AlertDescription>
+                </Alert>
             )}
 
             {/* Photo previews */}
