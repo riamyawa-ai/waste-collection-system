@@ -1,9 +1,4 @@
-// Forms components will be added in Day 2+
-// This folder will contain reusable form components like:
-// - CollectionRequestForm
-// - LoginForm  
-// - RegisterForm
-// - ProfileForm
-// - etc.
-
-export {};
+export { LoginForm } from "./LoginForm";
+export { RegisterForm } from "./RegisterForm";
+export { ForgotPasswordForm } from "./ForgotPasswordForm";
+export { ResetPasswordForm } from "./ResetPasswordForm";
