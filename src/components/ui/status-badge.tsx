@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 import { STATUS_COLORS, STATUS_LABELS, type RequestStatus } from "@/constants/status";
 
-interface StatusBadgeProps {
+export interface StatusBadgeProps {
   status: RequestStatus;
   className?: string;
   showDot?: boolean;
+  size?: "sm" | "md" | "lg";
 }
 
 // Dot color mapping for each status
@@ -23,7 +24,24 @@ const DOT_COLORS: Record<RequestStatus, string> = {
   cancelled: "bg-gray-500",
 };
 
-export function StatusBadge({ status, className, showDot = true }: StatusBadgeProps) {
+const SIZE_STYLES = {
+  sm: "px-2 py-0.5 text-xs gap-1",
+  md: "px-2.5 py-1 text-xs gap-1.5",
+  lg: "px-3 py-1.5 text-sm gap-2",
+};
+
+const DOT_SIZES = {
+  sm: "w-1 h-1",
+  md: "w-1.5 h-1.5",
+  lg: "w-2 h-2",
+};
+
+export function StatusBadge({
+  status,
+  className,
+  showDot = true,
+  size = "md"
+}: StatusBadgeProps) {
   const colors = STATUS_COLORS[status];
   const label = STATUS_LABELS[status];
   const dotColor = DOT_COLORS[status];
@@ -31,7 +49,8 @@ export function StatusBadge({ status, className, showDot = true }: StatusBadgePr
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border",
+        "inline-flex items-center rounded-full font-medium border",
+        SIZE_STYLES[size],
         colors.bg,
         colors.text,
         colors.border,
@@ -39,7 +58,7 @@ export function StatusBadge({ status, className, showDot = true }: StatusBadgePr
       )}
     >
       {showDot && (
-        <span className={cn("w-1.5 h-1.5 rounded-full", dotColor)} />
+        <span className={cn("rounded-full", DOT_SIZES[size], dotColor)} />
       )}
       {label}
     </span>

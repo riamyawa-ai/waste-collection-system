@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { APP_NAME } from "@/constants";
 import {
@@ -20,6 +19,8 @@ import {
   BarChart3,
   Calendar,
 } from "lucide-react";
+import { signOut } from "@/lib/auth/actions";
+import { useState } from "react";
 
 interface NavItem {
   label: string;
@@ -30,13 +31,15 @@ interface NavItem {
 
 interface SidebarProps {
   role: "client" | "staff" | "collector" | "admin";
+  collapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
 }
 
 const navItemsByRole: Record<string, NavItem[]> = {
   client: [
     { label: "Dashboard", href: "/client/dashboard", icon: LayoutDashboard },
     { label: "My Requests", href: "/client/requests", icon: FileText },
-    { label: "New Request", href: "/client/requests/new", icon: Recycle },
+    { label: "Schedule", href: "/client/schedule", icon: Calendar },
     { label: "Notifications", href: "/client/notifications", icon: Bell },
     { label: "Settings", href: "/client/settings", icon: Settings },
   ],
@@ -68,20 +71,37 @@ const navItemsByRole: Record<string, NavItem[]> = {
   ],
 };
 
-export function Sidebar({ role }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+export function Sidebar({ role, collapsed = false, onCollapsedChange }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navItems = navItemsByRole[role] || [];
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const toggleCollapsed = () => {
+    onCollapsedChange?.(!collapsed);
+  };
 
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-white border-r border-neutral-200 transition-all duration-300",
+        "fixed left-0 top-0 z-40 h-screen bg-white border-r border-neutral-200 transition-all duration-300 flex flex-col",
         collapsed ? "w-20" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-200">
+      <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-200 shrink-0">
         <Link href="/" className="flex items-center gap-3">
           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-eco shrink-0">
             <Recycle className="w-5 h-5 text-white" />
@@ -93,8 +113,9 @@ export function Sidebar({ role }: SidebarProps) {
           )}
         </Link>
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={toggleCollapsed}
           className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <ChevronLeft
             className={cn(
@@ -108,7 +129,7 @@ export function Sidebar({ role }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           return (
             <Link
               key={item.href}
@@ -119,6 +140,7 @@ export function Sidebar({ role }: SidebarProps) {
                   ? "bg-primary-50 text-primary-700"
                   : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
               )}
+              title={collapsed ? item.label : undefined}
             >
               <item.icon
                 className={cn(
@@ -144,17 +166,23 @@ export function Sidebar({ role }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-neutral-200 space-y-1">
+      <div className="p-3 border-t border-neutral-200 space-y-1 shrink-0">
         <Link
           href="/help"
           className="flex items-center gap-3 px-3 py-2.5 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 rounded-lg transition-colors"
+          title={collapsed ? "Help" : undefined}
         >
           <HelpCircle className="w-5 h-5 shrink-0 text-neutral-400" />
           {!collapsed && <span className="font-medium">Help</span>}
         </Link>
-        <button className="flex items-center gap-3 w-full px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="flex items-center gap-3 w-full px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+          title={collapsed ? "Log out" : undefined}
+        >
           <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && <span className="font-medium">Log out</span>}
+          {!collapsed && <span className="font-medium">{isLoggingOut ? 'Logging out...' : 'Log out'}</span>}
         </button>
       </div>
     </aside>

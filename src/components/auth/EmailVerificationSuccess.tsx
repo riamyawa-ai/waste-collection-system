@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle, Recycle, Loader2 } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { APP_NAME } from "@/constants";
 
 export function EmailVerificationSuccess() {
     const searchParams = useSearchParams();
@@ -37,7 +38,7 @@ export function EmailVerificationSuccess() {
                     Email Verified!
                 </h1>
                 <p className="text-neutral-600 mb-6">
-                    Your email has been successfully verified. You can now access all features of EcoCollect Panabo.
+                    Your email has been successfully verified. You can now access all features of {APP_NAME}.
                 </p>
 
                 {/* Auto-redirect notice */}

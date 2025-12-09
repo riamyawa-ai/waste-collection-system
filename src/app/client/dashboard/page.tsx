@@ -40,11 +40,13 @@ async function CalendarWrapper() {
   const result = await getClientRequests({ limit: 100 });
 
   const events = result.success && result.data?.requests
-    ? result.data.requests.map((req) => ({
+    ? result.data.requests.map((req: { id: string; preferred_date: string; status: string; request_number: string; barangay?: string; preferred_time_slot?: string }) => ({
       id: req.id,
       date: req.preferred_date,
       status: req.status as RequestStatus,
       title: req.request_number,
+      barangay: req.barangay,
+      time_slot: req.preferred_time_slot,
     }))
     : [];
 

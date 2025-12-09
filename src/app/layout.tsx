@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "recycling",
     "Davao del Norte",
   ],
-  authors: [{ name: "EcoCollect Panabo Team" }],
+  authors: [{ name: `${APP_NAME} Team` }],
   openGraph: {
     type: "website",
     locale: "en_PH",

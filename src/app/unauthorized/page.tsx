@@ -2,9 +2,10 @@ import Link from "next/link";
 import { ShieldX, ArrowLeft, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Metadata } from "next";
+import { APP_NAME } from "@/constants";
 
 export const metadata: Metadata = {
-    title: "Unauthorized | EcoCollect Panabo",
+    title: `Unauthorized | ${APP_NAME}`,
     description: "You don't have permission to access this page.",
 };
 
