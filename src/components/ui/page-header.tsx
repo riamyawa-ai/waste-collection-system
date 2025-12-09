@@ -4,6 +4,7 @@ interface PageHeaderProps {
   title: string;
   description?: string;
   children?: React.ReactNode;
+  action?: React.ReactNode;
   className?: string;
 }
 
@@ -11,8 +12,11 @@ export function PageHeader({
   title,
   description,
   children,
+  action,
   className,
 }: PageHeaderProps) {
+  const actionContent = action || children;
+
   return (
     <div
       className={cn(
@@ -30,7 +34,8 @@ export function PageHeader({
           </p>
         )}
       </div>
-      {children && <div className="flex items-center gap-3">{children}</div>}
+      {actionContent && <div className="flex items-center gap-3">{actionContent}</div>}
     </div>
   );
 }
+

@@ -1,6 +1,68 @@
-import { DashboardLayout } from "@/components/layouts";
-import { PageHeader, StatCard, EcoCard, EcoCardContent } from "@/components/ui";
-import { FileText, Clock, CheckCircle2, Truck } from "lucide-react";
+import { Suspense } from 'react';
+import { DashboardLayout } from '@/components/layouts';
+import { PageHeader } from '@/components/ui';
+import {
+  DashboardStats,
+  DashboardStatsSkeleton,
+  CollectionCalendar,
+  CollectionCalendarSkeleton,
+  QuickActions,
+  RecentActivity,
+  RecentActivitySkeleton,
+} from '@/components/client';
+import {
+  getClientDashboardStats,
+  getClientRecentActivity,
+  getClientRequests,
+} from '@/lib/actions/requests';
+import type { RequestStatus } from '@/constants/status';
+
+// Force dynamic rendering since this page uses authentication
+export const dynamic = 'force-dynamic';
+
+// Server component for fetching stats
+async function DashboardStatsWrapper() {
+  const result = await getClientDashboardStats();
+
+  if (!result.success || !result.data) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-700">
+        Unable to load statistics
+      </div>
+    );
+  }
+
+  return <DashboardStats stats={result.data} />;
+}
+
+// Server component for fetching calendar events
+async function CalendarWrapper() {
+  const result = await getClientRequests({ limit: 100 });
+
+  const events = result.success && result.data?.requests
+    ? result.data.requests.map((req) => ({
+      id: req.id,
+      date: req.preferred_date,
+      status: req.status as RequestStatus,
+      title: req.request_number,
+    }))
+    : [];
+
+  return <CollectionCalendar events={events} />;
+}
+
+// Server component for fetching recent activity
+async function RecentActivityWrapper() {
+  const result = await getClientRecentActivity(5);
+
+  if (!result.success || !result.data) {
+    return (
+      <RecentActivity activities={[]} />
+    );
+  }
+
+  return <RecentActivity activities={result.data as never[]} />;
+}
 
 export default function ClientDashboard() {
   return (
@@ -11,47 +73,41 @@ export default function ClientDashboard() {
       />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <StatCard
-          title="Total Requests"
-          value={12}
-          icon={FileText}
-          trend={{ value: 8, isPositive: true }}
-          description="this month"
-        />
-        <StatCard
-          title="Pending"
-          value={2}
-          icon={Clock}
-          description="awaiting pickup"
-        />
-        <StatCard
-          title="Completed"
-          value={9}
-          icon={CheckCircle2}
-          trend={{ value: 12, isPositive: true }}
-          description="this month"
-        />
-        <StatCard
-          title="In Progress"
-          value={1}
-          icon={Truck}
-          description="being collected"
-        />
+      <div className="mt-6">
+        <Suspense fallback={<DashboardStatsSkeleton />}>
+          <DashboardStatsWrapper />
+        </Suspense>
       </div>
 
-      {/* Recent Activity */}
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold text-neutral-900 mb-4">
-          Recent Requests
-        </h2>
-        <EcoCard>
-          <EcoCardContent className="p-8 text-center text-neutral-500">
-            Your recent collection requests will appear here.
-            <br />
-            <span className="text-sm">(Coming in Day 2+)</span>
-          </EcoCardContent>
-        </EcoCard>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        {/* Calendar and Activity - Takes 2 columns */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Calendar */}
+          <Suspense fallback={<CollectionCalendarSkeleton />}>
+            <CalendarWrapper />
+          </Suspense>
+
+          {/* Recent Activity */}
+          <Suspense fallback={<RecentActivitySkeleton />}>
+            <RecentActivityWrapper />
+          </Suspense>
+        </div>
+
+        {/* Quick Actions - Takes 1 column */}
+        <div className="space-y-6">
+          <QuickActions />
+
+          {/* Announcements placeholder */}
+          <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="p-4 border-b border-neutral-200">
+              <h3 className="font-semibold text-neutral-900">Announcements</h3>
+            </div>
+            <div className="p-6 text-center text-neutral-500">
+              <p className="text-sm">No announcements at this time</p>
+            </div>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
