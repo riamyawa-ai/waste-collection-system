@@ -10,6 +10,8 @@ import { Mail, ArrowRight, AlertCircle, Recycle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PasswordInput } from "@/components/ui/password-input";
 import { RateLimitWarning } from "@/components/ui/rate-limit-warning";
 import { loginSchema, type LoginFormData } from "@/lib/validators/auth";
@@ -78,10 +80,10 @@ export function LoginForm() {
             <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
                 {/* Error Alert */}
                 {error && !rateLimitInfo.lockoutRemaining && (
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <p className="text-sm">{error}</p>
-                    </div>
+                    <Alert variant="destructive">
+                        <AlertCircle className="w-4 h-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
                 )}
 
                 {/* Rate Limit Warning */}
@@ -134,13 +136,11 @@ export function LoginForm() {
 
                 {/* Remember Me */}
                 <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
+                    <Checkbox
                         id="rememberMe"
-                        className="w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
                         {...register("rememberMe")}
                     />
-                    <label htmlFor="rememberMe" className="text-sm text-neutral-600">
+                    <label htmlFor="rememberMe" className="text-sm text-neutral-600 cursor-pointer">
                         Remember me for 30 days
                     </label>
                 </div>

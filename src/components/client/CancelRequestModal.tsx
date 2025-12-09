@@ -1,8 +1,19 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { X, AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cancelRequest } from '@/lib/actions/requests';
 
 interface CancelRequestModalProps {
@@ -24,8 +35,6 @@ export function CancelRequestModal({
     const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
 
-    if (!isOpen) return null;
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
@@ -42,6 +51,7 @@ export function CancelRequestModal({
             });
 
             if (result.success) {
+                setReason('');
                 onSuccess?.();
                 onClose();
             } else {
@@ -50,80 +60,68 @@ export function CancelRequestModal({
         });
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={onClose}
-            />
+    const handleOpenChange = (open: boolean) => {
+        if (!open && !isPending) {
+            setReason('');
+            setError(null);
+            onClose();
+        }
+    };
 
-            {/* Modal */}
-            <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
+    return (
+        <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
+            <AlertDialogContent className="sm:max-w-md">
+                <AlertDialogHeader>
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-lg">
+                        <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-lg shrink-0">
                             <AlertTriangle className="w-5 h-5 text-red-600" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold text-neutral-900">
-                                Cancel Request
-                            </h2>
-                            <p className="text-sm text-neutral-500">{requestNumber}</p>
+                            <AlertDialogTitle>Cancel Request</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {requestNumber}
+                            </AlertDialogDescription>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        disabled={isPending}
-                        className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-                    >
-                        <X className="w-5 h-5 text-neutral-500" />
-                    </button>
-                </div>
+                </AlertDialogHeader>
 
-                {/* Content */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <p className="text-neutral-600">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <p className="text-sm text-neutral-600">
                         Are you sure you want to cancel this request? This action cannot be
                         undone.
                     </p>
 
                     {error && (
-                        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                            {error}
-                        </div>
+                        <Alert variant="destructive">
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
                     )}
 
                     <div className="space-y-2">
-                        <label
-                            htmlFor="cancel-reason"
-                            className="block text-sm font-medium text-neutral-700"
-                        >
-                            Reason for cancellation <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
+                        <Label htmlFor="cancel-reason" required>
+                            Reason for cancellation
+                        </Label>
+                        <Textarea
                             id="cancel-reason"
                             rows={3}
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             placeholder="Please explain why you're cancelling this request..."
                             disabled={isPending}
-                            className="flex w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                             maxLength={500}
+                            className="resize-none"
                         />
                         <p className="text-xs text-neutral-400 text-right">
                             {reason.length}/500
                         </p>
                     </div>
 
-                    <div className="flex gap-3 pt-2">
+                    <AlertDialogFooter>
                         <Button
                             type="button"
                             variant="outline"
                             onClick={onClose}
                             disabled={isPending}
-                            className="flex-1"
                         >
                             Keep Request
                         </Button>
@@ -131,7 +129,6 @@ export function CancelRequestModal({
                             type="submit"
                             variant="destructive"
                             disabled={isPending || !reason.trim()}
-                            className="flex-1"
                         >
                             {isPending ? (
                                 <>
@@ -142,9 +139,9 @@ export function CancelRequestModal({
                                 'Cancel Request'
                             )}
                         </Button>
-                    </div>
+                    </AlertDialogFooter>
                 </form>
-            </div>
-        </div>
+            </AlertDialogContent>
+        </AlertDialog>
     );
 }

@@ -4,10 +4,8 @@ import { useState, useTransition, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    X,
     Edit,
     User,
-    Phone,
     MapPin,
     Calendar,
     Clock,
@@ -16,9 +14,18 @@ import {
     Loader2,
 } from 'lucide-react';
 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { BarangaySelect } from '@/components/ui/barangay-select';
 import { cn } from '@/lib/utils';
@@ -130,7 +137,7 @@ export function EditRequestModal({
         }
     }, [isOpen, request, reset]);
 
-    if (!isOpen || !request) return null;
+    if (!request) return null;
 
     const onSubmit = (data: UpdateRequestInput) => {
         setError(null);
@@ -145,52 +152,37 @@ export function EditRequestModal({
         });
     };
 
-    const handleClose = () => {
-        if (!isPending) {
+    const handleOpenChange = (open: boolean) => {
+        if (!open && !isPending) {
             onClose();
         }
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto">
-            {/* Backdrop */}
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={handleClose}
-            />
-
-            {/* Modal */}
-            <div className="relative w-full max-w-3xl mx-4 my-8 bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-                {/* Header */}
-                <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white">
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader className="bg-gradient-to-r from-primary-500 to-primary-600 text-white -m-6 mb-0 p-6 rounded-t-lg">
                     <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
                             <Edit className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold">Edit Request</h2>
-                            <p className="text-sm text-white/80">
+                            <DialogTitle className="text-xl text-white">Edit Request</DialogTitle>
+                            <DialogDescription className="text-white/80">
                                 {request.request_number}
-                            </p>
+                            </DialogDescription>
                         </div>
                     </div>
-                    <button
-                        onClick={handleClose}
-                        disabled={isPending}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+                </DialogHeader>
 
                 {/* Form Content */}
-                <form onSubmit={handleSubmit(onSubmit)} className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto pt-6 -mx-6 px-6">
                     {/* Error Alert */}
                     {error && (
-                        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 mb-6">
-                            <AlertCircle className="w-5 h-5 shrink-0" />
-                            <p className="text-sm">{error}</p>
-                        </div>
+                        <Alert variant="destructive" className="mb-6">
+                            <AlertCircle className="w-4 h-4" />
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
                     )}
 
                     <div className="space-y-6">
@@ -287,12 +279,12 @@ export function EditRequestModal({
                                     <Label htmlFor="address" required>
                                         Complete Address
                                     </Label>
-                                    <textarea
+                                    <Textarea
                                         id="address"
                                         rows={2}
                                         placeholder="Street name, building/house number, landmarks, etc."
                                         disabled={isPending}
-                                        className="flex w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                                        className="resize-none"
                                         {...register('address')}
                                     />
                                     {errors.address && (
@@ -357,7 +349,7 @@ export function EditRequestModal({
                                         Preferred Date
                                     </Label>
                                     <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" />
                                         <Input
                                             id="preferred_date"
                                             type="date"
@@ -377,7 +369,7 @@ export function EditRequestModal({
                                         Preferred Time
                                     </Label>
                                     <div className="relative">
-                                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" />
                                         <select
                                             id="preferred_time_slot"
                                             className="flex w-full h-10 rounded-lg border border-neutral-300 bg-white pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
@@ -426,13 +418,13 @@ export function EditRequestModal({
                                 <Label htmlFor="special_instructions">
                                     Special Instructions <span className="text-neutral-400">(Optional)</span>
                                 </Label>
-                                <textarea
+                                <Textarea
                                     id="special_instructions"
                                     rows={4}
                                     placeholder="Provide any special instructions:&#10;• Access codes or gate information&#10;• Waste type and volume description&#10;• Specific location details&#10;• Safety precautions&#10;• Best approach routes"
                                     disabled={isPending}
                                     maxLength={500}
-                                    className="flex w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                                    className="resize-none"
                                     {...register('special_instructions')}
                                 />
                                 <div className="flex justify-between text-xs text-neutral-500">
@@ -444,11 +436,11 @@ export function EditRequestModal({
                     </div>
 
                     {/* Submit Buttons */}
-                    <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6 mt-6 border-t border-neutral-200">
+                    <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6 mt-6 border-t border-neutral-200 -mx-6 px-6 pb-6 bg-white sticky bottom-0">
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={handleClose}
+                            onClick={onClose}
                             disabled={isPending}
                             className="flex-1 sm:flex-none"
                         >
@@ -470,7 +462,7 @@ export function EditRequestModal({
                         </Button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }

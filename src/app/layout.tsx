@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { APP_NAME, APP_DESCRIPTION } from "@/constants";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: {
@@ -46,7 +47,9 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className="antialiased">
         <AuthProvider>{children}</AuthProvider>
+        <Toaster />
       </body>
     </html>
   );
 }
+

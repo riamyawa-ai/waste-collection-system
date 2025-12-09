@@ -10,6 +10,8 @@ import { Mail, User, ArrowRight, AlertCircle, Recycle, MapPin } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { BarangaySelect } from "@/components/ui/barangay-select";
@@ -81,10 +83,10 @@ export function RegisterForm() {
             <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-5">
                 {/* Error Alert */}
                 {error && (
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <p className="text-sm">{error}</p>
-                    </div>
+                    <Alert variant="destructive">
+                        <AlertCircle className="w-4 h-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
                 )}
 
                 {/* Name Fields */}
@@ -247,14 +249,13 @@ export function RegisterForm() {
 
                 {/* Terms & Conditions */}
                 <div className="flex items-start gap-2">
-                    <input
-                        type="checkbox"
+                    <Checkbox
                         id="agreeToTerms"
-                        className="mt-1 w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
+                        className="mt-1"
                         disabled={isPending}
                         {...register("agreeToTerms")}
                     />
-                    <label htmlFor="agreeToTerms" className="text-sm text-neutral-600">
+                    <label htmlFor="agreeToTerms" className="text-sm text-neutral-600 cursor-pointer">
                         I agree to the{" "}
                         <Link href="/terms" className="text-primary-600 hover:underline">
                             Terms of Service

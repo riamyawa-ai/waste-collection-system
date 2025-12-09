@@ -5,7 +5,6 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     User,
-    Phone,
     MapPin,
     Calendar,
     Clock,
@@ -18,6 +17,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { BarangaySelect } from '@/components/ui/barangay-select';
 import { PhotoUploader } from './PhotoUploader';
@@ -113,10 +114,10 @@ export function RequestForm({ defaultValues, onSuccess, onCancel }: RequestFormP
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Error Alert */}
             {error && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
-                    <p className="text-sm">{error}</p>
-                </div>
+                <Alert variant="destructive">
+                    <AlertCircle className="w-4 h-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
             )}
 
             {/* Section 1: Requester Information */}
@@ -212,12 +213,12 @@ export function RequestForm({ defaultValues, onSuccess, onCancel }: RequestFormP
                         <Label htmlFor="address" required>
                             Complete Address
                         </Label>
-                        <textarea
+                        <Textarea
                             id="address"
                             rows={2}
                             placeholder="Street name, building/house number, landmarks, etc."
                             disabled={isPending}
-                            className="flex w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                            className="resize-none"
                             {...register('address')}
                         />
                         {errors.address && (
@@ -351,13 +352,13 @@ export function RequestForm({ defaultValues, onSuccess, onCancel }: RequestFormP
                     <Label htmlFor="special_instructions">
                         Special Instructions <span className="text-neutral-400">(Optional)</span>
                     </Label>
-                    <textarea
+                    <Textarea
                         id="special_instructions"
                         rows={4}
                         placeholder="Provide any special instructions:&#10;• Access codes or gate information&#10;• Waste type and volume description&#10;• Specific location details&#10;• Safety precautions&#10;• Best approach routes"
                         disabled={isPending}
                         maxLength={500}
-                        className="flex w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                        className="resize-none"
                         {...register('special_instructions')}
                     />
                     <div className="flex justify-between text-xs text-neutral-500">

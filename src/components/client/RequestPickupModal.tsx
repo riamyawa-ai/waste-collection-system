@@ -1,7 +1,13 @@
 'use client';
 
-import { X, Recycle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Recycle } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
 import { RequestForm } from './RequestForm';
 
 interface RequestPickupModalProps {
@@ -15,49 +21,40 @@ export function RequestPickupModal({
     onClose,
     onSuccess,
 }: RequestPickupModalProps) {
-    if (!isOpen) return null;
-
     const handleSuccess = (requestId: string) => {
         onSuccess?.(requestId);
         onClose();
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto">
-            {/* Backdrop */}
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={onClose}
-            />
+    const handleOpenChange = (open: boolean) => {
+        if (!open) {
+            onClose();
+        }
+    };
 
-            {/* Modal */}
-            <div className="relative w-full max-w-3xl mx-4 my-8 bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+    return (
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0">
                 {/* Header */}
-                <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white">
+                <DialogHeader className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-6 rounded-t-lg">
                     <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
                             <Recycle className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold">Request Waste Pickup</h2>
-                            <p className="text-sm text-white/80">
+                            <DialogTitle className="text-xl text-white">Request Waste Pickup</DialogTitle>
+                            <DialogDescription className="text-white/80">
                                 Fill out the form to schedule a collection
-                            </p>
+                            </DialogDescription>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+                </DialogHeader>
 
                 {/* Form Content */}
-                <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                <div className="flex-1 overflow-y-auto p-6">
                     <RequestForm onSuccess={handleSuccess} onCancel={onClose} />
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }
