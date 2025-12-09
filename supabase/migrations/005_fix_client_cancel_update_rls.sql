@@ -4,21 +4,24 @@
 -- 
 -- Problem: The existing RLS policy only allows clients to update requests
 -- when status = 'pending', but they also need to cancel 'accepted' requests.
--- Additionally, the policy needs to allow the status to be changed to 'cancelled'.
+-- Additionally, the policy needs a WITH CHECK clause to allow status changes.
 -- ============================================================================
 
--- Drop the existing restrictive policy
+-- Drop existing policies (use IF EXISTS to avoid errors)
 DROP POLICY IF EXISTS "Clients can update pending requests" ON collection_requests;
+DROP POLICY IF EXISTS "Clients can update own cancellable requests" ON collection_requests;
 
--- Create a more permissive policy for client updates
--- Clients can update their own requests if:
--- 1. They own the request (client_id = auth.uid())
--- 2. The current status is 'pending' or 'accepted' (cancellable states)
+-- Create a proper policy for client updates with WITH CHECK
+-- USING: determines which rows can be selected for update (pre-update state)
+-- WITH CHECK: validates the row after the update (post-update state)
 CREATE POLICY "Clients can update own cancellable requests"
   ON collection_requests FOR UPDATE
   USING (
     client_id = auth.uid() 
     AND status IN ('pending', 'accepted')
+  )
+  WITH CHECK (
+    client_id = auth.uid()
   );
 
 -- Add a comment for documentation

@@ -272,13 +272,26 @@ export async function cancelRequest(
                 cancelled_by: user.id,
                 cancelled_at: new Date().toISOString(),
             })
-            .eq('id', validation.data.id);
+            .eq('id', validation.data.id)
+            .eq('client_id', user.id);
 
         if (error) {
-            console.error('Error cancelling request:', error);
+            console.error('Error cancelling request:', JSON.stringify(error, null, 2));
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
+            console.error('Error details:', error.details);
+
+            // Check for RLS policy violation
+            if (error.code === '42501' || error.message?.includes('policy')) {
+                return {
+                    success: false,
+                    error: 'Permission denied by database policy. Please contact support.',
+                };
+            }
+
             return {
                 success: false,
-                error: 'Failed to cancel request. Please try again.',
+                error: `Failed to cancel request: ${error.message || error.code || 'Unknown error'}`,
             };
         }
 
