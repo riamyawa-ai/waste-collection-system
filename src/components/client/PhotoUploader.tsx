@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
@@ -143,13 +144,15 @@ export function PhotoUploader({
                                 sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
                                 className="object-cover"
                             />
-                            <button
+                            <Button
                                 type="button"
+                                variant="destructive"
+                                size="icon"
                                 onClick={() => removePhoto(index)}
-                                className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                className="absolute top-1 right-1 w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                                <X className="w-4 h-4" />
-                            </button>
+                                <X className="w-3 h-3" />
+                            </Button>
                             <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs py-1 px-2 truncate">
                                 {photos[index]?.name}
                             </div>

@@ -21,6 +21,15 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -369,36 +378,48 @@ export function EditRequestModal({
                                         Preferred Time
                                     </Label>
                                     <div className="relative">
-                                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" />
-                                        <select
-                                            id="preferred_time_slot"
-                                            className="flex w-full h-10 rounded-lg border border-neutral-300 bg-white pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                                            disabled={isPending}
-                                            {...register('preferred_time_slot')}
-                                        >
-                                            <option value="">Select time slot</option>
-                                            <optgroup label="Morning">
-                                                {TIME_SLOTS.MORNING.map((slot) => (
-                                                    <option key={slot} value={slot}>
-                                                        {slot}
-                                                    </option>
-                                                ))}
-                                            </optgroup>
-                                            <optgroup label="Afternoon">
-                                                {TIME_SLOTS.AFTERNOON.map((slot) => (
-                                                    <option key={slot} value={slot}>
-                                                        {slot}
-                                                    </option>
-                                                ))}
-                                            </optgroup>
-                                            <optgroup label="Flexible">
-                                                {TIME_SLOTS.FLEXIBLE.map((slot) => (
-                                                    <option key={slot} value={slot}>
-                                                        {slot}
-                                                    </option>
-                                                ))}
-                                            </optgroup>
-                                        </select>
+                                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 z-10" />
+                                        <Controller
+                                            name="preferred_time_slot"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    defaultValue={field.value}
+                                                    disabled={isPending}
+                                                >
+                                                    <SelectTrigger className="w-full pl-10">
+                                                        <SelectValue placeholder="Select time slot" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Morning</SelectLabel>
+                                                            {TIME_SLOTS.MORNING.map((slot) => (
+                                                                <SelectItem key={slot} value={slot}>
+                                                                    {slot}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectGroup>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Afternoon</SelectLabel>
+                                                            {TIME_SLOTS.AFTERNOON.map((slot) => (
+                                                                <SelectItem key={slot} value={slot}>
+                                                                    {slot}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectGroup>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Flexible</SelectLabel>
+                                                            {TIME_SLOTS.FLEXIBLE.map((slot) => (
+                                                                <SelectItem key={slot} value={slot}>
+                                                                    {slot}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
                                     </div>
                                     {errors.preferred_time_slot && (
                                         <p className="text-sm text-red-600">{errors.preferred_time_slot.message}</p>
