@@ -39,9 +39,12 @@ const navItemsByRole: Record<string, NavItem[]> = {
   client: [
     { label: "Dashboard", href: "/client/dashboard", icon: LayoutDashboard },
     { label: "My Requests", href: "/client/requests", icon: FileText },
+    { label: "Payments", href: "/client/payments", icon: BarChart3 },
     { label: "Schedule", href: "/client/schedule", icon: Calendar },
+    { label: "Announcements", href: "/client/announcements", icon: FileText },
+    { label: "Feedback", href: "/client/feedback", icon: FileText },
     { label: "Notifications", href: "/client/notifications", icon: Bell },
-    { label: "Settings", href: "/client/settings", icon: Settings },
+    { label: "Settings", href: "/client/profile", icon: Settings },
   ],
   staff: [
     { label: "Dashboard", href: "/staff/dashboard", icon: LayoutDashboard },
