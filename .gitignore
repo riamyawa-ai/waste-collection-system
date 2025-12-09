@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+Thumbs.db
 
 # debug
 npm-debug.log*
@@ -36,7 +37,6 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
-.env.example
 
 # allow .env.example to be committed
 !.env.example
@@ -47,3 +47,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase
+supabase/.temp/
+supabase/.branches/
+.supabase/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

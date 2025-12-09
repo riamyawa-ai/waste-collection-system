@@ -167,7 +167,9 @@ export async function signUp(formData: RegisterFormData): Promise<AuthActionResu
         options: {
             emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
             data: {
-                full_name: fullName,
+                first_name: firstName,
+                last_name: lastName,
+                full_name: `${firstName} ${lastName}`,
                 phone,
                 barangay,
                 address,
