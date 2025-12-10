@@ -6,7 +6,6 @@ import {
     MessageSquare,
     Search,
     Star,
-    Filter,
     MoreHorizontal,
     Eye,
     Flag,
@@ -14,7 +13,6 @@ import {
     RefreshCw,
     BarChart3,
     TrendingUp,
-    Users,
     Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -167,8 +165,8 @@ export default function FeedbackPage() {
                     <Star
                         key={star}
                         className={`h-4 w-4 ${star <= rating
-                                ? 'text-amber-400 fill-amber-400'
-                                : 'text-slate-600'
+                            ? 'text-amber-400 fill-amber-400'
+                            : 'text-slate-600'
                             }`}
                     />
                 ))}
@@ -472,9 +470,9 @@ export default function FeedbackPage() {
                                         {performance.slice(0, 5).map((collector, index) => (
                                             <div key={collector.id} className="flex items-center gap-3">
                                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-amber-500/20 text-amber-400' :
-                                                        index === 1 ? 'bg-slate-400/20 text-slate-300' :
-                                                            index === 2 ? 'bg-orange-600/20 text-orange-400' :
-                                                                'bg-slate-600/20 text-slate-400'
+                                                    index === 1 ? 'bg-slate-400/20 text-slate-300' :
+                                                        index === 2 ? 'bg-orange-600/20 text-orange-400' :
+                                                            'bg-slate-600/20 text-slate-400'
                                                     }`}>
                                                     {index + 1}
                                                 </div>

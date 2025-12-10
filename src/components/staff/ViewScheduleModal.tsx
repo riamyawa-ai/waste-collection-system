@@ -10,7 +10,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import {
     MapPin,
     Clock,
@@ -219,8 +218,8 @@ export function ViewScheduleModal({ open, onClose, scheduleId }: ViewScheduleMod
                                             className="flex items-start gap-3 p-3 bg-slate-700/50 rounded-lg"
                                         >
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${stop.is_completed
-                                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                                    : 'bg-slate-600 text-slate-300'
+                                                ? 'bg-emerald-500/20 text-emerald-400'
+                                                : 'bg-slate-600 text-slate-300'
                                                 }`}>
                                                 {stop.is_completed ? (
                                                     <CheckCircle className="h-4 w-4" />

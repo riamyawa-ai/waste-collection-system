@@ -10,7 +10,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -20,9 +19,7 @@ import {
     Calendar,
     MapPin,
     Phone,
-    Send,
-    Flag,
-    CheckCircle
+    Send
 } from 'lucide-react';
 import { getFeedbackById, updateFeedback } from '@/lib/actions/feedback';
 import { format } from 'date-fns';
@@ -118,8 +115,8 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
                     <Star
                         key={star}
                         className={`h-6 w-6 ${star <= rating
-                                ? 'text-amber-400 fill-amber-400'
-                                : 'text-slate-600'
+                            ? 'text-amber-400 fill-amber-400'
+                            : 'text-slate-600'
                             }`}
                     />
                 ))}

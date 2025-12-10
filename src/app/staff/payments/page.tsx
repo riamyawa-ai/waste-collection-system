@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import {
     DollarSign,
     Search,
-    Filter,
     MoreHorizontal,
     Eye,
     CheckCircle,
@@ -14,7 +13,6 @@ import {
     TrendingUp,
     Clock,
     CreditCard,
-    Calendar,
     FileText,
     Receipt
 } from 'lucide-react';

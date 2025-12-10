@@ -18,10 +18,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { MapPin, Plus, Trash2, GripVertical, Route, Calendar, Clock, Users } from 'lucide-react';
+import { Trash2, Route } from 'lucide-react';
 import { createSchedule } from '@/lib/actions/schedule';
 import { getAvailableCollectors } from '@/lib/actions/staff';
 import { LOCATION_TYPES, SAMPLE_LOCATIONS } from '@/lib/mapbox/utils';
@@ -213,8 +212,8 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                             >
                                 <div
                                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= s
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'bg-slate-700 text-slate-400'
+                                        ? 'bg-emerald-500 text-white'
+                                        : 'bg-slate-700 text-slate-400'
                                         }`}
                                 >
                                     {s}
@@ -262,8 +261,8 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                             key={type.id}
                                             onClick={() => handleTypeToggle(type.id)}
                                             className={`p-3 rounded-lg border text-sm font-medium transition-all ${selectedTypes.includes(type.id)
-                                                    ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
-                                                    : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:border-slate-500'
+                                                ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                                                : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:border-slate-500'
                                                 }`}
                                         >
                                             {type.label}

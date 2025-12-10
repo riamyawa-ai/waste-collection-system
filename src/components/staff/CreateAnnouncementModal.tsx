@@ -21,7 +21,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { Megaphone, Calendar, Users, Bell, AlertTriangle } from 'lucide-react';
+import { Megaphone, Users, AlertTriangle } from 'lucide-react';
 import { createAnnouncement } from '@/lib/actions/announcement';
 
 interface CreateAnnouncementModalProps {
@@ -204,8 +204,8 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                         key={option.value}
                                         onClick={() => handleAudienceChange(option.value)}
                                         className={`p-3 rounded-lg border text-sm font-medium transition-all flex items-center gap-2 ${targetAudience.includes(option.value)
-                                                ? 'border-purple-500 bg-purple-500/20 text-purple-400'
-                                                : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:border-slate-500'
+                                            ? 'border-purple-500 bg-purple-500/20 text-purple-400'
+                                            : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:border-slate-500'
                                             }`}
                                     >
                                         <Users className="h-4 w-4" />
