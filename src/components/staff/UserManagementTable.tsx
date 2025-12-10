@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { getUsers, updateUserStatus, deleteUser, type UserFilters } from "@/lib/actions/staff";
+import { getUsers, updateUserStatus, type UserFilters } from "@/lib/actions/staff";
 import {
     Table,
     TableBody,
@@ -62,6 +62,8 @@ interface User {
 interface UserManagementTableProps {
     onView: (user: User) => void;
     onEdit: (user: User) => void;
+    onResetPassword: (user: User) => void;
+    onDelete: (user: User) => void;
     onRefresh?: () => void;
 }
 
@@ -81,6 +83,8 @@ const statusColors: Record<string, string> = {
 export function UserManagementTable({
     onView,
     onEdit,
+    onResetPassword,
+    onDelete,
     onRefresh,
 }: UserManagementTableProps) {
     const [users, setUsers] = useState<User[]>([]);
@@ -123,19 +127,7 @@ export function UserManagementTable({
         }
     };
 
-    const handleDelete = async (userId: string) => {
-        if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-            return;
-        }
 
-        const result = await deleteUser(userId);
-        if (result.success) {
-            toast.success("User deleted successfully");
-            fetchUsers();
-        } else {
-            toast.error(result.error || "Failed to delete user");
-        }
-    };
 
     const getInitials = (name: string) => {
         return name
@@ -329,13 +321,13 @@ export function UserManagementTable({
                                                             Suspend
                                                         </DropdownMenuItem>
                                                     )}
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => onResetPassword(user)}>
                                                         <Key className="w-4 h-4 mr-2" />
                                                         Reset Password
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
-                                                        onClick={() => handleDelete(user.id)}
+                                                        onClick={() => onDelete(user)}
                                                         className="text-red-600"
                                                     >
                                                         <Trash2 className="w-4 h-4 mr-2" />

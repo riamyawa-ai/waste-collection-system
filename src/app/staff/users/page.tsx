@@ -8,6 +8,9 @@ import {
     UserManagementTable,
     AddUserModal,
     ViewUserModal,
+    EditUserModal,
+    ResetPasswordModal,
+    DeleteUserModal,
 } from "@/components/staff";
 import { UserPlus, Download } from "lucide-react";
 
@@ -24,12 +27,17 @@ interface User {
     avatar_url?: string;
     created_at: string;
     last_login_at?: string;
+    address?: string;
 }
 
 export default function UsersPage() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
-    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [refreshKey, setRefreshKey] = useState(0);
 
     const handleRefresh = useCallback(() => {
@@ -37,14 +45,31 @@ export default function UsersPage() {
     }, []);
 
     const handleView = (user: User) => {
-        setSelectedUserId(user.id);
+        setSelectedUser(user);
         setShowViewModal(true);
     };
 
     const handleEdit = (user: User) => {
-        // For now, open view modal - edit functionality can be added
-        setSelectedUserId(user.id);
-        setShowViewModal(true);
+        setSelectedUser(user);
+        setShowEditModal(true);
+    };
+
+    const handleResetPassword = (user: User) => {
+        setSelectedUser(user);
+        setShowResetModal(true);
+    };
+
+    const handleDelete = (user: User) => {
+        setSelectedUser(user);
+        setShowDeleteModal(true);
+    };
+
+    const handleCloseModals = () => {
+        setShowViewModal(false);
+        setShowEditModal(false);
+        setShowResetModal(false);
+        setShowDeleteModal(false);
+        setSelectedUser(null);
     };
 
     return (
@@ -73,24 +98,42 @@ export default function UsersPage() {
                 key={`table-${refreshKey}`}
                 onView={handleView}
                 onEdit={handleEdit}
+                onResetPassword={handleResetPassword}
+                onDelete={handleDelete}
                 onRefresh={handleRefresh}
             />
 
-            {/* Add User Modal */}
+            {/* Modals */}
             <AddUserModal
                 open={showAddModal}
                 onClose={() => setShowAddModal(false)}
                 onSuccess={handleRefresh}
             />
 
-            {/* View User Modal */}
             <ViewUserModal
                 open={showViewModal}
-                onClose={() => {
-                    setShowViewModal(false);
-                    setSelectedUserId(null);
-                }}
-                userId={selectedUserId}
+                onClose={handleCloseModals}
+                userId={selectedUser?.id || null}
+            />
+
+            <EditUserModal
+                open={showEditModal}
+                onClose={handleCloseModals}
+                onSuccess={handleRefresh}
+                user={selectedUser}
+            />
+
+            <ResetPasswordModal
+                open={showResetModal}
+                onClose={handleCloseModals}
+                user={selectedUser}
+            />
+
+            <DeleteUserModal
+                open={showDeleteModal}
+                onClose={handleCloseModals}
+                onSuccess={handleRefresh}
+                user={selectedUser}
             />
         </div>
     );

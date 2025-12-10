@@ -1196,6 +1196,41 @@ export async function createUser(input: CreateUserInput): Promise<ActionResult> 
 }
 
 // ============================================================================
+// USER PASSWORD RESET
+// ============================================================================
+
+export async function resetUserPassword(userId: string): Promise<ActionResult> {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { success: false, error: 'Not authenticated' };
+    }
+
+    // Check permissions
+    const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    if (!currentProfile || !['admin', 'staff'].includes(currentProfile.role)) {
+        return { success: false, error: 'Unauthorized' };
+    }
+
+    // Mock reset notification
+    await supabase.from('notifications').insert({
+        user_id: userId,
+        type: 'system_alert',
+        title: 'Password Reset',
+        message: 'Your password reset request has been processed. Please check your email.',
+        data: { type: 'password_reset' },
+    });
+
+    return { success: true };
+}
+
+// ============================================================================
 // QUICK ACTION BADGE COUNTS
 // ============================================================================
 
