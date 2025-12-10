@@ -786,8 +786,6 @@ export async function acceptRequest(requestId: string): Promise<ActionResult> {
         .from('collection_requests')
         .update({
             status: 'accepted',
-            reviewed_by: user.id,
-            reviewed_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         })
         .eq('id', requestId);
@@ -802,8 +800,7 @@ export async function acceptRequest(requestId: string): Promise<ActionResult> {
         type: 'request_status_update',
         title: 'Request Accepted',
         message: `Your request ${request.request_number} has been accepted. Please proceed with payment.`,
-        reference_id: requestId,
-        reference_type: 'collection_request',
+        data: { request_id: requestId },
     });
 
     revalidatePath('/staff/collections');
@@ -841,8 +838,8 @@ export async function rejectRequest(
         .update({
             status: 'rejected',
             rejection_reason: reason,
-            reviewed_by: user.id,
-            reviewed_at: new Date().toISOString(),
+            rejected_by: user.id,
+            rejected_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         })
         .eq('id', requestId);
@@ -857,8 +854,7 @@ export async function rejectRequest(
         type: 'request_status_update',
         title: 'Request Rejected',
         message: `Your request ${request.request_number} has been rejected. Reason: ${reason}`,
-        reference_id: requestId,
-        reference_type: 'collection_request',
+        data: { request_id: requestId },
     });
 
     revalidatePath('/staff/collections');
@@ -906,7 +902,8 @@ export async function recordPayment(
         date_received: paymentData.dateReceived,
         receipt_url: paymentData.receiptUrl,
         staff_notes: paymentData.notes,
-        recorded_by: user.id,
+        verified_by: user.id,
+        verified_at: new Date().toISOString(),
         status: 'verified',
     });
 
@@ -933,8 +930,7 @@ export async function recordPayment(
         type: 'payment_verification',
         title: 'Payment Confirmed',
         message: `Your payment for request ${request.request_number} has been confirmed.`,
-        reference_id: requestId,
-        reference_type: 'collection_request',
+        data: { request_id: requestId },
     });
 
     revalidatePath('/staff/collections');
