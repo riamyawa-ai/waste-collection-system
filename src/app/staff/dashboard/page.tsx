@@ -1,74 +1,104 @@
-import { DashboardLayout } from "@/components/layouts";
-import { PageHeader, StatCard, EcoCard, EcoCardContent, Button } from "@/components/ui";
-import { FileText, Clock, CheckCircle2, Truck, Users, AlertTriangle } from "lucide-react";
+"use client";
+
+import { PageHeader } from "@/components/ui";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import {
+  StaffDashboardStats,
+  StaffQuickActions,
+  StaffRecentActivity,
+} from "@/components/staff";
+import { EcoCard, EcoCardContent } from "@/components/ui";
+import { Plus, FileText, Users } from "lucide-react";
 
 export default function StaffDashboard() {
   return (
-    <DashboardLayout role="staff">
+    <div className="space-y-6">
       <PageHeader
         title="Staff Dashboard"
-        description="Manage collection requests and coordinate with collectors."
+        description="Manage collection requests, users, and coordinate with collectors."
       >
-        <Button>View All Requests</Button>
+        <div className="flex gap-3">
+          <Link href="/staff/collections">
+            <Button variant="outline">
+              <FileText className="w-4 h-4 mr-2" />
+              View Requests
+            </Button>
+          </Link>
+          <Link href="/staff/users">
+            <Button>
+              <Users className="w-4 h-4 mr-2" />
+              Manage Users
+            </Button>
+          </Link>
+        </div>
       </PageHeader>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mt-6">
-        <StatCard
-          title="Total Requests"
-          value={156}
-          icon={FileText}
-        />
-        <StatCard
-          title="Pending"
-          value={23}
-          icon={Clock}
-        />
-        <StatCard
-          title="Scheduled"
-          value={45}
-          icon={Truck}
-        />
-        <StatCard
-          title="Completed"
-          value={82}
-          icon={CheckCircle2}
-        />
-        <StatCard
-          title="Urgent"
-          value={6}
-          icon={AlertTriangle}
-        />
-        <StatCard
-          title="Active Collectors"
-          value={8}
-          icon={Users}
-        />
-      </div>
+      {/* Stats */}
+      <StaffDashboardStats />
 
-      {/* Content Area */}
-      <div className="mt-8 grid lg:grid-cols-2 gap-6">
+      {/* Quick Actions */}
+      <section>
+        <h2 className="text-lg font-semibold text-neutral-900 mb-4">
+          Quick Actions
+        </h2>
+        <StaffQuickActions />
+      </section>
+
+      {/* Content Grid */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Recent Activity */}
+        <StaffRecentActivity />
+
+        {/* Announcements Quick Access */}
         <EcoCard>
           <EcoCardContent>
-            <h3 className="font-semibold text-neutral-900 mb-4">
-              Today&apos;s Schedule
-            </h3>
-            <p className="text-neutral-500 text-sm">
-              Schedule management coming in Day 4...
-            </p>
-          </EcoCardContent>
-        </EcoCard>
-        <EcoCard>
-          <EcoCardContent>
-            <h3 className="font-semibold text-neutral-900 mb-4">
-              Recent Activity
-            </h3>
-            <p className="text-neutral-500 text-sm">
-              Activity feed coming in Day 4...
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-neutral-900">
+                Announcements
+              </h3>
+              <Link href="/staff/announcements">
+                <Button variant="outline" size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New
+                </Button>
+              </Link>
+            </div>
+            <div className="space-y-3">
+              <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-blue-600">💡</span>
+                  <span className="text-sm font-medium text-blue-900">
+                    System Update Available
+                  </span>
+                </div>
+                <p className="text-xs text-blue-700">
+                  New features have been added to the collection management
+                  module.
+                </p>
+              </div>
+              <div className="p-3 bg-yellow-50 border border-yellow-100 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-yellow-600">⚠️</span>
+                  <span className="text-sm font-medium text-yellow-900">
+                    Holiday Schedule
+                  </span>
+                </div>
+                <p className="text-xs text-yellow-700">
+                  Remember to update collection schedules for the upcoming
+                  holiday.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/staff/announcements"
+              className="block text-center text-sm text-primary-600 hover:text-primary-700 mt-4"
+            >
+              View all announcements →
+            </Link>
           </EcoCardContent>
         </EcoCard>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }
