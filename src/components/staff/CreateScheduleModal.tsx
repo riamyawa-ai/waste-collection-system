@@ -19,11 +19,13 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Trash2, Route } from 'lucide-react';
+import { Trash2, Route, Map, List } from 'lucide-react';
 import { createSchedule } from '@/lib/actions/schedule';
 import { getAvailableCollectors } from '@/lib/actions/staff';
 import { LOCATION_TYPES, SAMPLE_LOCATIONS } from '@/lib/mapbox/utils';
+import { MapboxRouteEditor } from './MapboxRouteEditor';
 
 interface CreateScheduleModalProps {
     open: boolean;
@@ -254,21 +256,54 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                             </div>
 
                             <div>
-                                <Label className="text-slate-300 mb-3 block">Quick Route Selection</Label>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {LOCATION_TYPES.map((type) => (
-                                        <button
-                                            key={type.id}
-                                            onClick={() => handleTypeToggle(type.id)}
-                                            className={`p-3 rounded-lg border text-sm font-medium transition-all ${selectedTypes.includes(type.id)
-                                                ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
-                                                : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:border-slate-500'
-                                                }`}
-                                        >
-                                            {type.label}
-                                        </button>
-                                    ))}
-                                </div>
+                                <Label className="text-slate-300 mb-3 block">Route Selection</Label>
+                                <Tabs defaultValue="map" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-2 bg-slate-700/50">
+                                        <TabsTrigger value="map" className="data-[state=active]:bg-emerald-600">
+                                            <Map className="h-4 w-4 mr-2" />
+                                            Map View
+                                        </TabsTrigger>
+                                        <TabsTrigger value="list" className="data-[state=active]:bg-emerald-600">
+                                            <List className="h-4 w-4 mr-2" />
+                                            Quick Select
+                                        </TabsTrigger>
+                                    </TabsList>
+
+                                    <TabsContent value="map" className="mt-4">
+                                        <div className="rounded-lg overflow-hidden border border-slate-600">
+                                            <MapboxRouteEditor
+                                                stops={stops.map(s => ({
+                                                    ...s,
+                                                    latitude: s.latitude || 0,
+                                                    longitude: s.longitude || 0,
+                                                }))}
+                                                onStopsChange={(newStops) => setStops(newStops)}
+                                                showSampleLocations={true}
+                                                height="300px"
+                                            />
+                                        </div>
+                                        <p className="text-slate-400 text-sm mt-2">
+                                            Click on markers to add stops. Use the filter buttons to show specific location types.
+                                        </p>
+                                    </TabsContent>
+
+                                    <TabsContent value="list" className="mt-4">
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {LOCATION_TYPES.map((type) => (
+                                                <button
+                                                    key={type.id}
+                                                    onClick={() => handleTypeToggle(type.id)}
+                                                    className={`p-3 rounded-lg border text-sm font-medium transition-all ${selectedTypes.includes(type.id)
+                                                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                                                        : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:border-slate-500'
+                                                        }`}
+                                                >
+                                                    {type.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </TabsContent>
+                                </Tabs>
                             </div>
 
                             {stops.length > 0 && (
@@ -276,7 +311,7 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                     <Label className="text-slate-300 mb-3 block">
                                         Selected Stops ({stops.length})
                                     </Label>
-                                    <ScrollArea className="h-48 border border-slate-600 rounded-lg p-3">
+                                    <ScrollArea className="h-32 border border-slate-600 rounded-lg p-3">
                                         <div className="space-y-2">
                                             {stops.map((stop, index) => (
                                                 <div
