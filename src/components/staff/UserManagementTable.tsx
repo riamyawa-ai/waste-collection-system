@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { getUsers, updateUserStatus, type UserFilters } from "@/lib/actions/staff";
+import { getUsers, updateUserStatus, deleteUser, type UserFilters } from "@/lib/actions/staff";
 import {
     Table,
     TableBody,
@@ -120,6 +120,20 @@ export function UserManagementTable({
             fetchUsers();
         } else {
             toast.error(result.error || "Failed to update status");
+        }
+    };
+
+    const handleDelete = async (userId: string) => {
+        if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+            return;
+        }
+
+        const result = await deleteUser(userId);
+        if (result.success) {
+            toast.success("User deleted successfully");
+            fetchUsers();
+        } else {
+            toast.error(result.error || "Failed to delete user");
         }
     };
 
@@ -318,6 +332,14 @@ export function UserManagementTable({
                                                     <DropdownMenuItem>
                                                         <Key className="w-4 h-4 mr-2" />
                                                         Reset Password
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleDelete(user.id)}
+                                                        className="text-red-600"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                        Delete User
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>

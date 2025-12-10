@@ -21,16 +21,11 @@ import {
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import {
-    User,
     Mail,
     Phone,
     MapPin,
     Calendar,
-    Clock,
     Star,
-    FileText,
-    CreditCard,
-    Truck,
     Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
