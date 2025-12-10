@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import Map, { Marker, Source, Layer, NavigationControl, GeolocateControl, ViewStateChangeEvent } from 'react-map-gl';
 import type { MapRef } from 'react-map-gl';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     MapPin,
@@ -12,16 +11,16 @@ import {
     Route,
     Maximize2,
     Minimize2,
-    LocateFixed
+    LocateFixed,
+    Loader2,
 } from 'lucide-react';
 import {
     MAPBOX_ACCESS_TOKEN,
     MAPBOX_STYLE,
     PANABO_CENTER,
-    SAMPLE_LOCATIONS,
     LOCATION_TYPES,
     optimizeRoute,
-    generateRouteGeoJson
+    generateRouteGeoJson,
 } from '@/lib/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -35,6 +34,16 @@ interface Stop {
     longitude: number;
 }
 
+interface MapLocation {
+    id: string;
+    name: string;
+    type: string;
+    address: string;
+    barangay: string;
+    lat: number;
+    lng: number;
+}
+
 interface MapboxRouteEditorProps {
     stops: Stop[];
     onStopsChange: (stops: Stop[]) => void;
@@ -44,6 +53,17 @@ interface MapboxRouteEditorProps {
     showSampleLocations?: boolean;
     height?: string;
 }
+
+// Mapbox category mapping for POI search
+const MAPBOX_CATEGORIES: Record<string, string[]> = {
+    schools: ['school', 'college', 'university'],
+    hospitals: ['hospital', 'clinic', 'medical'],
+    parks: ['park', 'garden', 'playground'],
+    government: ['government', 'townhall', 'post_office'],
+    commercial: ['shop', 'store', 'mall', 'supermarket', 'restaurant'],
+    residential: ['residential', 'apartment', 'house'],
+    markets: ['market', 'marketplace', 'grocery'],
+};
 
 export function MapboxRouteEditor({
     stops,
@@ -57,16 +77,123 @@ export function MapboxRouteEditor({
     const mapRef = useRef<MapRef>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [selectedType, setSelectedType] = useState<string | null>(null);
+    const [locations, setLocations] = useState<MapLocation[]>([]);
+    const [loading, setLoading] = useState(false);
     const [viewState, setViewState] = useState({
         longitude: PANABO_CENTER.longitude,
         latitude: PANABO_CENTER.latitude,
         zoom: PANABO_CENTER.zoom,
     });
 
-    // Filter sample locations by type
-    const filteredLocations = selectedType && selectedType !== 'all'
-        ? SAMPLE_LOCATIONS.filter(loc => loc.type === selectedType)
-        : SAMPLE_LOCATIONS;
+    // Fetch POIs from Mapbox when type is selected
+    useEffect(() => {
+        if (selectedType && selectedType !== 'all') {
+            fetchPOIs(selectedType);
+        } else if (selectedType === 'all') {
+            // Fetch all types
+            fetchAllPOIs();
+        } else {
+            setLocations([]);
+        }
+    }, [selectedType]);
+
+    const fetchPOIs = async (type: string) => {
+        setLoading(true);
+        try {
+            const categories = MAPBOX_CATEGORIES[type] || [type];
+            const bbox = '125.52,7.15,125.85,7.45'; // Panabo City bounds
+
+            const allResults: MapLocation[] = [];
+
+            for (const category of categories.slice(0, 2)) { // Limit to 2 categories to avoid rate limiting
+                const response = await fetch(
+                    `https://api.mapbox.com/search/searchbox/v1/category/${category}?` +
+                    `access_token=${MAPBOX_ACCESS_TOKEN}&` +
+                    `bbox=${bbox}&` +
+                    `limit=10&` +
+                    `language=en`
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.features) {
+                        const mapped = data.features.map((feature: {
+                            properties: { mapbox_id: string; name: string; full_address?: string; context?: { place?: { name: string } } };
+                            geometry: { coordinates: [number, number] };
+                        }) => ({
+                            id: feature.properties.mapbox_id,
+                            name: feature.properties.name,
+                            type: type,
+                            address: feature.properties.full_address || 'Panabo City',
+                            barangay: feature.properties.context?.place?.name || 'Panabo',
+                            lat: feature.geometry.coordinates[1],
+                            lng: feature.geometry.coordinates[0],
+                        }));
+                        allResults.push(...mapped);
+                    }
+                }
+            }
+
+            // Remove duplicates
+            const unique = allResults.filter((v, i, a) =>
+                a.findIndex(t => t.id === v.id) === i
+            );
+
+            setLocations(unique);
+        } catch (error) {
+            console.error('Error fetching POIs:', error);
+            setLocations([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAllPOIs = async () => {
+        setLoading(true);
+        try {
+            const allResults: MapLocation[] = [];
+            const types = Object.keys(MAPBOX_CATEGORIES);
+
+            for (const type of types.slice(0, 4)) { // Limit to avoid too many requests
+                const categories = MAPBOX_CATEGORIES[type];
+                const category = categories[0]; // Just use first category
+                const bbox = '125.52,7.15,125.85,7.45';
+
+                const response = await fetch(
+                    `https://api.mapbox.com/search/searchbox/v1/category/${category}?` +
+                    `access_token=${MAPBOX_ACCESS_TOKEN}&` +
+                    `bbox=${bbox}&` +
+                    `limit=5&` +
+                    `language=en`
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.features) {
+                        const mapped = data.features.map((feature: {
+                            properties: { mapbox_id: string; name: string; full_address?: string; context?: { place?: { name: string } } };
+                            geometry: { coordinates: [number, number] };
+                        }) => ({
+                            id: feature.properties.mapbox_id,
+                            name: feature.properties.name,
+                            type: type,
+                            address: feature.properties.full_address || 'Panabo City',
+                            barangay: feature.properties.context?.place?.name || 'Panabo',
+                            lat: feature.geometry.coordinates[1],
+                            lng: feature.geometry.coordinates[0],
+                        }));
+                        allResults.push(...mapped);
+                    }
+                }
+            }
+
+            setLocations(allResults);
+        } catch (error) {
+            console.error('Error fetching all POIs:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Get location type color
     const getTypeColor = (type: string) => {
@@ -74,8 +201,8 @@ export function MapboxRouteEditor({
         return locationType?.color || '#64748b';
     };
 
-    // Handle clicking on a sample location
-    const handleLocationClick = (location: typeof SAMPLE_LOCATIONS[0]) => {
+    // Handle clicking on a location
+    const handleLocationClick = (location: MapLocation) => {
         if (readOnly) return;
 
         // Check if already added
@@ -150,7 +277,7 @@ export function MapboxRouteEditor({
     }, [stops]);
 
     return (
-        <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-slate-900' : ''}`}>
+        <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
             {/* Type Filter */}
             {showSampleLocations && !readOnly && (
                 <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1 max-w-[60%]">
@@ -158,15 +285,23 @@ export function MapboxRouteEditor({
                         <button
                             key={type.id}
                             onClick={() => setSelectedType(selectedType === type.id ? null : type.id)}
-                            className={`px-2 py-1 rounded text-xs font-medium transition-all ${selectedType === type.id
-                                ? 'bg-white text-slate-900'
-                                : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700'
+                            className={`px-2 py-1 rounded text-xs font-medium transition-all shadow-sm ${selectedType === type.id
+                                    ? 'text-white'
+                                    : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
                                 }`}
-                            style={selectedType === type.id ? { backgroundColor: type.color, color: '#fff' } : {}}
+                            style={selectedType === type.id ? { backgroundColor: type.color } : {}}
                         >
                             {type.label}
                         </button>
                     ))}
+                </div>
+            )}
+
+            {/* Loading indicator */}
+            {loading && (
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary-600" />
+                    <span className="text-sm text-neutral-600">Loading locations...</span>
                 </div>
             )}
 
@@ -177,7 +312,7 @@ export function MapboxRouteEditor({
                         size="sm"
                         variant="secondary"
                         onClick={handleOptimizeRoute}
-                        className="bg-slate-800/80 text-white hover:bg-slate-700 border-0"
+                        className="bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200 shadow-sm"
                     >
                         <Route className="h-4 w-4 mr-1" />
                         Optimize
@@ -188,7 +323,7 @@ export function MapboxRouteEditor({
                         size="sm"
                         variant="secondary"
                         onClick={fitToStops}
-                        className="bg-slate-800/80 text-white hover:bg-slate-700 border-0"
+                        className="bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200 shadow-sm"
                     >
                         <LocateFixed className="h-4 w-4" />
                     </Button>
@@ -197,7 +332,7 @@ export function MapboxRouteEditor({
                     size="icon"
                     variant="secondary"
                     onClick={() => setIsFullscreen(!isFullscreen)}
-                    className="bg-slate-800/80 text-white hover:bg-slate-700 border-0"
+                    className="bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200 shadow-sm"
                 >
                     {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                 </Button>
@@ -224,15 +359,6 @@ export function MapboxRouteEditor({
                 {routeLineData && (
                     <Source id="route" type="geojson" data={routeLineData}>
                         <Layer
-                            id="route-line"
-                            type="line"
-                            paint={{
-                                'line-color': '#10b981',
-                                'line-width': 4,
-                                'line-opacity': 0.8,
-                            }}
-                        />
-                        <Layer
                             id="route-line-outline"
                             type="line"
                             paint={{
@@ -241,11 +367,20 @@ export function MapboxRouteEditor({
                                 'line-opacity': 0.4,
                             }}
                         />
+                        <Layer
+                            id="route-line"
+                            type="line"
+                            paint={{
+                                'line-color': '#10b981',
+                                'line-width': 4,
+                                'line-opacity': 0.8,
+                            }}
+                        />
                     </Source>
                 )}
 
-                {/* Sample Location Markers */}
-                {showSampleLocations && filteredLocations.map((location) => {
+                {/* Location Markers from API */}
+                {showSampleLocations && locations.map((location) => {
                     const isSelected = stops.some(s => s.id === location.id);
                     return (
                         <Marker
@@ -261,8 +396,8 @@ export function MapboxRouteEditor({
                             >
                                 <div
                                     className={`w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 ${isSelected
-                                        ? 'border-white bg-emerald-500'
-                                        : 'border-white/50'
+                                            ? 'border-white bg-emerald-500'
+                                            : 'border-white'
                                         }`}
                                     style={{
                                         backgroundColor: isSelected ? '#10b981' : getTypeColor(location.type),
@@ -287,7 +422,7 @@ export function MapboxRouteEditor({
                         latitude={stop.latitude}
                     >
                         <div className="relative group">
-                            <div className="w-8 h-8 rounded-full bg-emerald-500 border-3 border-white shadow-lg flex items-center justify-center text-white font-bold text-sm">
+                            <div className="w-8 h-8 rounded-full bg-emerald-500 border-2 border-white shadow-lg flex items-center justify-center text-white font-bold text-sm">
                                 {index + 1}
                             </div>
                             {!readOnly && (
@@ -299,7 +434,7 @@ export function MapboxRouteEditor({
                                 </button>
                             )}
                             {/* Tooltip */}
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-neutral-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                 {stop.locationName}
                             </div>
                         </div>
@@ -310,10 +445,10 @@ export function MapboxRouteEditor({
             {/* Selected Stops Panel (when fullscreen) */}
             {isFullscreen && stops.length > 0 && (
                 <div className="absolute bottom-4 left-4 z-10 w-80">
-                    <Card className="bg-slate-800/90 border-slate-700 backdrop-blur-sm">
+                    <Card className="bg-white shadow-lg">
                         <CardHeader className="py-3 px-4">
-                            <CardTitle className="text-sm text-white flex items-center gap-2">
-                                <MapPin className="h-4 w-4 text-emerald-400" />
+                            <CardTitle className="text-sm text-neutral-900 flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-emerald-600" />
                                 Selected Stops ({stops.length})
                             </CardTitle>
                         </CardHeader>
@@ -324,11 +459,11 @@ export function MapboxRouteEditor({
                                         <span className="w-5 h-5 rounded-full bg-emerald-500 text-white text-xs flex items-center justify-center font-bold">
                                             {index + 1}
                                         </span>
-                                        <span className="text-white truncate flex-1">{stop.locationName}</span>
+                                        <span className="text-neutral-900 truncate flex-1">{stop.locationName}</span>
                                         {!readOnly && (
                                             <button
                                                 onClick={() => handleRemoveStop(stop.id)}
-                                                className="text-slate-400 hover:text-red-400"
+                                                className="text-neutral-400 hover:text-red-500"
                                             >
                                                 <Trash2 className="h-3 w-3" />
                                             </button>
@@ -341,11 +476,20 @@ export function MapboxRouteEditor({
                 </div>
             )}
 
-            {/* Instructions (when no stops) */}
-            {!readOnly && stops.length === 0 && (
+            {/* Instructions (when no type selected) */}
+            {!readOnly && !selectedType && stops.length === 0 && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
-                    <div className="bg-slate-800/90 text-white text-sm px-4 py-2 rounded-lg backdrop-blur-sm">
-                        Click on markers to add stops to your route
+                    <div className="bg-white text-neutral-700 text-sm px-4 py-2 rounded-lg shadow-md border border-neutral-200">
+                        Select a location type above to show places on the map
+                    </div>
+                </div>
+            )}
+
+            {/* No results message */}
+            {!loading && selectedType && locations.length === 0 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
+                    <div className="bg-white text-neutral-700 text-sm px-4 py-2 rounded-lg shadow-md border border-neutral-200">
+                        No {selectedType} found in this area. Try another category.
                     </div>
                 </div>
             )}

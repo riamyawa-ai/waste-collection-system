@@ -1,7 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback } from "react";
+import { PageHeader, EcoCard, EcoCardContent } from "@/components/ui";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
     MessageSquare,
     Search,
@@ -11,83 +36,56 @@ import {
     Flag,
     CheckCircle,
     RefreshCw,
-    BarChart3,
     TrendingUp,
-    Calendar
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from "lucide-react";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import {
-    getFeedback,
+    getFeedbackList,
     getFeedbackStats,
-    markFeedbackAsReviewed,
-    flagFeedback,
-    getCollectorPerformance
-} from '@/lib/actions/feedback';
-import { ViewFeedbackModal } from '@/components/staff/ViewFeedbackModal';
-import { format } from 'date-fns';
+    getCollectorPerformance,
+} from "@/lib/actions/staff";
+import { ViewFeedbackModal } from "@/components/staff/ViewFeedbackModal";
+import { format } from "date-fns";
 
 interface Feedback {
     id: string;
-    overall_rating: number;
-    comments: string | null;
-    is_anonymous: boolean;
-    status: string;
+    rating: number;
+    comment: string | null;
     created_at: string;
-    client: { id: string; full_name: string; email: string } | null;
-    collector: { id: string; full_name: string; phone: string } | null;
-    request: { id: string; request_number: string; barangay: string } | null;
+    is_flagged: boolean;
+    staff_response: string | null;
+    client: {
+        id: string;
+        full_name: string;
+        email: string;
+    } | null;
+    collector: {
+        id: string;
+        full_name: string;
+    } | null;
 }
 
 interface Stats {
-    total: number;
+    totalFeedback: number;
     averageRating: number;
-    pendingReview: number;
-    thisMonth: number;
-    ratingDistribution: Record<number, number>;
+    needsAttention: number;
+    resolvedThisWeek: number;
 }
 
 interface CollectorPerformance {
     id: string;
-    name: string;
-    totalFeedback: number;
-    averageRating: number;
-    completedCollections: number;
+    full_name: string;
+    average_rating: number;
+    total_feedback: number;
 }
 
 export default function FeedbackPage() {
-    const [feedback, setFeedback] = useState<Feedback[]>([]);
+    const [feedbackList, setFeedbackList] = useState<Feedback[]>([]);
     const [stats, setStats] = useState<Stats | null>(null);
-    const [performance, setPerformance] = useState<CollectorPerformance[]>([]);
+    const [collectors, setCollectors] = useState<CollectorPerformance[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [ratingFilter, setRatingFilter] = useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState("");
+    const [ratingFilter, setRatingFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all");
     const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
     const [showViewModal, setShowViewModal] = useState(false);
     const [pagination, setPagination] = useState({
@@ -99,15 +97,16 @@ export default function FeedbackPage() {
 
     useEffect(() => {
         loadData();
-    }, [statusFilter, ratingFilter, pagination.page]);
+    }, [ratingFilter, statusFilter, pagination.page]);
 
     const loadData = async () => {
         setLoading(true);
         try {
             const [feedbackResult, statsResult, performanceResult] = await Promise.all([
-                getFeedback({
-                    status: statusFilter as 'new' | 'reviewed' | 'responded' | 'flagged' | 'all',
-                    rating: ratingFilter !== 'all' ? parseInt(ratingFilter) : undefined,
+                getFeedbackList({
+                    search: searchQuery || undefined,
+                    ratingFilter: ratingFilter as "all" | "positive" | "neutral" | "negative",
+                    statusFilter: statusFilter as "all" | "pending" | "responded" | "flagged",
                     page: pagination.page,
                     limit: pagination.limit,
                 }),
@@ -116,8 +115,8 @@ export default function FeedbackPage() {
             ]);
 
             if (feedbackResult.success && feedbackResult.data) {
-                setFeedback(feedbackResult.data.feedback || []);
-                setPagination(prev => ({
+                setFeedbackList(feedbackResult.data.feedbackList || []);
+                setPagination((prev) => ({
                     ...prev,
                     total: feedbackResult.data?.total || 0,
                     totalPages: feedbackResult.data?.totalPages || 0,
@@ -129,44 +128,33 @@ export default function FeedbackPage() {
             }
 
             if (performanceResult.success && performanceResult.data) {
-                setPerformance(performanceResult.data);
+                setCollectors(performanceResult.data);
             }
         } catch (error) {
-            toast.error('Failed to load feedback');
+            toast.error("Failed to load feedback");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleMarkReviewed = async (feedbackId: string) => {
-        const result = await markFeedbackAsReviewed(feedbackId);
-        if (result.success) {
-            toast.success('Marked as reviewed');
-            loadData();
-        } else {
-            toast.error(result.error || 'Failed to update');
-        }
-    };
+    const handleRefresh = useCallback(() => {
+        loadData();
+    }, [ratingFilter, statusFilter, pagination.page]);
 
-    const handleFlag = async (feedbackId: string) => {
-        const result = await flagFeedback(feedbackId);
-        if (result.success) {
-            toast.success('Feedback flagged for follow-up');
-            loadData();
-        } else {
-            toast.error(result.error || 'Failed to flag');
-        }
+    const handleSearch = () => {
+        setPagination((prev) => ({ ...prev, page: 1 }));
+        loadData();
     };
 
     const renderStars = (rating: number) => {
         return (
-            <div className="flex items-center gap-0.5">
+            <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                         key={star}
                         className={`h-4 w-4 ${star <= rating
-                            ? 'text-amber-400 fill-amber-400'
-                            : 'text-slate-600'
+                            ? "text-amber-400 fill-amber-400"
+                            : "text-neutral-200"
                             }`}
                     />
                 ))}
@@ -174,366 +162,325 @@ export default function FeedbackPage() {
         );
     };
 
-    const getStatusBadge = (status: string) => {
-        const styles: Record<string, string> = {
-            new: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-            reviewed: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            responded: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-            flagged: 'bg-red-500/20 text-red-400 border-red-500/30',
-        };
-        return styles[status] || styles.new;
+    const getRatingBadge = (rating: number) => {
+        if (rating >= 4) return "bg-green-100 text-green-700";
+        if (rating >= 3) return "bg-amber-100 text-amber-700";
+        return "bg-red-100 text-red-700";
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
-            <div className="max-w-7xl mx-auto space-y-6">
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white">Feedback Management</h1>
-                        <p className="text-slate-400 mt-1">Review and manage user feedback</p>
-                    </div>
-                    <Button
-                        variant="outline"
-                        onClick={loadData}
-                        className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                    >
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Refresh
-                    </Button>
-                </div>
+        <div className="space-y-6">
+            <PageHeader
+                title="User Feedback"
+                description="View and manage feedback from service users."
+            >
+                <Button variant="outline" onClick={handleRefresh}>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                </Button>
+            </PageHeader>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-500/20 rounded-lg">
-                                        <MessageSquare className="h-5 w-5 text-blue-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-slate-400 text-sm">Total Feedback</p>
-                                        <p className="text-2xl font-bold text-white">{stats?.total || 0}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-amber-500/20 rounded-lg">
-                                        <Star className="h-5 w-5 text-amber-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-slate-400 text-sm">Average Rating</p>
-                                        <p className="text-2xl font-bold text-white">{stats?.averageRating || 0}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                    >
-                        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-purple-500/20 rounded-lg">
-                                        <Eye className="h-5 w-5 text-purple-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-slate-400 text-sm">Pending Review</p>
-                                        <p className="text-2xl font-bold text-white">{stats?.pendingReview || 0}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                    >
-                        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-emerald-500/20 rounded-lg">
-                                        <Calendar className="h-5 w-5 text-emerald-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-slate-400 text-sm">This Month</p>
-                                        <p className="text-2xl font-bold text-white">{stats?.thisMonth || 0}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Feedback List */}
-                    <div className="lg:col-span-2 space-y-4">
-                        {/* Filters */}
-                        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                            <CardContent className="p-4">
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                    <div className="flex-1 relative">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                        <Input
-                                            placeholder="Search feedback..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="pl-10 bg-slate-700/50 border-slate-600 text-white"
-                                        />
-                                    </div>
-                                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                        <SelectTrigger className="w-full sm:w-36 bg-slate-700/50 border-slate-600 text-white">
-                                            <SelectValue placeholder="Status" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
-                                            <SelectItem value="all">All Status</SelectItem>
-                                            <SelectItem value="new">New</SelectItem>
-                                            <SelectItem value="reviewed">Reviewed</SelectItem>
-                                            <SelectItem value="responded">Responded</SelectItem>
-                                            <SelectItem value="flagged">Flagged</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Select value={ratingFilter} onValueChange={setRatingFilter}>
-                                        <SelectTrigger className="w-full sm:w-36 bg-slate-700/50 border-slate-600 text-white">
-                                            <SelectValue placeholder="Rating" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
-                                            <SelectItem value="all">All Ratings</SelectItem>
-                                            <SelectItem value="5">5 Stars</SelectItem>
-                                            <SelectItem value="4">4 Stars</SelectItem>
-                                            <SelectItem value="3">3 Stars</SelectItem>
-                                            <SelectItem value="2">2 Stars</SelectItem>
-                                            <SelectItem value="1">1 Star</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Feedback Table */}
-                        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                            <CardContent className="p-0">
-                                {loading ? (
-                                    <div className="flex items-center justify-center py-20">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400" />
-                                    </div>
-                                ) : feedback.length === 0 ? (
-                                    <div className="text-center py-20">
-                                        <MessageSquare className="h-12 w-12 text-slate-500 mx-auto mb-4" />
-                                        <h3 className="text-lg font-medium text-white mb-2">No feedback found</h3>
-                                        <p className="text-slate-400">Feedback will appear here when clients submit reviews</p>
-                                    </div>
-                                ) : (
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="border-slate-700 hover:bg-transparent">
-                                                <TableHead className="text-slate-400">Date</TableHead>
-                                                <TableHead className="text-slate-400">Client</TableHead>
-                                                <TableHead className="text-slate-400">Collector</TableHead>
-                                                <TableHead className="text-slate-400">Rating</TableHead>
-                                                <TableHead className="text-slate-400">Status</TableHead>
-                                                <TableHead className="text-slate-400 text-right">Actions</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {feedback.map((item) => (
-                                                <TableRow
-                                                    key={item.id}
-                                                    className="border-slate-700 hover:bg-slate-700/30"
-                                                >
-                                                    <TableCell>
-                                                        <p className="text-white text-sm">
-                                                            {format(new Date(item.created_at), 'MMM dd, yyyy')}
-                                                        </p>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <p className="text-white">
-                                                            {item.is_anonymous ? 'Anonymous' : item.client?.full_name || 'Unknown'}
-                                                        </p>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <p className="text-white">{item.collector?.full_name || 'Unknown'}</p>
-                                                    </TableCell>
-                                                    <TableCell>{renderStars(item.overall_rating)}</TableCell>
-                                                    <TableCell>
-                                                        <Badge className={getStatusBadge(item.status)}>
-                                                            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700">
-                                                                <DropdownMenuItem
-                                                                    onClick={() => {
-                                                                        setSelectedFeedback(item);
-                                                                        setShowViewModal(true);
-                                                                    }}
-                                                                    className="text-slate-300 hover:bg-slate-700"
-                                                                >
-                                                                    <Eye className="h-4 w-4 mr-2" />
-                                                                    View Details
-                                                                </DropdownMenuItem>
-                                                                {item.status === 'new' && (
-                                                                    <DropdownMenuItem
-                                                                        onClick={() => handleMarkReviewed(item.id)}
-                                                                        className="text-emerald-400 hover:bg-slate-700"
-                                                                    >
-                                                                        <CheckCircle className="h-4 w-4 mr-2" />
-                                                                        Mark Reviewed
-                                                                    </DropdownMenuItem>
-                                                                )}
-                                                                <DropdownMenuSeparator className="bg-slate-700" />
-                                                                <DropdownMenuItem
-                                                                    onClick={() => handleFlag(item.id)}
-                                                                    className="text-red-400 hover:bg-slate-700"
-                                                                >
-                                                                    <Flag className="h-4 w-4 mr-2" />
-                                                                    Flag for Follow-up
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Pagination */}
-                        {pagination.totalPages > 1 && (
-                            <div className="flex justify-center gap-2">
-                                <Button
-                                    variant="outline"
-                                    disabled={pagination.page === 1}
-                                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                                    className="border-slate-600 text-slate-300"
-                                >
-                                    Previous
-                                </Button>
-                                <span className="flex items-center px-4 text-slate-400">
-                                    Page {pagination.page} of {pagination.totalPages}
-                                </span>
-                                <Button
-                                    variant="outline"
-                                    disabled={pagination.page === pagination.totalPages}
-                                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                                    className="border-slate-600 text-slate-300"
-                                >
-                                    Next
-                                </Button>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <EcoCard>
+                    <EcoCardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                                <MessageSquare className="h-5 w-5 text-blue-600" />
                             </div>
-                        )}
-                    </div>
+                            <div>
+                                <p className="text-neutral-500 text-sm">Total Feedback</p>
+                                <p className="text-2xl font-bold text-neutral-900">
+                                    {stats?.totalFeedback || 0}
+                                </p>
+                            </div>
+                        </div>
+                    </EcoCardContent>
+                </EcoCard>
 
-                    {/* Collector Performance Sidebar */}
-                    <div className="space-y-4">
-                        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-lg text-white flex items-center gap-2">
-                                    <BarChart3 className="h-5 w-5 text-amber-400" />
-                                    Top Performers
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {performance.length === 0 ? (
-                                    <p className="text-slate-400 text-sm text-center py-4">No data available</p>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {performance.slice(0, 5).map((collector, index) => (
-                                            <div key={collector.id} className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-amber-500/20 text-amber-400' :
-                                                    index === 1 ? 'bg-slate-400/20 text-slate-300' :
-                                                        index === 2 ? 'bg-orange-600/20 text-orange-400' :
-                                                            'bg-slate-600/20 text-slate-400'
-                                                    }`}>
-                                                    {index + 1}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-white font-medium truncate">{collector.name}</p>
-                                                    <div className="flex items-center gap-2">
-                                                        {renderStars(Math.round(collector.averageRating))}
-                                                        <span className="text-slate-400 text-sm">
-                                                            ({collector.totalFeedback})
-                                                        </span>
+                <EcoCard>
+                    <EcoCardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-100 rounded-lg">
+                                <Star className="h-5 w-5 text-amber-600" />
+                            </div>
+                            <div>
+                                <p className="text-neutral-500 text-sm">Average Rating</p>
+                                <p className="text-2xl font-bold text-neutral-900">
+                                    {stats?.averageRating?.toFixed(1) || "0.0"}
+                                </p>
+                            </div>
+                        </div>
+                    </EcoCardContent>
+                </EcoCard>
+
+                <EcoCard>
+                    <EcoCardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-red-100 rounded-lg">
+                                <Flag className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div>
+                                <p className="text-neutral-500 text-sm">Needs Attention</p>
+                                <p className="text-2xl font-bold text-neutral-900">
+                                    {stats?.needsAttention || 0}
+                                </p>
+                            </div>
+                        </div>
+                    </EcoCardContent>
+                </EcoCard>
+
+                <EcoCard>
+                    <EcoCardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-green-100 rounded-lg">
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                                <p className="text-neutral-500 text-sm">Resolved This Week</p>
+                                <p className="text-2xl font-bold text-neutral-900">
+                                    {stats?.resolvedThisWeek || 0}
+                                </p>
+                            </div>
+                        </div>
+                    </EcoCardContent>
+                </EcoCard>
+            </div>
+
+            <div className="grid lg:grid-cols-4 gap-6">
+                {/* Main Content */}
+                <div className="lg:col-span-3 space-y-6">
+                    {/* Filters */}
+                    <EcoCard>
+                        <EcoCardContent className="p-4">
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <div className="flex-1 relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                                    <Input
+                                        placeholder="Search feedback..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                        className="pl-10"
+                                    />
+                                </div>
+                                <Select value={ratingFilter} onValueChange={setRatingFilter}>
+                                    <SelectTrigger className="w-full sm:w-40">
+                                        <SelectValue placeholder="Rating" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Ratings</SelectItem>
+                                        <SelectItem value="positive">Positive (4-5)</SelectItem>
+                                        <SelectItem value="neutral">Neutral (3)</SelectItem>
+                                        <SelectItem value="negative">Negative (1-2)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-full sm:w-40">
+                                        <SelectValue placeholder="Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Status</SelectItem>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="responded">Responded</SelectItem>
+                                        <SelectItem value="flagged">Flagged</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </EcoCardContent>
+                    </EcoCard>
+
+                    {/* Feedback Table */}
+                    <EcoCard>
+                        <EcoCardContent className="p-0">
+                            {loading ? (
+                                <div className="flex items-center justify-center py-20">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+                                </div>
+                            ) : feedbackList.length === 0 ? (
+                                <div className="text-center py-20">
+                                    <MessageSquare className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
+                                    <h3 className="text-lg font-medium text-neutral-900 mb-2">
+                                        No feedback found
+                                    </h3>
+                                    <p className="text-neutral-500">
+                                        Feedback from users will appear here
+                                    </p>
+                                </div>
+                            ) : (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Rating</TableHead>
+                                            <TableHead>Comment</TableHead>
+                                            <TableHead>Client</TableHead>
+                                            <TableHead>Collector</TableHead>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {feedbackList.map((feedback) => (
+                                            <TableRow key={feedback.id}>
+                                                <TableCell>
+                                                    <div className="flex flex-col gap-1">
+                                                        {renderStars(feedback.rating)}
+                                                        <Badge
+                                                            className={getRatingBadge(feedback.rating)}
+                                                        >
+                                                            {feedback.rating}/5
+                                                        </Badge>
                                                     </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-lg font-bold text-white">{collector.averageRating}</p>
-                                                </div>
-                                            </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <p className="text-neutral-900 line-clamp-2 max-w-xs">
+                                                        {feedback.comment || "No comment provided"}
+                                                    </p>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="text-sm">
+                                                        <p className="text-neutral-900 font-medium">
+                                                            {feedback.client?.full_name || "Unknown"}
+                                                        </p>
+                                                        <p className="text-neutral-500">
+                                                            {feedback.client?.email || ""}
+                                                        </p>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className="text-neutral-900">
+                                                        {feedback.collector?.full_name || "No collector"}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className="text-neutral-600 text-sm">
+                                                        {format(
+                                                            new Date(feedback.created_at),
+                                                            "MMM dd, yyyy"
+                                                        )}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {feedback.is_flagged ? (
+                                                        <Badge className="bg-red-100 text-red-700">
+                                                            <Flag className="h-3 w-3 mr-1" />
+                                                            Flagged
+                                                        </Badge>
+                                                    ) : feedback.staff_response ? (
+                                                        <Badge className="bg-green-100 text-green-700">
+                                                            <CheckCircle className="h-3 w-3 mr-1" />
+                                                            Responded
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge className="bg-amber-100 text-amber-700">
+                                                            Pending
+                                                        </Badge>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon">
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    setSelectedFeedback(feedback);
+                                                                    setShowViewModal(true);
+                                                                }}
+                                                            >
+                                                                <Eye className="h-4 w-4 mr-2" />
+                                                                View Details
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
                                         ))}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                    </TableBody>
+                                </Table>
+                            )}
+                        </EcoCardContent>
+                    </EcoCard>
 
-                        {/* Rating Distribution */}
-                        {stats?.ratingDistribution && (
-                            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg text-white flex items-center gap-2">
-                                        <TrendingUp className="h-5 w-5 text-emerald-400" />
-                                        Rating Distribution
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-3">
-                                        {[5, 4, 3, 2, 1].map((rating) => {
-                                            const count = stats.ratingDistribution[rating] || 0;
-                                            const percentage = stats.total > 0 ? (count / stats.total) * 100 : 0;
-                                            return (
-                                                <div key={rating} className="flex items-center gap-3">
-                                                    <div className="flex items-center gap-1 w-16">
-                                                        <span className="text-white text-sm">{rating}</span>
-                                                        <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
-                                                    </div>
-                                                    <div className="flex-1 bg-slate-700 rounded-full h-2 overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-500"
-                                                            style={{ width: `${percentage}%` }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-slate-400 text-sm w-10 text-right">{count}</span>
-                                                </div>
-                                            );
-                                        })}
+                    {/* Pagination */}
+                    {pagination.totalPages > 1 && (
+                        <div className="flex justify-center gap-2">
+                            <Button
+                                variant="outline"
+                                disabled={pagination.page === 1}
+                                onClick={() =>
+                                    setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
+                                }
+                            >
+                                Previous
+                            </Button>
+                            <span className="flex items-center px-4 text-neutral-500">
+                                Page {pagination.page} of {pagination.totalPages}
+                            </span>
+                            <Button
+                                variant="outline"
+                                disabled={pagination.page === pagination.totalPages}
+                                onClick={() =>
+                                    setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
+                                }
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Sidebar: Collector Performance */}
+                <div className="space-y-6">
+                    <EcoCard>
+                        <EcoCardContent className="p-4">
+                            <div className="flex items-center gap-2 mb-4">
+                                <TrendingUp className="h-5 w-5 text-primary-600" />
+                                <h3 className="font-semibold text-neutral-900">
+                                    Top Collectors
+                                </h3>
+                            </div>
+                            <div className="space-y-3">
+                                {collectors.slice(0, 5).map((collector, index) => (
+                                    <div
+                                        key={collector.id}
+                                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50"
+                                    >
+                                        <span className="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold">
+                                            {index + 1}
+                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-neutral-900 truncate">
+                                                {collector.full_name}
+                                            </p>
+                                            <p className="text-xs text-neutral-500">
+                                                {collector.total_feedback} reviews
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                                            <span className="text-sm font-medium text-neutral-900">
+                                                {collector.average_rating.toFixed(1)}
+                                            </span>
+                                        </div>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
+                                ))}
+                                {collectors.length === 0 && (
+                                    <p className="text-sm text-neutral-500 text-center py-4">
+                                        No collector data available
+                                    </p>
+                                )}
+                            </div>
+                        </EcoCardContent>
+                    </EcoCard>
                 </div>
             </div>
 
-            {/* View Modal */}
+            {/* View Feedback Modal */}
             {selectedFeedback && (
                 <ViewFeedbackModal
                     open={showViewModal}
@@ -542,7 +489,7 @@ export default function FeedbackPage() {
                         setSelectedFeedback(null);
                     }}
                     feedbackId={selectedFeedback.id}
-                    onUpdate={loadData}
+                    onSuccess={loadData}
                 />
             )}
         </div>
