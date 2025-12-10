@@ -21,7 +21,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Trash2, Route, Map, List } from 'lucide-react';
+import { Trash2, Route, Map, List, MapPin } from 'lucide-react';
 import { createSchedule } from '@/lib/actions/schedule';
 import { getAvailableCollectors } from '@/lib/actions/staff';
 import { LOCATION_TYPES, SAMPLE_LOCATIONS } from '@/lib/mapbox/utils';
@@ -224,10 +224,10 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                 <div key={s.id} className="flex flex-col items-center gap-2 bg-white px-2">
                                     <div
                                         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all duration-300 ${isCompleted
-                                                ? 'bg-emerald-600 border-emerald-600 text-white'
-                                                : isCurrent
-                                                    ? 'bg-white border-emerald-600 text-emerald-600 shadow-sm scale-110'
-                                                    : 'bg-white border-gray-300 text-gray-400'
+                                            ? 'bg-emerald-600 border-emerald-600 text-white'
+                                            : isCurrent
+                                                ? 'bg-white border-emerald-600 text-emerald-600 shadow-sm scale-110'
+                                                : 'bg-white border-gray-300 text-gray-400'
                                             }`}
                                     >
                                         {isCompleted ? (
@@ -309,23 +309,40 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                     </TabsContent>
 
                                     <TabsContent value="list" className="mt-0">
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                            {LOCATION_TYPES.map((type) => (
-                                                <button
-                                                    key={type.id}
-                                                    onClick={() => handleTypeToggle(type.id)}
-                                                    className={`p-3 rounded-lg border text-sm font-medium transition-all text-left flex flex-col gap-2 hover:shadow-sm ${selectedTypes.includes(type.id)
-                                                        ? 'border-emerald-500 bg-emerald-50/50 text-emerald-700'
-                                                        : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-200'
-                                                        }`}
-                                                >
-                                                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedTypes.includes(type.id) ? 'bg-emerald-100' : 'bg-gray-100'}`}>
-                                                        {/* We could render icon here if we import them dynamically or have a map */}
-                                                        <Map className="w-4 h-4" />
-                                                    </span>
-                                                    {type.label}
-                                                </button>
-                                            ))}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            {LOCATION_TYPES.map((type) => {
+                                                const isSelected = selectedTypes.includes(type.id);
+                                                return (
+                                                    <button
+                                                        key={type.id}
+                                                        onClick={() => handleTypeToggle(type.id)}
+                                                        className={`p-4 rounded-xl border-2 text-sm font-medium transition-all text-left flex flex-col gap-3 hover:shadow-md ${isSelected
+                                                            ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm'
+                                                            : 'border-gray-100 bg-white text-gray-600 hover:border-gray-200'
+                                                            }`}
+                                                    >
+                                                        <span
+                                                            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors`}
+                                                            style={{
+                                                                backgroundColor: isSelected ? type.color + '20' : '#f3f4f6',
+                                                                color: type.color
+                                                            }}
+                                                        >
+                                                            <MapPin className="w-5 h-5" />
+                                                        </span>
+                                                        <div className="flex items-center justify-between w-full">
+                                                            <span className={isSelected ? 'font-semibold' : ''}>{type.label}</span>
+                                                            {isSelected && (
+                                                                <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </TabsContent>
                                 </Tabs>

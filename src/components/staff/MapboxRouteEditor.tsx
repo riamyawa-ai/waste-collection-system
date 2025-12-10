@@ -69,14 +69,22 @@ export function MapboxRouteEditor({
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [locations, setLocations] = useState<MapLocation[]>([]);
     const [loading, setLoading] = useState(false);
+    const [isMapLoaded, setIsMapLoaded] = useState(false);
     const [viewState, setViewState] = useState({
         longitude: PANABO_CENTER.longitude,
         latitude: PANABO_CENTER.latitude,
-        zoom: PANABO_CENTER.zoom,
+        zoom: 14, // Zoomed in more for better visibility
     });
 
-    // Fetch POIs from Mapbox when type is selected
+    // Handle map load
+    const handleMapLoad = useCallback(() => {
+        setIsMapLoaded(true);
+    }, []);
+
+    // Fetch POIs from Mapbox when type is selected and map is loaded
     useEffect(() => {
+        if (!isMapLoaded) return;
+
         if (selectedType && selectedType !== 'all') {
             fetchPOIs(selectedType);
         } else if (selectedType === 'all') {
@@ -85,7 +93,7 @@ export function MapboxRouteEditor({
         } else {
             setLocations([]);
         }
-    }, [selectedType]);
+    }, [selectedType, isMapLoaded]);
 
     const fetchPOIs = async (type: string) => {
         setLoading(true);
@@ -276,21 +284,38 @@ export function MapboxRouteEditor({
         <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
             {/* Type Filter */}
             {showSampleLocations && !readOnly && (
-                <div className="absolute top-2 left-2 z-10 w-[calc(100%-120px)]">
-                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none px-1 py-1">
-                        {LOCATION_TYPES.filter(t => t.id !== 'all').map((type) => (
+                <div className="absolute top-3 left-3 z-10 w-[calc(100%-140px)]">
+                    <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-2">
+                        <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+                            {/* All Types Button */}
                             <button
-                                key={type.id}
-                                onClick={() => setSelectedType(selectedType === type.id ? null : type.id)}
-                                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-sm border flex items-center gap-1.5 ${selectedType === type.id
-                                    ? 'text-white border-transparent transform scale-105'
-                                    : 'bg-white text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 border-neutral-200'
+                                onClick={() => setSelectedType(selectedType === 'all' ? null : 'all')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${selectedType === 'all'
+                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
-                                style={selectedType === type.id ? { backgroundColor: type.color } : {}}
                             >
-                                {type.label}
+                                All Types
                             </button>
-                        ))}
+                            {/* Individual Type Buttons */}
+                            {LOCATION_TYPES.filter(t => t.id !== 'all').map((type) => (
+                                <button
+                                    key={type.id}
+                                    onClick={() => setSelectedType(selectedType === type.id ? null : type.id)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${selectedType === type.id
+                                            ? 'text-white shadow-md transform scale-105'
+                                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                    style={selectedType === type.id ? { backgroundColor: type.color } : {}}
+                                >
+                                    <span
+                                        className={`w-2 h-2 rounded-full ${selectedType === type.id ? 'bg-white/50' : ''}`}
+                                        style={selectedType !== type.id ? { backgroundColor: type.color } : {}}
+                                    />
+                                    {type.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             )}
@@ -341,6 +366,7 @@ export function MapboxRouteEditor({
                 ref={mapRef}
                 {...viewState}
                 onMove={(evt: ViewStateChangeEvent) => setViewState(evt.viewState)}
+                onLoad={handleMapLoad}
                 mapStyle={MAPBOX_STYLE}
                 mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
                 style={{ width: '100%', height: isFullscreen ? '100vh' : height }}
@@ -357,8 +383,8 @@ export function MapboxRouteEditor({
                     showUserHeading
                 />
 
-                {/* Route Line */}
-                {routeLineData && (
+                {/* Route Line - only render after map is loaded */}
+                {isMapLoaded && routeLineData && (
                     <Source id="route" type="geojson" data={routeLineData}>
                         <Layer
                             id="route-line-outline"
@@ -382,8 +408,11 @@ export function MapboxRouteEditor({
                 )}
 
                 {/* Location Markers from API */}
-                {showSampleLocations && locations.map((location) => {
+                {showSampleLocations && isMapLoaded && locations.map((location) => {
                     const isSelected = stops.some(s => s.id === location.id);
+                    const isHighlighted = selectedType && (selectedType === 'all' || location.type === selectedType);
+                    const typeColor = getTypeColor(location.type);
+
                     return (
                         <Marker
                             key={location.id}
@@ -392,24 +421,37 @@ export function MapboxRouteEditor({
                             onClick={() => handleLocationClick(location)}
                         >
                             <div
-                                className={`cursor-pointer transition-all transform ${isSelected ? 'scale-125' : 'hover:scale-110'
-                                    }`}
-                                title={location.name}
+                                className={`cursor-pointer transition-all duration-200 transform ${isSelected ? 'scale-125 z-20' : 'hover:scale-110'}`}
+                                title={`${location.name} - ${location.type}`}
                             >
+                                {/* Highlight ring for selected type */}
+                                {isHighlighted && !isSelected && (
+                                    <div
+                                        className="absolute -inset-1 rounded-full animate-pulse opacity-40"
+                                        style={{ backgroundColor: typeColor }}
+                                    />
+                                )}
                                 <div
-                                    className={`w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 ${isSelected
-                                        ? 'border-white bg-emerald-500'
-                                        : 'border-white'
+                                    className={`relative w-7 h-7 rounded-full flex items-center justify-center shadow-lg border-2 transition-all ${isSelected
+                                        ? 'border-white ring-2 ring-emerald-400 ring-offset-1'
+                                        : 'border-white hover:ring-2 hover:ring-offset-1'
                                         }`}
                                     style={{
-                                        backgroundColor: isSelected ? '#10b981' : getTypeColor(location.type),
-                                    }}
+                                        backgroundColor: isSelected ? '#10b981' : typeColor,
+                                        '--tw-ring-color': typeColor,
+                                    } as React.CSSProperties}
                                 >
-                                    {isSelected && (
+                                    {isSelected ? (
                                         <span className="text-white text-xs font-bold">
                                             {stops.findIndex(s => s.id === location.id) + 1}
                                         </span>
+                                    ) : (
+                                        <MapPin className="w-3.5 h-3.5 text-white" />
                                     )}
+                                </div>
+                                {/* Location name tooltip on hover */}
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 hover:opacity-100 pointer-events-none transition-opacity">
+                                    {location.name}
                                 </div>
                             </div>
                         </Marker>
