@@ -249,11 +249,18 @@ export function RegisterForm() {
 
                 {/* Terms & Conditions */}
                 <div className="flex items-start gap-2">
-                    <Checkbox
-                        id="agreeToTerms"
-                        className="mt-1"
-                        disabled={isPending}
-                        {...register("agreeToTerms")}
+                    <Controller
+                        name="agreeToTerms"
+                        control={control}
+                        render={({ field }) => (
+                            <Checkbox
+                                id="agreeToTerms"
+                                className="mt-1"
+                                disabled={isPending}
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
+                        )}
                     />
                     <label htmlFor="agreeToTerms" className="text-sm text-neutral-600 cursor-pointer">
                         I agree to the{" "}

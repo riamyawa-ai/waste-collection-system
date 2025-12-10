@@ -23,6 +23,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { BarangaySelect } from "@/components/ui/barangay-select";
 import { PasswordStrengthMeter } from "@/components/ui/password-strength";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { createUser } from "@/lib/actions/staff";
 import { Loader2, Eye, EyeOff, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -68,17 +69,37 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
             return;
         }
 
+        if (formData.password.length < 8) {
+            toast.error("Password must be at least 8 characters");
+            return;
+        }
+
         setLoading(true);
         try {
-            // This would call a server action to create the user
-            // For now, we'll show a placeholder
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            toast.success("User created successfully");
-            onSuccess();
-            onClose();
-            resetForm();
-        } catch (error) {
-            toast.error("Failed to create user");
+            const result = await createUser({
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address || undefined,
+                barangay: formData.barangay || undefined,
+                role: formData.role,
+                status: formData.status,
+                password: formData.password,
+                autoVerify: formData.autoVerify,
+                sendWelcomeEmail: formData.sendWelcomeEmail,
+            });
+
+            if (result.success) {
+                toast.success("User created successfully");
+                onSuccess();
+                onClose();
+                resetForm();
+            } else {
+                toast.error(result.error || "Failed to create user");
+            }
+        } catch {
+            toast.error("An unexpected error occurred");
         }
         setLoading(false);
     };

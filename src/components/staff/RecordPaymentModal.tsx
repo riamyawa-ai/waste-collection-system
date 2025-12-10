@@ -178,7 +178,10 @@ export function RecordPaymentModal({
 
                         <div className="space-y-2">
                             <Label htmlFor="receipt">Upload Receipt (Optional)</Label>
-                            <div className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-primary-300 transition-colors cursor-pointer">
+                            <div
+                                className="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-primary-300 transition-colors cursor-pointer"
+                                onClick={() => toast.info("File upload feature is coming soon")}
+                            >
                                 <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
                                 <p className="text-sm text-neutral-600">
                                     Click to upload or drag and drop

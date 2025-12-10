@@ -44,11 +44,9 @@ import {
     XCircle,
     CreditCard,
     Users,
-    Truck,
     MoreVertical,
     ChevronLeft,
     ChevronRight,
-    MapPin,
     Phone,
 } from "lucide-react";
 import { format } from "date-fns";

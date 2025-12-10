@@ -67,7 +67,7 @@ export function AcceptRejectModal({
             } else {
                 toast.error(result.error || "Failed to process request");
             }
-        } catch (error) {
+        } catch {
             toast.error("An error occurred");
         }
         setLoading(false);

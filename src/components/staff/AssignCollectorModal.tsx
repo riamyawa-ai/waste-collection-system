@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getAvailableCollectors, assignCollector } from "@/lib/actions/staff";
-import { Users, Loader2, Star, Truck, CheckCircle, Clock } from "lucide-react";
+import { Users, Loader2, Star, Truck, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface Collector {
@@ -53,20 +53,21 @@ export function AssignCollectorModal({
     const [selectedCollector, setSelectedCollector] = useState<string>("");
     const [instructions, setInstructions] = useState("");
 
-    useEffect(() => {
-        if (open) {
-            fetchCollectors();
-        }
-    }, [open]);
-
-    async function fetchCollectors() {
+    const fetchCollectors = async () => {
         setLoading(true);
         const result = await getAvailableCollectors();
         if (result.success && result.data) {
             setCollectors(result.data);
         }
         setLoading(false);
-    }
+    };
+
+    useEffect(() => {
+        if (open) {
+            fetchCollectors();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
 
     const handleSubmit = async () => {
         if (!request || !selectedCollector) {
@@ -90,7 +91,7 @@ export function AssignCollectorModal({
             } else {
                 toast.error(result.error || "Failed to assign collector");
             }
-        } catch (error) {
+        } catch {
             toast.error("An error occurred");
         }
         setSubmitting(false);
@@ -195,8 +196,8 @@ export function AssignCollectorModal({
                                                 <label
                                                     key={collector.id}
                                                     className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all ${selectedCollector === collector.id
-                                                            ? "border-primary-500 bg-primary-50"
-                                                            : "border-neutral-200 hover:border-primary-300"
+                                                        ? "border-primary-500 bg-primary-50"
+                                                        : "border-neutral-200 hover:border-primary-300"
                                                         }`}
                                                 >
                                                     <RadioGroupItem value={collector.id} />
@@ -249,8 +250,8 @@ export function AssignCollectorModal({
                                                 <label
                                                     key={collector.id}
                                                     className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all opacity-60 ${selectedCollector === collector.id
-                                                            ? "border-primary-500 bg-primary-50"
-                                                            : "border-neutral-200 hover:border-primary-300"
+                                                        ? "border-primary-500 bg-primary-50"
+                                                        : "border-neutral-200 hover:border-primary-300"
                                                         }`}
                                                 >
                                                     <RadioGroupItem value={collector.id} />

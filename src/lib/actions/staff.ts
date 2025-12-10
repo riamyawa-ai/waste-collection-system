@@ -1126,3 +1126,115 @@ export async function completeRequest(requestId: string): Promise<ActionResult> 
     revalidatePath('/staff/collections');
     return { success: true };
 }
+
+// ============================================================================
+// USER CREATION
+// ============================================================================
+
+export async function createUser(input: CreateUserInput): Promise<ActionResult> {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { success: false, error: 'Not authenticated' };
+    }
+
+    // Check if user is staff or admin
+    const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    if (!currentProfile || !['admin', 'staff'].includes(currentProfile.role)) {
+        return { success: false, error: 'Unauthorized - Only staff and admin can create users' };
+    }
+
+    // Check if email already exists
+    const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', input.email)
+        .single();
+
+    if (existingUser) {
+        return { success: false, error: 'A user with this email already exists' };
+    }
+
+    // Create user through Supabase Auth
+    // Note: This requires admin access. For client-side, we create profile directly
+    // In production, this should use Supabase Admin API or a secure backend endpoint
+
+    try {
+        // For now, we'll insert directly into profiles
+        // The auth user would need to be created separately through admin API
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+                id: crypto.randomUUID(),
+                first_name: input.firstName,
+                last_name: input.lastName,
+                email: input.email,
+                phone: input.phone,
+                address: input.address || null,
+                barangay: input.barangay || null,
+                role: input.role,
+                status: input.status,
+                email_verified: input.autoVerify || false,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            });
+
+        if (profileError) {
+            return { success: false, error: profileError.message };
+        }
+
+        // TODO: In production, send welcome email if input.sendWelcomeEmail is true
+        // This would use a service like Resend, SendGrid, or Supabase's email features
+
+        revalidatePath('/staff/users');
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: 'Failed to create user' };
+    }
+}
+
+// ============================================================================
+// QUICK ACTION BADGE COUNTS
+// ============================================================================
+
+export async function getQuickActionCounts() {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { success: false, error: 'Not authenticated' };
+    }
+
+    // Get pending requests count
+    const { count: pendingRequests } = await supabase
+        .from('collection_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+
+    // Get pending payments (accepted requests awaiting payment)
+    const { count: pendingPayments } = await supabase
+        .from('collection_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'accepted');
+
+    // Get unread feedback count
+    const { count: unreadFeedback } = await supabase
+        .from('feedback')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'new');
+
+    return {
+        success: true,
+        data: {
+            pendingRequests: pendingRequests || 0,
+            pendingPayments: pendingPayments || 0,
+            unreadFeedback: unreadFeedback || 0,
+        },
+    };
+}
