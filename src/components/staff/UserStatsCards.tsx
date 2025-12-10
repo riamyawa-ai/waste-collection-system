@@ -35,8 +35,8 @@ export function UserStatsCards() {
 
     if (loading) {
         return (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                {[...Array(7)].map((_, i) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
                     <div key={i} className="h-28 bg-neutral-100 animate-pulse rounded-xl" />
                 ))}
             </div>
@@ -48,48 +48,34 @@ export function UserStatsCards() {
     }
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard
                 title="Total Users"
                 value={stats.total}
                 icon={Users}
-                className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200"
+                className="bg-white border-l-4 border-l-primary-500 shadow-sm"
+                trend={{ value: 3, isPositive: true }}
             />
             <StatCard
                 title="Active"
                 value={stats.active}
                 icon={UserCheck}
-                className="border-green-200"
-            />
-            <StatCard
-                title="Inactive"
-                value={stats.inactive}
-                icon={UserX}
-                className="border-neutral-200"
-            />
-            <StatCard
-                title="Suspended"
-                value={stats.suspended}
-                icon={UserMinus}
-                className="border-red-200"
-            />
-            <StatCard
-                title="Staff"
-                value={stats.byRole.staff}
-                icon={Briefcase}
-                className="border-blue-200"
+                className="bg-white border-l-4 border-l-green-500 shadow-sm"
+                trend={{ value: 98, isPositive: true }}
             />
             <StatCard
                 title="Clients"
                 value={stats.byRole.client}
                 icon={Home}
-                className="border-purple-200"
+                className="bg-white border-l-4 border-l-purple-500 shadow-sm"
+                trend={{ value: 2, isPositive: true }}
             />
             <StatCard
                 title="Collectors"
                 value={stats.byRole.collector}
                 icon={Truck}
-                className="border-orange-200"
+                className="bg-white border-l-4 border-l-orange-500 shadow-sm"
+                trend={{ value: 0, isPositive: true }}
             />
         </div>
     );

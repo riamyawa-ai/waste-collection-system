@@ -10,7 +10,6 @@ interface StatCardProps {
     value: number;
     isPositive: boolean;
   };
-  chartData?: number[];
   className?: string;
 }
 
@@ -20,7 +19,6 @@ export function StatCard({
   description,
   icon: Icon,
   trend,
-  chartData,
   className,
 }: StatCardProps) {
   return (
@@ -45,42 +43,6 @@ export function StatCard({
             </div>
           )}
         </div>
-
-        {/* Mini Chart (Sparkline) */}
-        {chartData && chartData.length > 0 && (
-          <div className="absolute bottom-0 right-0 left-0 h-16 opacity-20 pointer-events-none">
-            <svg
-              width="100%"
-              height="100%"
-              viewBox={`0 0 ${chartData.length - 1} 100`}
-              preserveAspectRatio="none"
-              className={trend?.isPositive ? "text-green-600" : trend?.isPositive === false ? "text-red-600" : "text-primary-600"}
-            >
-              <path
-                d={`M 0 100 ${chartData.map((val, i) => {
-                  const max = Math.max(...chartData);
-                  const min = Math.min(...chartData);
-                  const range = max - min || 1;
-                  const normalized = ((val - min) / range) * 80; // Keep some padding
-                  return `L ${i} ${100 - (normalized + 10)}`;
-                }).join(" ")} L ${chartData.length - 1} 100 Z`}
-                fill="currentColor"
-              />
-              <path
-                d={`M ${chartData.map((val, i) => {
-                  const max = Math.max(...chartData);
-                  const min = Math.min(...chartData);
-                  const range = max - min || 1;
-                  const normalized = ((val - min) / range) * 80;
-                  return `${i === 0 ? "M" : "L"} ${i} ${100 - (normalized + 10)}`;
-                }).join(" ")}`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-          </div>
-        )}
 
         {(description || trend) && (
           <div className="mt-4 flex items-center gap-2 relative z-10">

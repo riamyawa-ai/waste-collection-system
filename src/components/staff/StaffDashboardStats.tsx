@@ -115,8 +115,7 @@ export function StaffDashboardStats() {
                     value={stats.pendingRequests}
                     icon={Clock}
                     description="Awaiting review"
-                    className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200"
-                    chartData={[4, 7, 5, 8, 12, 15, 10, stats.pendingRequests]}
+                    className="bg-white border-l-4 border-l-yellow-500 shadow-sm"
                     trend={{ value: 12, isPositive: true }}
                 />
                 <StatCard
@@ -124,16 +123,15 @@ export function StaffDashboardStats() {
                     value={getCollectionValue()}
                     icon={Truck}
                     description={`${timeFrame === "today" ? "Today" : timeFrame === "week" ? "This Week" : "This Month"}`}
-                    className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200"
-                    chartData={[10, 25, 18, 30, 22, 35, 40, 45]}
+                    className="bg-white border-l-4 border-l-blue-500 shadow-sm"
+                    trend={{ value: 5, isPositive: true }}
                 />
                 <StatCard
                     title="Revenue"
                     value={`₱${getRevenueValue().toLocaleString()}`}
                     icon={DollarSign}
                     description={`${timeFrame === "today" ? "Today" : timeFrame === "week" ? "This Week" : "This Month"}`}
-                    className="bg-gradient-to-br from-green-50 to-green-100 border-green-200"
-                    chartData={[1500, 2300, 1800, 3200, 2900, 4500, 3800, 5000]}
+                    className="bg-white border-l-4 border-l-green-500 shadow-sm"
                     trend={{ value: 8, isPositive: true }}
                 />
                 <StatCard
@@ -141,8 +139,8 @@ export function StaffDashboardStats() {
                     value={stats.totalUsers}
                     icon={Users}
                     description={`${stats.usersByRole.client} clients, ${stats.usersByRole.collector} collectors`}
-                    className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200"
-                    chartData={[stats.totalUsers - 10, stats.totalUsers - 8, stats.totalUsers - 5, stats.totalUsers - 2, stats.totalUsers]}
+                    className="bg-white border-l-4 border-l-purple-500 shadow-sm"
+                    trend={{ value: 3, isPositive: true }}
                 />
             </div>
         </div>

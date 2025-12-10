@@ -64,32 +64,30 @@ export function CollectionStatsCards() {
                 title="Pending Review"
                 value={stats.pending}
                 icon={Clock}
-                className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200"
+                className="bg-white border-l-4 border-l-yellow-500 shadow-sm"
                 description="Needs action"
-                chartData={[stats.pending - 2, stats.pending + 1, stats.pending - 1, stats.pending + 3, stats.pending]}
                 trend={{ value: 5, isPositive: true }}
             />
             <StatCard
                 title="Awaiting Payment"
                 value={stats.accepted}
                 icon={CreditCard}
-                className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200"
-                chartData={[stats.accepted - 5, stats.accepted - 2, stats.accepted + 4, stats.accepted]}
+                className="bg-white border-l-4 border-l-blue-500 shadow-sm"
+                trend={{ value: 2, isPositive: false }}
             />
             <StatCard
                 title="In Progress"
                 value={stats.in_progress + stats.accepted_by_collector + stats.assigned}
                 icon={Truck}
-                className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200"
-                chartData={[2, 4, 3, 5, 8, 6, stats.in_progress + stats.assigned]}
+                className="bg-white border-l-4 border-l-orange-500 shadow-sm"
+                trend={{ value: 10, isPositive: true }}
             />
             <StatCard
                 title="Completed"
                 value={stats.completed}
                 icon={CheckCircle2}
-                className="bg-gradient-to-br from-green-50 to-green-100 border-green-200"
-                chartData={[stats.completed - 20, stats.completed - 15, stats.completed - 8, stats.completed - 5, stats.completed]}
-                trend={{ value: 12, isPositive: true }}
+                className="bg-white border-l-4 border-l-green-500 shadow-sm"
+                trend={{ value: 15, isPositive: true }}
             />
         </div>
     );
