@@ -46,6 +46,7 @@ declare module 'react-map-gl' {
         onClick?: (evt: any) => void;
         onLoad?: (evt: any) => void;
         attributionControl?: boolean;
+        maxBounds?: LngLatBoundsLike;
         children?: React.ReactNode;
     }
 

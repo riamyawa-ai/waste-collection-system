@@ -345,6 +345,10 @@ export function MapboxRouteEditor({
                 mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
                 style={{ width: '100%', height: isFullscreen ? '100vh' : height }}
                 attributionControl={false}
+                maxBounds={[
+                    [125.52, 7.15], // Southwest coordinates
+                    [125.85, 7.45]  // Northeast coordinates
+                ]}
             >
                 <NavigationControl position="bottom-right" />
                 <GeolocateControl

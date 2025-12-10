@@ -5,7 +5,7 @@
 export const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
 
 // Mapbox style URL
-export const MAPBOX_STYLE = 'mapbox://styles/mapbox/streets-v12';
+export const MAPBOX_STYLE = 'mapbox://styles/mapbox/standard';
 
 // Alternative styles for different use cases
 export const MAPBOX_STYLES = {
