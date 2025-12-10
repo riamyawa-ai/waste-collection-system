@@ -74,21 +74,21 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
 
     const getTypeBadge = (type: string) => {
         const styles: Record<string, string> = {
-            info: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-            success: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            warning: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-            error: 'bg-red-500/20 text-red-400 border-red-500/30',
-            maintenance: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-            event: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+            info: 'bg-blue-100 text-blue-700 border-blue-200',
+            success: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+            warning: 'bg-amber-100 text-amber-700 border-amber-200',
+            error: 'bg-red-100 text-red-700 border-red-200',
+            maintenance: 'bg-orange-100 text-orange-700 border-orange-200',
+            event: 'bg-purple-100 text-purple-700 border-purple-200',
         };
         return styles[type] || styles.info;
     };
 
     const getPriorityBadge = (priority: string) => {
         const styles: Record<string, string> = {
-            normal: 'bg-slate-500/20 text-slate-400',
-            important: 'bg-amber-500/20 text-amber-400',
-            urgent: 'bg-red-500/20 text-red-400',
+            normal: 'bg-slate-100 text-slate-700 border-slate-200',
+            important: 'bg-amber-100 text-amber-700 border-amber-200',
+            urgent: 'bg-red-100 text-red-700 border-red-200',
         };
         return styles[priority] || styles.normal;
     };
@@ -114,17 +114,17 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-2xl max-h-[90vh] bg-slate-800 border-slate-700 text-white">
+            <DialogContent className="max-w-2xl max-h-[90vh]">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                        <Megaphone className="h-5 w-5 text-purple-400" />
+                        <Megaphone className="h-5 w-5 text-purple-600" />
                         Announcement Details
                     </DialogTitle>
                 </DialogHeader>
 
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400" />
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
                     </div>
                 ) : announcement ? (
                     <ScrollArea className="max-h-[70vh] pr-4">
@@ -132,7 +132,7 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                             {/* Header */}
                             <div className="space-y-3">
                                 <div className="flex items-start justify-between gap-4">
-                                    <h3 className="text-xl font-bold text-white">{announcement.title}</h3>
+                                    <h3 className="text-xl font-bold text-gray-900">{announcement.title}</h3>
                                     <Badge className={getStatusDisplay().style}>
                                         {getStatusDisplay().label}
                                     </Badge>
@@ -153,7 +153,7 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
 
                             {/* Image */}
                             {announcement.image_url && (
-                                <div className="rounded-lg overflow-hidden">
+                                <div className="rounded-lg overflow-hidden border border-gray-200">
                                     <img
                                         src={announcement.image_url}
                                         alt={announcement.title}
@@ -163,18 +163,18 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                             )}
 
                             {/* Content */}
-                            <div className="bg-slate-700/50 rounded-lg p-4">
-                                <p className="text-slate-300 whitespace-pre-wrap">{announcement.content}</p>
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                <p className="text-gray-700 whitespace-pre-wrap">{announcement.content}</p>
                             </div>
 
                             {/* Meta Info */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-slate-700/50 rounded-lg p-4">
-                                    <div className="flex items-center gap-2 text-slate-400 mb-2">
+                                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                    <div className="flex items-center gap-2 text-gray-500 mb-2">
                                         <Users className="h-4 w-4" />
                                         <span className="text-sm">Target Audience</span>
                                     </div>
-                                    <p className="text-white">
+                                    <p className="text-gray-900 font-medium">
                                         {announcement.target_audience.includes('all')
                                             ? 'All Users'
                                             : announcement.target_audience.map(a =>
@@ -182,33 +182,33 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                                             ).join(', ')}
                                     </p>
                                 </div>
-                                <div className="bg-slate-700/50 rounded-lg p-4">
-                                    <div className="flex items-center gap-2 text-slate-400 mb-2">
+                                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                    <div className="flex items-center gap-2 text-gray-500 mb-2">
                                         <Eye className="h-4 w-4" />
                                         <span className="text-sm">Views</span>
                                     </div>
-                                    <p className="text-white text-lg font-bold">{announcement.views_count}</p>
+                                    <p className="text-gray-900 text-lg font-bold">{announcement.views_count}</p>
                                 </div>
                             </div>
 
                             {/* Dates */}
-                            <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                            <div className="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-100">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-slate-400">
+                                    <div className="flex items-center gap-2 text-gray-500">
                                         <Calendar className="h-4 w-4" />
                                         <span className="text-sm">Publish Date</span>
                                     </div>
-                                    <p className="text-white">
+                                    <p className="text-gray-900">
                                         {format(new Date(announcement.publish_date), 'MMM dd, yyyy \'at\' h:mm a')}
                                     </p>
                                 </div>
                                 {announcement.expiry_date && (
                                     <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-slate-400">
+                                        <div className="flex items-center gap-2 text-gray-500">
                                             <Clock className="h-4 w-4" />
                                             <span className="text-sm">Expiry Date</span>
                                         </div>
-                                        <p className="text-white">
+                                        <p className="text-gray-900">
                                             {format(new Date(announcement.expiry_date), 'MMM dd, yyyy')}
                                         </p>
                                     </div>
@@ -216,15 +216,15 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                             </div>
 
                             {/* Notification Settings */}
-                            <div className="bg-slate-700/50 rounded-lg p-4">
-                                <h4 className="text-sm font-medium text-slate-400 mb-3">Notification Settings</h4>
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                <h4 className="text-sm font-medium text-gray-500 mb-3">Notification Settings</h4>
                                 <div className="flex gap-4">
-                                    <div className={`flex items-center gap-2 ${announcement.send_email_notification ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                    <div className={`flex items-center gap-2 ${announcement.send_email_notification ? 'text-emerald-600' : 'text-gray-400'}`}>
                                         <Mail className="h-4 w-4" />
                                         <span className="text-sm">Email</span>
                                         {announcement.send_email_notification ? '✓' : '✗'}
                                     </div>
-                                    <div className={`flex items-center gap-2 ${announcement.send_push_notification ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                    <div className={`flex items-center gap-2 ${announcement.send_push_notification ? 'text-emerald-600' : 'text-gray-400'}`}>
                                         <Bell className="h-4 w-4" />
                                         <span className="text-sm">In-App</span>
                                         {announcement.send_push_notification ? '✓' : '✗'}
@@ -233,7 +233,7 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                             </div>
 
                             {/* Creator Info */}
-                            <div className="text-xs text-slate-500 pt-4 border-t border-slate-700">
+                            <div className="text-xs text-gray-500 pt-4 border-t border-gray-200">
                                 <p>Created by {announcement.creator?.full_name || 'Unknown'}</p>
                                 <p>Created on {format(new Date(announcement.created_at), 'MMM dd, yyyy \'at\' h:mm a')}</p>
                                 {announcement.updated_at !== announcement.created_at && (
@@ -244,15 +244,14 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                     </ScrollArea>
                 ) : (
                     <div className="text-center py-10">
-                        <p className="text-slate-400">Announcement not found</p>
+                        <p className="text-gray-500">Announcement not found</p>
                     </div>
                 )}
 
-                <div className="flex justify-end pt-4 border-t border-slate-700">
+                <div className="flex justify-end pt-4 border-t border-gray-200">
                     <Button
                         variant="outline"
                         onClick={onClose}
-                        className="border-slate-600 text-slate-300"
                     >
                         Close
                     </Button>

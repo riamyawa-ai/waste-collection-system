@@ -19,6 +19,7 @@ import {
     MAPBOX_STYLE,
     PANABO_CENTER,
     LOCATION_TYPES,
+    MAPBOX_POI_CATEGORIES,
     optimizeRoute,
     generateRouteGeoJson,
 } from '@/lib/mapbox';
@@ -53,17 +54,6 @@ interface MapboxRouteEditorProps {
     showSampleLocations?: boolean;
     height?: string;
 }
-
-// Mapbox category mapping for POI search
-const MAPBOX_CATEGORIES: Record<string, string[]> = {
-    schools: ['school', 'college', 'university'],
-    hospitals: ['hospital', 'clinic', 'medical'],
-    parks: ['park', 'garden', 'playground'],
-    government: ['government', 'townhall', 'post_office'],
-    commercial: ['shop', 'store', 'mall', 'supermarket', 'restaurant'],
-    residential: ['residential', 'apartment', 'house'],
-    markets: ['market', 'marketplace', 'grocery'],
-};
 
 export function MapboxRouteEditor({
     stops,
@@ -100,12 +90,13 @@ export function MapboxRouteEditor({
     const fetchPOIs = async (type: string) => {
         setLoading(true);
         try {
-            const categories = MAPBOX_CATEGORIES[type] || [type];
+            const config = MAPBOX_POI_CATEGORIES[type];
+            const categories = config ? config.mapboxIds : [type];
             const bbox = '125.52,7.15,125.85,7.45'; // Panabo City bounds
 
             const allResults: MapLocation[] = [];
 
-            for (const category of categories.slice(0, 2)) { // Limit to 2 categories to avoid rate limiting
+            for (const category of categories.slice(0, 3)) { // Limit categories per type
                 const response = await fetch(
                     `https://api.mapbox.com/search/searchbox/v1/category/${category}?` +
                     `access_token=${MAPBOX_ACCESS_TOKEN}&` +
@@ -152,11 +143,11 @@ export function MapboxRouteEditor({
         setLoading(true);
         try {
             const allResults: MapLocation[] = [];
-            const types = Object.keys(MAPBOX_CATEGORIES);
+            const types = Object.keys(MAPBOX_POI_CATEGORIES);
 
-            for (const type of types.slice(0, 4)) { // Limit to avoid too many requests
-                const categories = MAPBOX_CATEGORIES[type];
-                const category = categories[0]; // Just use first category
+            for (const type of types.slice(0, 5)) { // Limit to avoid too many requests
+                const config = MAPBOX_POI_CATEGORIES[type];
+                const category = config.mapboxIds[0]; // Just use first category of each type
                 const bbox = '125.52,7.15,125.85,7.45';
 
                 const response = await fetch(
@@ -197,6 +188,11 @@ export function MapboxRouteEditor({
 
     // Get location type color
     const getTypeColor = (type: string) => {
+        // First try to find in specific types
+        const config = MAPBOX_POI_CATEGORIES[type];
+        if (config) return config.color;
+
+        // Fallback to location types list
         const locationType = LOCATION_TYPES.find(t => t.id === type);
         return locationType?.color || '#64748b';
     };
@@ -286,8 +282,8 @@ export function MapboxRouteEditor({
                             key={type.id}
                             onClick={() => setSelectedType(selectedType === type.id ? null : type.id)}
                             className={`px-2 py-1 rounded text-xs font-medium transition-all shadow-sm ${selectedType === type.id
-                                    ? 'text-white'
-                                    : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
+                                ? 'text-white'
+                                : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
                                 }`}
                             style={selectedType === type.id ? { backgroundColor: type.color } : {}}
                         >
@@ -396,8 +392,8 @@ export function MapboxRouteEditor({
                             >
                                 <div
                                     className={`w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 ${isSelected
-                                            ? 'border-white bg-emerald-500'
-                                            : 'border-white'
+                                        ? 'border-white bg-emerald-500'
+                                        : 'border-white'
                                         }`}
                                     style={{
                                         backgroundColor: isSelected ? '#10b981' : getTypeColor(location.type),

@@ -238,7 +238,7 @@ CREATE TABLE schedule_stops (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   schedule_id UUID NOT NULL REFERENCES collection_schedules(id) ON DELETE CASCADE,
   location_name TEXT NOT NULL,
-  location_type TEXT NOT NULL, -- 'school', 'hospital', 'park', 'government', 'commercial', 'residential', 'market'
+  location_type TEXT NOT NULL,
   address TEXT NOT NULL,
   barangay TEXT NOT NULL,
   latitude DECIMAL(10, 8),

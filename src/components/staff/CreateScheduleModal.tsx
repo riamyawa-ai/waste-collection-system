@@ -196,10 +196,10 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-4xl max-h-[90vh] bg-slate-800 border-slate-700 text-white">
+            <DialogContent className="max-w-4xl max-h-[90vh]">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                        <Route className="h-5 w-5 text-emerald-400" />
+                        <Route className="h-5 w-5 text-emerald-600" />
                         Create Collection Schedule
                     </DialogTitle>
                 </DialogHeader>
@@ -214,15 +214,15 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                             >
                                 <div
                                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= s
-                                        ? 'bg-emerald-500 text-white'
-                                        : 'bg-slate-700 text-slate-400'
+                                        ? 'bg-emerald-600 text-white'
+                                        : 'bg-gray-200 text-gray-500'
                                         }`}
                                 >
                                     {s}
                                 </div>
                                 {s < 3 && (
                                     <div
-                                        className={`flex-1 h-1 mx-2 rounded ${step > s ? 'bg-emerald-500' : 'bg-slate-700'
+                                        className={`flex-1 h-1 mx-2 rounded ${step > s ? 'bg-emerald-600' : 'bg-gray-200'
                                             }`}
                                     />
                                 )}
@@ -235,42 +235,42 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2">
-                                    <Label className="text-slate-300">Schedule Name *</Label>
+                                    <Label className="text-gray-700">Schedule Name *</Label>
                                     <Input
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="e.g., Morning Route - Schools"
-                                        className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                        className="mt-1"
                                     />
                                 </div>
                                 <div className="col-span-2">
-                                    <Label className="text-slate-300">Description</Label>
+                                    <Label className="text-gray-700">Description</Label>
                                     <Textarea
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                         placeholder="Brief description of this schedule..."
-                                        className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                        className="mt-1"
                                         rows={2}
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <Label className="text-slate-300 mb-3 block">Route Selection</Label>
+                                <Label className="text-gray-700 mb-3 block">Route Selection</Label>
                                 <Tabs defaultValue="map" className="w-full">
-                                    <TabsList className="grid w-full grid-cols-2 bg-slate-700/50">
-                                        <TabsTrigger value="map" className="data-[state=active]:bg-emerald-600">
+                                    <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+                                        <TabsTrigger value="map" className="data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm">
                                             <Map className="h-4 w-4 mr-2" />
                                             Map View
                                         </TabsTrigger>
-                                        <TabsTrigger value="list" className="data-[state=active]:bg-emerald-600">
+                                        <TabsTrigger value="list" className="data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm">
                                             <List className="h-4 w-4 mr-2" />
                                             Quick Select
                                         </TabsTrigger>
                                     </TabsList>
 
                                     <TabsContent value="map" className="mt-4">
-                                        <div className="rounded-lg overflow-hidden border border-slate-600">
+                                        <div className="rounded-lg overflow-hidden border border-gray-200">
                                             <MapboxRouteEditor
                                                 stops={stops.map(s => ({
                                                     ...s,
@@ -282,7 +282,7 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                                 height="300px"
                                             />
                                         </div>
-                                        <p className="text-slate-400 text-sm mt-2">
+                                        <p className="text-gray-500 text-sm mt-2">
                                             Click on markers to add stops. Use the filter buttons to show specific location types.
                                         </p>
                                     </TabsContent>
@@ -294,8 +294,8 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                                     key={type.id}
                                                     onClick={() => handleTypeToggle(type.id)}
                                                     className={`p-3 rounded-lg border text-sm font-medium transition-all ${selectedTypes.includes(type.id)
-                                                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
-                                                        : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:border-slate-500'
+                                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                                                         }`}
                                                 >
                                                     {type.label}
@@ -308,24 +308,24 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
 
                             {stops.length > 0 && (
                                 <div>
-                                    <Label className="text-slate-300 mb-3 block">
+                                    <Label className="text-gray-700 mb-3 block">
                                         Selected Stops ({stops.length})
                                     </Label>
-                                    <ScrollArea className="h-32 border border-slate-600 rounded-lg p-3">
+                                    <ScrollArea className="h-32 border border-gray-200 rounded-lg p-3">
                                         <div className="space-y-2">
                                             {stops.map((stop, index) => (
                                                 <div
                                                     key={stop.id}
-                                                    className="flex items-center gap-3 p-2 bg-slate-700/50 rounded-lg"
+                                                    className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-100"
                                                 >
-                                                    <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
+                                                    <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
                                                         {index + 1}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-white text-sm font-medium truncate">
+                                                        <p className="text-gray-900 text-sm font-medium truncate">
                                                             {stop.locationName}
                                                         </p>
-                                                        <p className="text-slate-400 text-xs truncate">
+                                                        <p className="text-gray-500 text-xs truncate">
                                                             {stop.address}, {stop.barangay}
                                                         </p>
                                                     </div>
@@ -333,7 +333,7 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => removeStop(stop.id)}
-                                                        className="text-slate-400 hover:text-red-400"
+                                                        className="text-gray-400 hover:text-red-600 hover:bg-red-50"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
@@ -351,12 +351,12 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label className="text-slate-300">Schedule Type *</Label>
+                                    <Label className="text-gray-700">Schedule Type *</Label>
                                     <Select value={scheduleType} onValueChange={(v) => setScheduleType(v as typeof scheduleType)}>
-                                        <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white mt-1">
+                                        <SelectTrigger className="mt-1">
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
+                                        <SelectContent>
                                             <SelectItem value="one-time">One-time</SelectItem>
                                             <SelectItem value="weekly">Weekly</SelectItem>
                                             <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
@@ -365,60 +365,60 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label className="text-slate-300">Start Date *</Label>
+                                    <Label className="text-gray-700">Start Date *</Label>
                                     <Input
                                         type="date"
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
-                                        className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                        className="mt-1"
                                     />
                                 </div>
                                 <div>
-                                    <Label className="text-slate-300">End Date</Label>
+                                    <Label className="text-gray-700">End Date</Label>
                                     <Input
                                         type="date"
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
-                                        className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                        className="mt-1"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <Label className="text-slate-300">Start Time *</Label>
+                                        <Label className="text-gray-700">Start Time *</Label>
                                         <Input
                                             type="time"
                                             value={startTime}
                                             onChange={(e) => setStartTime(e.target.value)}
-                                            className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                            className="mt-1"
                                         />
                                     </div>
                                     <div>
-                                        <Label className="text-slate-300">End Time *</Label>
+                                        <Label className="text-gray-700">End Time *</Label>
                                         <Input
                                             type="time"
                                             value={endTime}
                                             onChange={(e) => setEndTime(e.target.value)}
-                                            className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                            className="mt-1"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             <div>
-                                <Label className="text-slate-300 mb-3 block">Assign Collector</Label>
+                                <Label className="text-gray-700 mb-3 block">Assign Collector</Label>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label className="text-slate-400 text-sm">Primary Collector</Label>
+                                        <Label className="text-gray-500 text-sm">Primary Collector</Label>
                                         <Select value={collectorId} onValueChange={setCollectorId}>
-                                            <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white mt-1">
+                                            <SelectTrigger className="mt-1">
                                                 <SelectValue placeholder="Select collector" />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-slate-800 border-slate-700">
+                                            <SelectContent>
                                                 <SelectItem value="">None</SelectItem>
                                                 {collectors.map((c) => (
                                                     <SelectItem key={c.id} value={c.id}>
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`w-2 h-2 rounded-full ${c.isOnDuty ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+                                                            <span className={`w-2 h-2 rounded-full ${c.isOnDuty ? 'bg-emerald-500' : 'bg-gray-400'}`} />
                                                             {c.full_name}
                                                         </div>
                                                     </SelectItem>
@@ -427,12 +427,12 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                         </Select>
                                     </div>
                                     <div>
-                                        <Label className="text-slate-400 text-sm">Backup Collector</Label>
+                                        <Label className="text-gray-500 text-sm">Backup Collector</Label>
                                         <Select value={backupCollectorId} onValueChange={setBackupCollectorId}>
-                                            <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white mt-1">
+                                            <SelectTrigger className="mt-1">
                                                 <SelectValue placeholder="Select backup" />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-slate-800 border-slate-700">
+                                            <SelectContent>
                                                 <SelectItem value="">None</SelectItem>
                                                 {collectors.filter(c => c.id !== collectorId).map((c) => (
                                                     <SelectItem key={c.id} value={c.id}>
@@ -450,32 +450,32 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                     {/* Step 3: Review & Confirm */}
                     {step === 3 && (
                         <div className="space-y-6">
-                            <div className="bg-slate-700/50 rounded-lg p-4 space-y-4">
-                                <h3 className="font-semibold text-white">Schedule Summary</h3>
+                            <div className="bg-gray-50 rounded-lg p-4 space-y-4 border border-gray-200">
+                                <h3 className="font-semibold text-gray-900">Schedule Summary</h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <p className="text-slate-400">Name</p>
-                                        <p className="text-white font-medium">{name}</p>
+                                        <p className="text-gray-500">Name</p>
+                                        <p className="text-gray-900 font-medium">{name}</p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400">Type</p>
-                                        <p className="text-white font-medium capitalize">{scheduleType}</p>
+                                        <p className="text-gray-500">Type</p>
+                                        <p className="text-gray-900 font-medium capitalize">{scheduleType}</p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400">Date</p>
-                                        <p className="text-white font-medium">{startDate}</p>
+                                        <p className="text-gray-500">Date</p>
+                                        <p className="text-gray-900 font-medium">{startDate}</p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400">Time</p>
-                                        <p className="text-white font-medium">{startTime} - {endTime}</p>
+                                        <p className="text-gray-500">Time</p>
+                                        <p className="text-gray-900 font-medium">{startTime} - {endTime}</p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400">Stops</p>
-                                        <p className="text-white font-medium">{stops.length} locations</p>
+                                        <p className="text-gray-500">Stops</p>
+                                        <p className="text-gray-900 font-medium">{stops.length} locations</p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400">Collector</p>
-                                        <p className="text-white font-medium">
+                                        <p className="text-gray-500">Collector</p>
+                                        <p className="text-gray-900 font-medium">
                                             {collectors.find(c => c.id === collectorId)?.full_name || 'Not assigned'}
                                         </p>
                                     </div>
@@ -483,12 +483,12 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                             </div>
 
                             <div>
-                                <Label className="text-slate-300">Special Instructions</Label>
+                                <Label className="text-gray-700">Special Instructions</Label>
                                 <Textarea
                                     value={specialInstructions}
                                     onChange={(e) => setSpecialInstructions(e.target.value)}
                                     placeholder="Any special instructions for the collector..."
-                                    className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                    className="mt-1"
                                     rows={3}
                                 />
                             </div>
@@ -497,18 +497,17 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                 </ScrollArea>
 
                 {/* Actions */}
-                <div className="flex justify-between pt-4 border-t border-slate-700">
+                <div className="flex justify-between pt-4 border-t border-gray-200">
                     <Button
                         variant="outline"
                         onClick={() => step > 1 ? setStep(step - 1) : onClose()}
-                        className="border-slate-600 text-slate-300"
                     >
                         {step > 1 ? 'Back' : 'Cancel'}
                     </Button>
                     <Button
                         onClick={() => step < 3 ? setStep(step + 1) : handleSubmit()}
                         disabled={loading || (step === 1 && (!name || stops.length === 0))}
-                        className="bg-emerald-600 hover:bg-emerald-700"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
                     >
                         {loading ? 'Creating...' : step < 3 ? 'Next' : 'Create Schedule'}
                     </Button>

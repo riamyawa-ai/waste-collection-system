@@ -31,12 +31,12 @@ interface CreateAnnouncementModalProps {
 }
 
 const ANNOUNCEMENT_TYPES = [
-    { value: 'info', label: 'Information', color: 'text-blue-400' },
-    { value: 'success', label: 'Success', color: 'text-emerald-400' },
-    { value: 'warning', label: 'Warning', color: 'text-amber-400' },
-    { value: 'error', label: 'Error/Alert', color: 'text-red-400' },
-    { value: 'maintenance', label: 'Maintenance', color: 'text-orange-400' },
-    { value: 'event', label: 'Event', color: 'text-purple-400' },
+    { value: 'info', label: 'Information', color: 'text-blue-600' },
+    { value: 'success', label: 'Success', color: 'text-emerald-600' },
+    { value: 'warning', label: 'Warning', color: 'text-amber-600' },
+    { value: 'error', label: 'Error/Alert', color: 'text-red-600' },
+    { value: 'maintenance', label: 'Maintenance', color: 'text-orange-600' },
+    { value: 'event', label: 'Event', color: 'text-purple-600' },
 ];
 
 const AUDIENCE_OPTIONS = [
@@ -125,10 +125,10 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-2xl max-h-[90vh] bg-slate-800 border-slate-700 text-white">
+            <DialogContent className="max-w-2xl max-h-[90vh]">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                        <Megaphone className="h-5 w-5 text-purple-400" />
+                        <Megaphone className="h-5 w-5 text-purple-600" />
                         Create Announcement
                     </DialogTitle>
                 </DialogHeader>
@@ -137,23 +137,23 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                     <div className="space-y-6">
                         {/* Title */}
                         <div>
-                            <Label className="text-slate-300">Title *</Label>
+                            <Label className="text-gray-700">Title *</Label>
                             <Input
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="Enter announcement title"
-                                className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                className="mt-1"
                             />
                         </div>
 
                         {/* Content */}
                         <div>
-                            <Label className="text-slate-300">Content *</Label>
+                            <Label className="text-gray-700">Content *</Label>
                             <Textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 placeholder="Write your announcement content..."
-                                className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                className="mt-1"
                                 rows={5}
                             />
                         </div>
@@ -161,12 +161,12 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                         {/* Type and Priority */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label className="text-slate-300">Type</Label>
+                                <Label className="text-gray-700">Type</Label>
                                 <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
-                                    <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white mt-1">
+                                    <SelectTrigger className="mt-1">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectContent>
                                         {ANNOUNCEMENT_TYPES.map((t) => (
                                             <SelectItem key={t.value} value={t.value}>
                                                 <span className={t.color}>{t.label}</span>
@@ -176,16 +176,16 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                 </Select>
                             </div>
                             <div>
-                                <Label className="text-slate-300">Priority</Label>
+                                <Label className="text-gray-700">Priority</Label>
                                 <Select value={priority} onValueChange={(v) => setPriority(v as typeof priority)}>
-                                    <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white mt-1">
+                                    <SelectTrigger className="mt-1">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectContent>
                                         <SelectItem value="normal">Normal</SelectItem>
                                         <SelectItem value="important">Important</SelectItem>
                                         <SelectItem value="urgent">
-                                            <span className="flex items-center gap-1 text-red-400">
+                                            <span className="flex items-center gap-1 text-red-600">
                                                 <AlertTriangle className="h-3 w-3" />
                                                 Urgent
                                             </span>
@@ -197,15 +197,15 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
 
                         {/* Target Audience */}
                         <div>
-                            <Label className="text-slate-300 mb-3 block">Target Audience</Label>
+                            <Label className="text-gray-700 mb-3 block">Target Audience</Label>
                             <div className="grid grid-cols-2 gap-2">
                                 {AUDIENCE_OPTIONS.map((option) => (
                                     <button
                                         key={option.value}
                                         onClick={() => handleAudienceChange(option.value)}
                                         className={`p-3 rounded-lg border text-sm font-medium transition-all flex items-center gap-2 ${targetAudience.includes(option.value)
-                                            ? 'border-purple-500 bg-purple-500/20 text-purple-400'
-                                            : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:border-slate-500'
+                                            ? 'border-purple-600 bg-purple-50 text-purple-700'
+                                            : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300'
                                             }`}
                                     >
                                         <Users className="h-4 w-4" />
@@ -223,7 +223,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                     checked={publishImmediately}
                                     onCheckedChange={(checked) => setPublishImmediately(!!checked)}
                                 />
-                                <Label htmlFor="publishImmediately" className="text-slate-300 cursor-pointer">
+                                <Label htmlFor="publishImmediately" className="text-gray-700 cursor-pointer">
                                     Publish immediately
                                 </Label>
                             </div>
@@ -231,12 +231,12 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                             {!publishImmediately && (
                                 <div className="grid grid-cols-2 gap-4 pl-6">
                                     <div>
-                                        <Label className="text-slate-300">Publish Date</Label>
+                                        <Label className="text-gray-700">Publish Date</Label>
                                         <Input
                                             type="date"
                                             value={publishDate}
                                             onChange={(e) => setPublishDate(e.target.value)}
-                                            className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                            className="mt-1"
                                         />
                                     </div>
                                 </div>
@@ -244,12 +244,12 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label className="text-slate-300">Expiry Date (Optional)</Label>
+                                    <Label className="text-gray-700">Expiry Date (Optional)</Label>
                                     <Input
                                         type="date"
                                         value={expiryDate}
                                         onChange={(e) => setExpiryDate(e.target.value)}
-                                        className="bg-slate-700/50 border-slate-600 text-white mt-1"
+                                        className="mt-1"
                                     />
                                 </div>
                             </div>
@@ -257,7 +257,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
 
                         {/* Notification Options */}
                         <div className="space-y-3">
-                            <Label className="text-slate-300">Notification Options</Label>
+                            <Label className="text-gray-700">Notification Options</Label>
                             <div className="space-y-2 pl-2">
                                 <div className="flex items-center gap-3">
                                     <Checkbox
@@ -265,7 +265,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                         checked={sendEmailNotification}
                                         onCheckedChange={(checked) => setSendEmailNotification(!!checked)}
                                     />
-                                    <Label htmlFor="sendEmail" className="text-slate-400 cursor-pointer">
+                                    <Label htmlFor="sendEmail" className="text-gray-600 cursor-pointer">
                                         Send email notification to target users
                                     </Label>
                                 </div>
@@ -275,7 +275,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                         checked={sendPushNotification}
                                         onCheckedChange={(checked) => setSendPushNotification(!!checked)}
                                     />
-                                    <Label htmlFor="sendPush" className="text-slate-400 cursor-pointer">
+                                    <Label htmlFor="sendPush" className="text-gray-600 cursor-pointer">
                                         Send in-app notification to target users
                                     </Label>
                                 </div>
@@ -285,18 +285,17 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                 </ScrollArea>
 
                 {/* Actions */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                     <Button
                         variant="outline"
                         onClick={onClose}
-                        className="border-slate-600 text-slate-300"
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
                         disabled={loading || !title || !content}
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
                     >
                         {loading ? 'Creating...' : publishImmediately ? 'Publish Now' : 'Schedule'}
                     </Button>

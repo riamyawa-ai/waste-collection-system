@@ -15,48 +15,105 @@ export const PANABO_BOUNDS: [[number, number], [number, number]] = [
     [125.85, 7.45], // Northeast
 ];
 
-// Location types for quick routes
-export const LOCATION_TYPES = [
-    { id: 'schools', label: 'Schools', icon: 'school', color: '#3b82f6' },
-    { id: 'hospitals', label: 'Hospitals', icon: 'hospital', color: '#ef4444' },
-    { id: 'parks', label: 'Parks & Plaza', icon: 'tree', color: '#22c55e' },
-    { id: 'government', label: 'Government Offices', icon: 'building', color: '#8b5cf6' },
-    { id: 'commercial', label: 'Establishments/Commercial', icon: 'store', color: '#f59e0b' },
-    { id: 'residential', label: 'Residential Areas', icon: 'home', color: '#06b6d4' },
-    { id: 'markets', label: 'Markets', icon: 'shopping-cart', color: '#ec4899' },
-    { id: 'all', label: 'All Types', icon: 'layers', color: '#64748b' },
-] as const;
+// Comprehensive Mapbox POI Categories mapping
+export const MAPBOX_POI_CATEGORIES: Record<string, {
+    label: string;
+    icon: string;
+    color: string;
+    mapboxIds: string[]; // Mapbox category terms
+}> = {
+    food: {
+        label: 'Food & Drink',
+        icon: 'utensils',
+        color: '#f59e0b', // amber-500
+        mapboxIds: ['restaurant', 'cafe', 'bakery', 'food', 'fast_food']
+    },
+    shopping: {
+        label: 'Shopping',
+        icon: 'shopping-bag',
+        color: '#ec4899', // pink-500
+        mapboxIds: ['shop', 'store', 'mall', 'supermarket', 'grocery', 'clothing_store', 'electronics_store']
+    },
+    health: {
+        label: 'Health',
+        icon: 'hospital',
+        color: '#ef4444', // red-500
+        mapboxIds: ['hospital', 'clinic', 'pharmacy', 'doctor', 'dentist']
+    },
+    education: {
+        label: 'Education',
+        icon: 'school',
+        color: '#3b82f6', // blue-500
+        mapboxIds: ['school', 'college', 'university', 'kindergarten', 'library']
+    },
+    government: {
+        label: 'Public Services',
+        icon: 'building-2',
+        color: '#6366f1', // indigo-500
+        mapboxIds: ['government', 'post_office', 'police', 'fire_station', 'townhall']
+    },
+    leisure: {
+        label: 'Leisure & Parks',
+        icon: 'tree',
+        color: '#22c55e', // green-500
+        mapboxIds: ['park', 'garden', 'playground', 'cinema', 'museum', 'tourist_attraction']
+    },
+    financial: {
+        label: 'Financial',
+        icon: 'landmark',
+        color: '#8b5cf6', // violet-500
+        mapboxIds: ['bank', 'atm']
+    },
+    transport: {
+        label: 'Transport',
+        icon: 'car',
+        color: '#0ea5e9', // sky-500
+        mapboxIds: ['gas_station', 'parking', 'bus_station']
+    },
+    lodging: {
+        label: 'Lodging',
+        icon: 'bed',
+        color: '#d946ef', // fuchsia-500
+        mapboxIds: ['hotel', 'motel', 'guest_house']
+    },
+    residential: {
+        label: 'Residential',
+        icon: 'home',
+        color: '#06b6d4', // cyan-500
+        mapboxIds: ['residential', 'apartment', 'house', 'housing_development']
+    }
+};
 
-// Sample locations in Panabo City for demonstration
+// Flattened LOCATION_TYPES for backward compatibility and UI iteration
+export const LOCATION_TYPES = [
+    { id: 'all', label: 'All Types', icon: 'layers', color: '#64748b' },
+    ...Object.entries(MAPBOX_POI_CATEGORIES).map(([key, config]) => ({
+        id: key,
+        label: config.label,
+        icon: config.icon,
+        color: config.color
+    }))
+];
+
+// Sample locations in Panabo City for demonstration/fallback
 export const SAMPLE_LOCATIONS = [
     // Schools
-    { id: '1', name: 'Panabo National High School', type: 'schools', address: 'J.P. Laurel, Poblacion', barangay: 'J.P. Laurel (Poblacion)', lat: 7.3100, lng: 125.6855 },
-    { id: '2', name: 'University of Mindanao - Panabo', type: 'schools', address: 'Gredu, Poblacion', barangay: 'Gredu (Poblacion)', lat: 7.3070, lng: 125.6820 },
-    { id: '3', name: 'Panabo Central Elementary School', type: 'schools', address: 'San Francisco, Poblacion', barangay: 'San Francisco (Poblacion)', lat: 7.3085, lng: 125.6840 },
+    { id: '1', name: 'Panabo National High School', type: 'education', address: 'J.P. Laurel, Poblacion', barangay: 'J.P. Laurel (Poblacion)', lat: 7.3100, lng: 125.6855 },
+    { id: '2', name: 'University of Mindanao - Panabo', type: 'education', address: 'Gredu, Poblacion', barangay: 'Gredu (Poblacion)', lat: 7.3070, lng: 125.6820 },
 
     // Hospitals
-    { id: '4', name: 'Panabo Polymedic General Hospital', type: 'hospitals', address: 'Quezon St., Poblacion', barangay: 'J.P. Laurel (Poblacion)', lat: 7.3095, lng: 125.6860 },
-    { id: '5', name: 'DOLE Hospital', type: 'hospitals', address: 'A.O. Floirendo', barangay: 'A.O. Floirendo', lat: 7.2820, lng: 125.6540 },
-
-    // Parks
-    { id: '6', name: 'Panabo City Hall Park', type: 'parks', address: 'J.P. Laurel, Poblacion', barangay: 'J.P. Laurel (Poblacion)', lat: 7.3092, lng: 125.6848 },
-    { id: '7', name: 'Panabo Freedom Park', type: 'parks', address: 'San Nicolas, Poblacion', barangay: 'San Nicolas (Poblacion)', lat: 7.3110, lng: 125.6830 },
+    { id: '4', name: 'Panabo Polymedic General Hospital', type: 'health', address: 'Quezon St., Poblacion', barangay: 'J.P. Laurel (Poblacion)', lat: 7.3095, lng: 125.6860 },
 
     // Government
     { id: '8', name: 'Panabo City Hall', type: 'government', address: 'J.P. Laurel, Poblacion', barangay: 'J.P. Laurel (Poblacion)', lat: 7.3090, lng: 125.6845 },
-    { id: '9', name: 'Panabo Public Market (Government)', type: 'government', address: 'San Francisco, Poblacion', barangay: 'San Francisco (Poblacion)', lat: 7.3075, lng: 125.6835 },
 
     // Commercial
-    { id: '10', name: 'Panabo Public Market', type: 'commercial', address: 'San Francisco, Poblacion', barangay: 'San Francisco (Poblacion)', lat: 7.3078, lng: 125.6838 },
-    { id: '11', name: 'Gaisano Mall Panabo', type: 'commercial', address: 'Quezon, Poblacion', barangay: 'Quezon', lat: 7.3105, lng: 125.6870 },
+    { id: '10', name: 'Panabo Public Market', type: 'shopping', address: 'San Francisco, Poblacion', barangay: 'San Francisco (Poblacion)', lat: 7.3078, lng: 125.6838 },
+    { id: '11', name: 'Gaisano Mall Panabo', type: 'shopping', address: 'Quezon, Poblacion', barangay: 'Quezon', lat: 7.3105, lng: 125.6870 },
 
-    // Residential
-    { id: '12', name: 'Villa Esperanza Subdivision', type: 'residential', address: 'Kasilak', barangay: 'Kasilak', lat: 7.3150, lng: 125.6900 },
-    { id: '13', name: 'Buenavista Heights', type: 'residential', address: 'Buenavista', barangay: 'Buenavista', lat: 7.2950, lng: 125.6780 },
-
-    // Markets
-    { id: '14', name: 'Panabo Public Market Main', type: 'markets', address: 'San Francisco, Poblacion', barangay: 'San Francisco (Poblacion)', lat: 7.3080, lng: 125.6840 },
-    { id: '15', name: 'New Visayas Market', type: 'markets', address: 'New Visayas', barangay: 'New Visayas', lat: 7.3200, lng: 125.7000 },
+    // Food
+    { id: '20', name: 'Jollibee Panabo', type: 'food', address: 'Quezon St, Panabo', barangay: 'Poblacion', lat: 7.3082, lng: 125.6850 },
+    { id: '21', name: 'McDonalds Panabo', type: 'food', address: 'National Highway', barangay: 'Poblacion', lat: 7.3085, lng: 125.6852 },
 ];
 
 // Calculate distance between two coordinates (Haversine formula)
