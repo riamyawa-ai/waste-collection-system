@@ -116,7 +116,7 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
                         key={star}
                         className={`h-6 w-6 ${star <= rating
                             ? 'text-amber-400 fill-amber-400'
-                            : 'text-slate-600'
+                            : 'text-gray-300'
                             }`}
                     />
                 ))}
@@ -126,27 +126,27 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
 
     const getStatusBadge = (status: string) => {
         const styles: Record<string, string> = {
-            new: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-            reviewed: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            responded: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-            flagged: 'bg-red-500/20 text-red-400 border-red-500/30',
+            new: 'bg-blue-100 text-blue-700 border-blue-200',
+            reviewed: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+            responded: 'bg-purple-100 text-purple-700 border-purple-200',
+            flagged: 'bg-red-100 text-red-700 border-red-200',
         };
         return styles[status] || styles.new;
     };
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-2xl max-h-[90vh] bg-slate-800 border-slate-700 text-white">
+            <DialogContent className="max-w-2xl max-h-[90vh]">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                        <MessageSquare className="h-5 w-5 text-amber-400" />
+                        <MessageSquare className="h-5 w-5 text-amber-500" />
                         Feedback Details
                     </DialogTitle>
                 </DialogHeader>
 
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400" />
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500" />
                     </div>
                 ) : feedback ? (
                     <ScrollArea className="max-h-[70vh] pr-4">
@@ -155,7 +155,7 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
                             <div className="flex items-center justify-between">
                                 <div className="space-y-2">
                                     {renderStars(feedback.overall_rating)}
-                                    <p className="text-slate-400 text-sm">
+                                    <p className="text-gray-500 text-sm">
                                         {feedback.overall_rating} out of 5 stars
                                     </p>
                                 </div>
@@ -165,19 +165,19 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
                             </div>
 
                             {/* Client Info */}
-                            <div className="bg-slate-700/50 rounded-lg p-4">
-                                <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                <h4 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
                                     <User className="h-4 w-4" />
                                     Client
                                 </h4>
                                 {feedback.is_anonymous ? (
-                                    <p className="text-white italic">Anonymous Feedback</p>
+                                    <p className="text-gray-900 italic">Anonymous Feedback</p>
                                 ) : (
                                     <div className="space-y-1">
-                                        <p className="text-white font-medium">{feedback.client?.full_name}</p>
-                                        <p className="text-slate-400 text-sm">{feedback.client?.email}</p>
+                                        <p className="text-gray-900 font-medium">{feedback.client?.full_name}</p>
+                                        <p className="text-gray-500 text-sm">{feedback.client?.email}</p>
                                         {feedback.client?.phone && (
-                                            <p className="text-slate-400 text-sm flex items-center gap-1">
+                                            <p className="text-gray-500 text-sm flex items-center gap-1">
                                                 <Phone className="h-3 w-3" />
                                                 {feedback.client.phone}
                                             </p>
@@ -187,16 +187,16 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
                             </div>
 
                             {/* Collector Info */}
-                            <div className="bg-slate-700/50 rounded-lg p-4">
-                                <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                <h4 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
                                     <User className="h-4 w-4" />
                                     Collector
                                 </h4>
                                 <div className="space-y-1">
-                                    <p className="text-white font-medium">{feedback.collector?.full_name}</p>
-                                    <p className="text-slate-400 text-sm">{feedback.collector?.email}</p>
+                                    <p className="text-gray-900 font-medium">{feedback.collector?.full_name}</p>
+                                    <p className="text-gray-500 text-sm">{feedback.collector?.email}</p>
                                     {feedback.collector?.phone && (
-                                        <p className="text-slate-400 text-sm flex items-center gap-1">
+                                        <p className="text-gray-500 text-sm flex items-center gap-1">
                                             <Phone className="h-3 w-3" />
                                             {feedback.collector.phone}
                                         </p>
@@ -206,24 +206,24 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
 
                             {/* Request Info */}
                             {feedback.request && (
-                                <div className="bg-slate-700/50 rounded-lg p-4">
-                                    <h4 className="text-sm font-medium text-slate-400 mb-3">Related Request</h4>
+                                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                    <h4 className="text-sm font-medium text-gray-500 mb-3">Related Request</h4>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div>
-                                            <p className="text-slate-400">Request Number</p>
-                                            <p className="text-white font-mono">{feedback.request.request_number}</p>
+                                            <p className="text-gray-500">Request Number</p>
+                                            <p className="text-gray-900 font-mono">{feedback.request.request_number}</p>
                                         </div>
                                         <div>
-                                            <p className="text-slate-400">Completed</p>
-                                            <p className="text-white">
+                                            <p className="text-gray-500">Completed</p>
+                                            <p className="text-gray-900">
                                                 {feedback.request.completed_at
                                                     ? format(new Date(feedback.request.completed_at), 'MMM dd, yyyy')
                                                     : 'N/A'}
                                             </p>
                                         </div>
                                         <div className="col-span-2">
-                                            <p className="text-slate-400">Location</p>
-                                            <p className="text-white flex items-center gap-1">
+                                            <p className="text-gray-500">Location</p>
+                                            <p className="text-gray-900 flex items-center gap-1">
                                                 <MapPin className="h-3 w-3" />
                                                 {feedback.request.address}, {feedback.request.barangay}
                                             </p>
@@ -234,29 +234,29 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
 
                             {/* Comments */}
                             <div>
-                                <h4 className="text-sm font-medium text-slate-400 mb-2">Client Comments</h4>
-                                <div className="bg-slate-700/50 rounded-lg p-4">
-                                    <p className="text-slate-300 whitespace-pre-wrap">
+                                <h4 className="text-sm font-medium text-gray-500 mb-2">Client Comments</h4>
+                                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                    <p className="text-gray-700 whitespace-pre-wrap">
                                         {feedback.comments || 'No comments provided'}
                                     </p>
                                 </div>
                             </div>
 
-                            <Separator className="bg-slate-700" />
+                            <Separator className="bg-gray-200" />
 
                             {/* Staff Response Section */}
                             <div className="space-y-4">
-                                <h4 className="text-sm font-medium text-white flex items-center gap-2">
-                                    <Send className="h-4 w-4 text-purple-400" />
+                                <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                                    <Send className="h-4 w-4 text-purple-600" />
                                     Staff Response
                                 </h4>
 
                                 {feedback.staff_response ? (
-                                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
-                                        <p className="text-slate-300 whitespace-pre-wrap mb-3">
+                                    <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                                        <p className="text-gray-700 whitespace-pre-wrap mb-3">
                                             {feedback.staff_response}
                                         </p>
-                                        <div className="text-xs text-slate-500">
+                                        <div className="text-xs text-gray-500">
                                             <p>Responded by {feedback.responder?.full_name || 'Unknown'}</p>
                                             {feedback.responded_at && (
                                                 <p>on {format(new Date(feedback.responded_at), 'MMM dd, yyyy \'at\' h:mm a')}</p>
@@ -269,13 +269,13 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
                                             value={response}
                                             onChange={(e) => setResponse(e.target.value)}
                                             placeholder="Write a response to this feedback..."
-                                            className="bg-slate-700/50 border-slate-600 text-white"
+                                            className="bg-white"
                                             rows={4}
                                         />
                                         <Button
                                             onClick={handleSubmitResponse}
                                             disabled={submitting || !response.trim()}
-                                            className="bg-purple-600 hover:bg-purple-700"
+                                            className="bg-purple-600 hover:bg-purple-700 text-white"
                                         >
                                             <Send className="h-4 w-4 mr-2" />
                                             {submitting ? 'Submitting...' : 'Submit Response'}
@@ -285,7 +285,7 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
                             </div>
 
                             {/* Meta Info */}
-                            <div className="text-xs text-slate-500 pt-4 border-t border-slate-700">
+                            <div className="text-xs text-gray-400 pt-4 border-t border-gray-200">
                                 <p className="flex items-center gap-1">
                                     <Calendar className="h-3 w-3" />
                                     Feedback submitted on {format(new Date(feedback.created_at), 'MMM dd, yyyy \'at\' h:mm a')}
@@ -295,15 +295,14 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
                     </ScrollArea>
                 ) : (
                     <div className="text-center py-10">
-                        <p className="text-slate-400">Feedback not found</p>
+                        <p className="text-gray-400">Feedback not found</p>
                     </div>
                 )}
 
-                <div className="flex justify-end pt-4 border-t border-slate-700">
+                <div className="flex justify-end pt-4 border-t border-gray-200">
                     <Button
                         variant="outline"
                         onClick={onClose}
-                        className="border-slate-600 text-slate-300"
                     >
                         Close
                     </Button>

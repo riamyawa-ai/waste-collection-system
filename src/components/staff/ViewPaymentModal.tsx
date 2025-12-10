@@ -153,9 +153,9 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
 
     const getStatusBadge = (status: string) => {
         const styles: Record<string, string> = {
-            pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-            verified: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-            completed: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+            pending: 'bg-amber-100 text-amber-700 border-amber-200',
+            verified: 'bg-blue-100 text-blue-700 border-blue-200',
+            completed: 'bg-emerald-100 text-emerald-700 border-emerald-200',
         };
         return styles[status] || styles.pending;
     };
@@ -169,27 +169,27 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-2xl max-h-[90vh] bg-slate-800 border-slate-700 text-white">
+            <DialogContent className="max-w-2xl max-h-[90vh]">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-emerald-400" />
+                        <DollarSign className="h-5 w-5 text-emerald-600" />
                         Payment Details
                     </DialogTitle>
                 </DialogHeader>
 
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400" />
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
                     </div>
                 ) : payment ? (
                     <ScrollArea className="max-h-[70vh] pr-4">
                         <div className="space-y-6">
                             {/* Amount and Status */}
-                            <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 rounded-lg p-6">
+                            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-lg p-6">
                                 <div className="flex items-center justify-between mb-4">
                                     <div>
-                                        <p className="text-emerald-300 text-sm">Amount</p>
-                                        <p className="text-3xl font-bold text-white">
+                                        <p className="text-emerald-700 text-sm">Amount</p>
+                                        <p className="text-3xl font-bold text-emerald-900">
                                             {formatCurrency(payment.amount)}
                                         </p>
                                     </div>
@@ -199,24 +199,24 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <p className="text-slate-400">Payment Number</p>
-                                        <p className="text-white font-mono">{payment.payment_number}</p>
+                                        <p className="text-emerald-600">Payment Number</p>
+                                        <p className="text-emerald-900 font-mono">{payment.payment_number}</p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400">Reference Number</p>
-                                        <p className="text-white font-mono">
+                                        <p className="text-emerald-600">Reference Number</p>
+                                        <p className="text-emerald-900 font-mono">
                                             {payment.reference_number || 'N/A'}
                                         </p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400">Payment Method</p>
-                                        <p className="text-white capitalize">
+                                        <p className="text-emerald-600">Payment Method</p>
+                                        <p className="text-emerald-900 capitalize">
                                             {payment.payment_method || 'Not specified'}
                                         </p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400">Date Received</p>
-                                        <p className="text-white">
+                                        <p className="text-emerald-600">Date Received</p>
+                                        <p className="text-emerald-900">
                                             {payment.date_received
                                                 ? format(new Date(payment.date_received), 'MMM dd, yyyy')
                                                 : 'Not recorded'}
@@ -227,17 +227,16 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
 
                             {/* Receipt */}
                             {payment.receipt_url && (
-                                <div className="bg-slate-700/50 rounded-lg p-4">
+                                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <Receipt className="h-4 w-4 text-slate-400" />
-                                            <span className="text-sm text-slate-300">Receipt Attached</span>
+                                            <Receipt className="h-4 w-4 text-gray-400" />
+                                            <span className="text-sm text-gray-700">Receipt Attached</span>
                                         </div>
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             onClick={() => window.open(payment.receipt_url!, '_blank')}
-                                            className="border-slate-600 text-slate-300"
                                         >
                                             <ExternalLink className="h-4 w-4 mr-2" />
                                             View Receipt
@@ -248,19 +247,19 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
 
                             {/* Client Info */}
                             {payment.client && (
-                                <div className="bg-slate-700/50 rounded-lg p-4">
-                                    <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                    <h4 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
                                         <User className="h-4 w-4" />
                                         Client Information
                                     </h4>
                                     <div className="space-y-1">
-                                        <p className="text-white font-medium">{payment.client.full_name}</p>
-                                        <p className="text-slate-400 text-sm">{payment.client.email}</p>
-                                        <p className="text-slate-400 text-sm flex items-center gap-1">
+                                        <p className="text-gray-900 font-medium">{payment.client.full_name}</p>
+                                        <p className="text-gray-500 text-sm">{payment.client.email}</p>
+                                        <p className="text-gray-500 text-sm flex items-center gap-1">
                                             <Phone className="h-3 w-3" />
                                             {payment.client.phone}
                                         </p>
-                                        <p className="text-slate-400 text-sm flex items-center gap-1">
+                                        <p className="text-gray-500 text-sm flex items-center gap-1">
                                             <MapPin className="h-3 w-3" />
                                             {payment.client.address}, {payment.client.barangay}
                                         </p>
@@ -270,23 +269,23 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
 
                             {/* Request Info */}
                             {payment.request && (
-                                <div className="bg-slate-700/50 rounded-lg p-4">
-                                    <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                    <h4 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
                                         <CreditCard className="h-4 w-4" />
                                         Related Request
                                     </h4>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div>
-                                            <p className="text-slate-400">Request Number</p>
-                                            <p className="text-white font-mono">{payment.request.request_number}</p>
+                                            <p className="text-gray-500">Request Number</p>
+                                            <p className="text-gray-900 font-mono">{payment.request.request_number}</p>
                                         </div>
                                         <div>
-                                            <p className="text-slate-400">Priority</p>
-                                            <p className="text-white capitalize">{payment.request.priority}</p>
+                                            <p className="text-gray-500">Priority</p>
+                                            <p className="text-gray-900 capitalize">{payment.request.priority}</p>
                                         </div>
                                         <div className="col-span-2">
-                                            <p className="text-slate-400">Location</p>
-                                            <p className="text-white">
+                                            <p className="text-gray-500">Location</p>
+                                            <p className="text-gray-900">
                                                 {payment.request.address}, {payment.request.barangay}
                                             </p>
                                         </div>
@@ -296,12 +295,12 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
 
                             {/* Verification Info */}
                             {payment.verifier && (
-                                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <CheckCircle className="h-4 w-4 text-blue-400" />
-                                        <span className="text-blue-400 font-medium">Verified</span>
+                                        <CheckCircle className="h-4 w-4 text-blue-600" />
+                                        <span className="text-blue-700 font-medium">Verified</span>
                                     </div>
-                                    <p className="text-slate-400 text-sm">
+                                    <p className="text-blue-600 text-sm">
                                         Verified by {payment.verifier.full_name}
                                         {payment.verified_at && (
                                             <> on {format(new Date(payment.verified_at), 'MMM dd, yyyy \'at\' h:mm a')}</>
@@ -313,7 +312,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                             {/* Staff Notes */}
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <h4 className="text-sm font-medium text-slate-400 flex items-center gap-2">
+                                    <h4 className="text-sm font-medium text-gray-500 flex items-center gap-2">
                                         <FileText className="h-4 w-4" />
                                         Staff Notes
                                     </h4>
@@ -322,7 +321,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => setIsEditing(true)}
-                                            className="text-slate-400"
+                                            className="text-gray-500"
                                         >
                                             Edit
                                         </Button>
@@ -335,7 +334,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                                             value={notes}
                                             onChange={(e) => setNotes(e.target.value)}
                                             placeholder="Add staff notes..."
-                                            className="bg-slate-700/50 border-slate-600 text-white"
+                                            className="bg-white"
                                             rows={3}
                                         />
                                         <div className="flex gap-2">
@@ -343,7 +342,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                                                 size="sm"
                                                 onClick={handleSaveNotes}
                                                 disabled={actionLoading}
-                                                className="bg-emerald-600 hover:bg-emerald-700"
+                                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                             >
                                                 Save
                                             </Button>
@@ -354,15 +353,14 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                                                     setIsEditing(false);
                                                     setNotes(payment.staff_notes || '');
                                                 }}
-                                                className="border-slate-600 text-slate-300"
                                             >
                                                 Cancel
                                             </Button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="bg-slate-700/50 rounded-lg p-3">
-                                        <p className="text-slate-300 text-sm">
+                                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                        <p className="text-gray-700 text-sm">
                                             {payment.staff_notes || 'No notes added'}
                                         </p>
                                     </div>
@@ -370,7 +368,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                             </div>
 
                             {/* Meta Info */}
-                            <div className="text-xs text-slate-500 pt-4 border-t border-slate-700">
+                            <div className="text-xs text-gray-400 pt-4 border-t border-gray-200">
                                 <p>Created on {format(new Date(payment.created_at), 'MMM dd, yyyy \'at\' h:mm a')}</p>
                                 {payment.updated_at !== payment.created_at && (
                                     <p>Last updated {format(new Date(payment.updated_at), 'MMM dd, yyyy \'at\' h:mm a')}</p>
@@ -380,18 +378,18 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                     </ScrollArea>
                 ) : (
                     <div className="text-center py-10">
-                        <p className="text-slate-400">Payment not found</p>
+                        <p className="text-gray-400">Payment not found</p>
                     </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex justify-between pt-4 border-t border-slate-700">
+                <div className="flex justify-between pt-4 border-t border-gray-200">
                     <div className="flex gap-2">
                         {payment?.status === 'pending' && (
                             <Button
                                 onClick={handleVerify}
                                 disabled={actionLoading}
-                                className="bg-blue-600 hover:bg-blue-700"
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
                                 <CheckCircle className="h-4 w-4 mr-2" />
                                 Verify Payment
@@ -401,7 +399,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                             <Button
                                 onClick={handleComplete}
                                 disabled={actionLoading}
-                                className="bg-emerald-600 hover:bg-emerald-700"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
                             >
                                 <CheckCircle className="h-4 w-4 mr-2" />
                                 Mark Completed
@@ -411,7 +409,6 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
                     <Button
                         variant="outline"
                         onClick={onClose}
-                        className="border-slate-600 text-slate-300"
                     >
                         Close
                     </Button>

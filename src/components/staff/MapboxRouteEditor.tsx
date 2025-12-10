@@ -276,20 +276,22 @@ export function MapboxRouteEditor({
         <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
             {/* Type Filter */}
             {showSampleLocations && !readOnly && (
-                <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1 max-w-[60%]">
-                    {LOCATION_TYPES.filter(t => t.id !== 'all').map((type) => (
-                        <button
-                            key={type.id}
-                            onClick={() => setSelectedType(selectedType === type.id ? null : type.id)}
-                            className={`px-2 py-1 rounded text-xs font-medium transition-all shadow-sm ${selectedType === type.id
-                                ? 'text-white'
-                                : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
-                                }`}
-                            style={selectedType === type.id ? { backgroundColor: type.color } : {}}
-                        >
-                            {type.label}
-                        </button>
-                    ))}
+                <div className="absolute top-2 left-2 z-10 w-[calc(100%-120px)]">
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none px-1 py-1">
+                        {LOCATION_TYPES.filter(t => t.id !== 'all').map((type) => (
+                            <button
+                                key={type.id}
+                                onClick={() => setSelectedType(selectedType === type.id ? null : type.id)}
+                                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-sm border flex items-center gap-1.5 ${selectedType === type.id
+                                    ? 'text-white border-transparent transform scale-105'
+                                    : 'bg-white text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 border-neutral-200'
+                                    }`}
+                                style={selectedType === type.id ? { backgroundColor: type.color } : {}}
+                            >
+                                {type.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             )}
 
