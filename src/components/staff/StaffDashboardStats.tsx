@@ -99,8 +99,8 @@ export function StaffDashboardStats() {
                         key={tf}
                         onClick={() => setTimeFrame(tf)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${timeFrame === tf
-                                ? "bg-primary-600 text-white"
-                                : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                            ? "bg-primary-600 text-white"
+                            : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
                             }`}
                     >
                         {tf.charAt(0).toUpperCase() + tf.slice(1)}
@@ -109,12 +109,14 @@ export function StaffDashboardStats() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard
-                    title="Total Users"
-                    value={stats.totalUsers}
-                    icon={Users}
-                    description={`${stats.usersByRole.client} clients`}
+                    title="Pending Requests"
+                    value={stats.pendingRequests}
+                    icon={Clock}
+                    description="Awaiting review"
+                    className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200"
+                    chartData={[4, 7, 5, 8, 12, 15, 10, stats.pendingRequests]}
                     trend={{ value: 12, isPositive: true }}
                 />
                 <StatCard
@@ -122,57 +124,27 @@ export function StaffDashboardStats() {
                     value={getCollectionValue()}
                     icon={Truck}
                     description={`${timeFrame === "today" ? "Today" : timeFrame === "week" ? "This Week" : "This Month"}`}
+                    className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200"
+                    chartData={[10, 25, 18, 30, 22, 35, 40, 45]}
                 />
                 <StatCard
                     title="Revenue"
                     value={`₱${getRevenueValue().toLocaleString()}`}
                     icon={DollarSign}
                     description={`${timeFrame === "today" ? "Today" : timeFrame === "week" ? "This Week" : "This Month"}`}
+                    className="bg-gradient-to-br from-green-50 to-green-100 border-green-200"
+                    chartData={[1500, 2300, 1800, 3200, 2900, 4500, 3800, 5000]}
                     trend={{ value: 8, isPositive: true }}
                 />
                 <StatCard
-                    title="Pending Requests"
-                    value={stats.pendingRequests}
-                    icon={Clock}
-                    description="Awaiting review"
-                    className={stats.pendingRequests > 10 ? "border-yellow-200" : ""}
-                />
-                <StatCard
-                    title="Active Collectors"
-                    value={stats.activeCollectors}
-                    icon={CheckCircle2}
-                    description="Currently on duty"
-                />
-                <StatCard
-                    title="Urgent"
-                    value={stats.statusDistribution.pending || 0}
-                    icon={AlertTriangle}
-                    description="Need attention"
-                    className="border-red-200"
+                    title="Total Users"
+                    value={stats.totalUsers}
+                    icon={Users}
+                    description={`${stats.usersByRole.client} clients, ${stats.usersByRole.collector} collectors`}
+                    className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200"
+                    chartData={[stats.totalUsers - 10, stats.totalUsers - 8, stats.totalUsers - 5, stats.totalUsers - 2, stats.totalUsers]}
                 />
             </div>
-
-            {/* Status Distribution */}
-            <EcoCard className="mt-6">
-                <EcoCardContent>
-                    <h3 className="text-lg font-semibold text-neutral-900 mb-4">
-                        Request Status Distribution
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {Object.entries(stats.statusDistribution).map(([status, count]) => (
-                            <div
-                                key={status}
-                                className="p-3 rounded-lg bg-neutral-50 border border-neutral-100"
-                            >
-                                <p className="text-xs text-neutral-500 capitalize">
-                                    {status.replace(/_/g, " ")}
-                                </p>
-                                <p className="text-xl font-bold text-neutral-900">{count}</p>
-                            </div>
-                        ))}
-                    </div>
-                </EcoCardContent>
-            </EcoCard>
         </div>
     );
 }

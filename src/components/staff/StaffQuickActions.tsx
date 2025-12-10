@@ -40,7 +40,7 @@ const quickActions: QuickAction[] = [
     {
         title: "Set Schedule",
         description: "Create collection schedules",
-        href: "/staff/schedules",
+        href: "/staff/schedule",
         icon: Calendar,
         variant: "default",
     },

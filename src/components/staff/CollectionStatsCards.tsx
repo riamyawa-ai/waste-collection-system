@@ -59,43 +59,37 @@ export function CollectionStatsCards() {
     }
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <StatCard
-                title="Total Requests"
-                value={stats.total}
-                icon={FileText}
-                className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200"
-            />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard
                 title="Pending Review"
                 value={stats.pending}
                 icon={Clock}
-                className="border-yellow-200"
-                description="Awaiting action"
+                className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200"
+                description="Needs action"
+                chartData={[stats.pending - 2, stats.pending + 1, stats.pending - 1, stats.pending + 3, stats.pending]}
+                trend={{ value: 5, isPositive: true }}
             />
             <StatCard
                 title="Awaiting Payment"
                 value={stats.accepted}
                 icon={CreditCard}
-                className="border-blue-200"
+                className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200"
+                chartData={[stats.accepted - 5, stats.accepted - 2, stats.accepted + 4, stats.accepted]}
             />
             <StatCard
                 title="In Progress"
-                value={stats.in_progress + stats.accepted_by_collector}
+                value={stats.in_progress + stats.accepted_by_collector + stats.assigned}
                 icon={Truck}
-                className="border-orange-200"
+                className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200"
+                chartData={[2, 4, 3, 5, 8, 6, stats.in_progress + stats.assigned]}
             />
             <StatCard
-                title="Completed Today"
-                value={stats.completedToday}
+                title="Completed"
+                value={stats.completed}
                 icon={CheckCircle2}
-                className="border-green-200"
-            />
-            <StatCard
-                title="Rejected"
-                value={stats.rejected}
-                icon={XCircle}
-                className="border-red-200"
+                className="bg-gradient-to-br from-green-50 to-green-100 border-green-200"
+                chartData={[stats.completed - 20, stats.completed - 15, stats.completed - 8, stats.completed - 5, stats.completed]}
+                trend={{ value: 12, isPositive: true }}
             />
         </div>
     );

@@ -7,7 +7,6 @@ import { APP_NAME } from "@/constants";
 import {
   LayoutDashboard,
   FileText,
-  Map,
   Bell,
   Settings,
   HelpCircle,
@@ -15,9 +14,13 @@ import {
   ChevronLeft,
   Recycle,
   Users,
+  CreditCard,
+  MessageSquare,
+  Megaphone,
+  Calendar,
   Truck,
   BarChart3,
-  Calendar,
+  Map,
 } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
 import { useState } from "react";
@@ -39,21 +42,21 @@ const navItemsByRole: Record<string, NavItem[]> = {
   client: [
     { label: "Dashboard", href: "/client/dashboard", icon: LayoutDashboard },
     { label: "My Requests", href: "/client/requests", icon: FileText },
-    { label: "Payments", href: "/client/payments", icon: BarChart3 },
+    { label: "Payments", href: "/client/payments", icon: CreditCard },
     { label: "Schedule", href: "/client/schedule", icon: Calendar },
-    { label: "Announcements", href: "/client/announcements", icon: FileText },
-    { label: "Feedback", href: "/client/feedback", icon: FileText },
+    { label: "Announcements", href: "/client/announcements", icon: Megaphone },
+    { label: "Feedback", href: "/client/feedback", icon: MessageSquare },
     { label: "Notifications", href: "/client/notifications", icon: Bell },
     { label: "Settings", href: "/client/profile", icon: Settings },
   ],
   staff: [
     { label: "Dashboard", href: "/staff/dashboard", icon: LayoutDashboard },
-    { label: "All Requests", href: "/staff/requests", icon: FileText },
-    { label: "Collectors", href: "/staff/collectors", icon: Truck },
+    { label: "Collections", href: "/staff/collections", icon: FileText },
+    { label: "Manage Users", href: "/staff/users", icon: Users },
+    { label: "Payments", href: "/staff/payments", icon: CreditCard },
+    { label: "Announcements", href: "/staff/announcements", icon: Megaphone },
+    { label: "Feedback", href: "/staff/feedback", icon: MessageSquare },
     { label: "Schedule", href: "/staff/schedule", icon: Calendar },
-    { label: "Map View", href: "/staff/map", icon: Map },
-    { label: "Reports", href: "/staff/reports", icon: BarChart3 },
-    { label: "Settings", href: "/staff/settings", icon: Settings },
   ],
   collector: [
     { label: "Dashboard", href: "/collector/dashboard", icon: LayoutDashboard },
