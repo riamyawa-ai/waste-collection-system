@@ -73,7 +73,7 @@ export function MapboxRouteEditor({
     const [viewState, setViewState] = useState({
         longitude: PANABO_CENTER.longitude,
         latitude: PANABO_CENTER.latitude,
-        zoom: 14, // Zoomed in more for better visibility
+        zoom: 10, // City-wide view for better establishment visibility
     });
 
     // Handle map load
@@ -291,8 +291,8 @@ export function MapboxRouteEditor({
                             <button
                                 onClick={() => setSelectedType(selectedType === 'all' ? null : 'all')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${selectedType === 'all'
-                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
                                 All Types
@@ -303,8 +303,8 @@ export function MapboxRouteEditor({
                                     key={type.id}
                                     onClick={() => setSelectedType(selectedType === type.id ? null : type.id)}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${selectedType === type.id
-                                            ? 'text-white shadow-md transform scale-105'
-                                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                        ? 'text-white shadow-md transform scale-105'
+                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                         }`}
                                     style={selectedType === type.id ? { backgroundColor: type.color } : {}}
                                 >
