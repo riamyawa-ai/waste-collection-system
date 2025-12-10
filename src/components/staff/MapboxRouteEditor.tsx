@@ -104,12 +104,67 @@ export function MapboxRouteEditor({
 
             const allResults: MapLocation[] = [];
 
-            for (const category of categories.slice(0, 3)) { // Limit categories per type
+            // Fetch from all mapbox IDs for this type (up to 4 categories)
+            for (const category of categories.slice(0, 4)) {
                 const response = await fetch(
                     `https://api.mapbox.com/search/searchbox/v1/category/${category}?` +
                     `access_token=${MAPBOX_ACCESS_TOKEN}&` +
                     `bbox=${bbox}&` +
-                    `limit=10&` +
+                    `limit=25&` + // Increased limit for more comprehensive results
+                    `language=en`
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.features) {
+                        const mapped = data.features.map((feature: {
+                            properties: { mapbox_id: string; name: string; full_address?: string; context?: { place?: { name: string } } };
+                            geometry: { coordinates: [number, number] };
+                        }) => ({
+                            id: feature.properties.mapbox_id,
+                            name: feature.properties.name,
+                            type: type,
+                            address: feature.properties.full_address || 'Panabo City',
+                            barangay: feature.properties.context?.place?.name || 'Panabo',
+                            lat: feature.geometry.coordinates[1],
+                            lng: feature.geometry.coordinates[0],
+                        }));
+                        allResults.push(...mapped);
+                    }
+                }
+            }
+
+            // Remove duplicates based on ID
+            const unique = allResults.filter((v, i, a) =>
+                a.findIndex(t => t.id === v.id) === i
+            );
+
+            setLocations(unique);
+        } catch (error) {
+            console.error('Error fetching POIs:', error);
+            setLocations([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAllPOIs = async () => {
+        setLoading(true);
+        try {
+            const allResults: MapLocation[] = [];
+            const types = Object.keys(MAPBOX_POI_CATEGORIES);
+
+            // Fetch from more types (up to 15) for comprehensive coverage
+            for (const type of types.slice(0, 15)) {
+                const config = MAPBOX_POI_CATEGORIES[type];
+                const category = config.mapboxIds[0];
+                const bbox = '125.52,7.15,125.85,7.45';
+
+                const response = await fetch(
+                    `https://api.mapbox.com/search/searchbox/v1/category/${category}?` +
+                    `access_token=${MAPBOX_ACCESS_TOKEN}&` +
+                    `bbox=${bbox}&` +
+                    `limit=10&` + // More results per type
                     `language=en`
                 );
 
@@ -139,54 +194,6 @@ export function MapboxRouteEditor({
             );
 
             setLocations(unique);
-        } catch (error) {
-            console.error('Error fetching POIs:', error);
-            setLocations([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchAllPOIs = async () => {
-        setLoading(true);
-        try {
-            const allResults: MapLocation[] = [];
-            const types = Object.keys(MAPBOX_POI_CATEGORIES);
-
-            for (const type of types.slice(0, 5)) { // Limit to avoid too many requests
-                const config = MAPBOX_POI_CATEGORIES[type];
-                const category = config.mapboxIds[0]; // Just use first category of each type
-                const bbox = '125.52,7.15,125.85,7.45';
-
-                const response = await fetch(
-                    `https://api.mapbox.com/search/searchbox/v1/category/${category}?` +
-                    `access_token=${MAPBOX_ACCESS_TOKEN}&` +
-                    `bbox=${bbox}&` +
-                    `limit=5&` +
-                    `language=en`
-                );
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.features) {
-                        const mapped = data.features.map((feature: {
-                            properties: { mapbox_id: string; name: string; full_address?: string; context?: { place?: { name: string } } };
-                            geometry: { coordinates: [number, number] };
-                        }) => ({
-                            id: feature.properties.mapbox_id,
-                            name: feature.properties.name,
-                            type: type,
-                            address: feature.properties.full_address || 'Panabo City',
-                            barangay: feature.properties.context?.place?.name || 'Panabo',
-                            lat: feature.geometry.coordinates[1],
-                            lng: feature.geometry.coordinates[0],
-                        }));
-                        allResults.push(...mapped);
-                    }
-                }
-            }
-
-            setLocations(allResults);
         } catch (error) {
             console.error('Error fetching all POIs:', error);
         } finally {
