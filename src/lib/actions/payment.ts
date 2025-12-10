@@ -374,7 +374,8 @@ export async function getRevenueByBarangay() {
     // Group by barangay
     const barangayRevenue: Record<string, number> = {};
     payments.forEach(p => {
-        const requestData = p.request as { barangay: string } | null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const requestData = p.request as any;
         const barangay = requestData?.barangay || 'Unknown';
         barangayRevenue[barangay] = (barangayRevenue[barangay] || 0) + (p.amount || 0);
     });
