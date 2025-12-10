@@ -39,10 +39,10 @@ import {
     TrendingUp,
 } from "lucide-react";
 import {
-    getFeedbackList,
+    getFeedback,
     getFeedbackStats,
     getCollectorPerformance,
-} from "@/lib/actions/staff";
+} from "@/lib/actions/feedback";
 import { ViewFeedbackModal } from "@/components/staff/ViewFeedbackModal";
 import { format } from "date-fns";
 
@@ -65,17 +65,19 @@ interface Feedback {
 }
 
 interface Stats {
-    totalFeedback: number;
+    total: number;
     averageRating: number;
-    needsAttention: number;
-    resolvedThisWeek: number;
+    pendingReview: number;
+    thisMonth: number;
+    ratingDistribution: Record<number, number>;
 }
 
 interface CollectorPerformance {
     id: string;
-    full_name: string;
-    average_rating: number;
-    total_feedback: number;
+    name: string;
+    totalFeedback: number;
+    averageRating: number;
+    completedCollections: number;
 }
 
 export default function FeedbackPage() {
@@ -103,10 +105,9 @@ export default function FeedbackPage() {
         setLoading(true);
         try {
             const [feedbackResult, statsResult, performanceResult] = await Promise.all([
-                getFeedbackList({
+                getFeedback({
                     search: searchQuery || undefined,
-                    ratingFilter: ratingFilter as "all" | "positive" | "neutral" | "negative",
-                    statusFilter: statusFilter as "all" | "pending" | "responded" | "flagged",
+                    status: (ratingFilter === 'all' ? undefined : (statusFilter === 'positive' ? undefined : statusFilter)) as 'new' | 'reviewed' | 'responded' | 'flagged' | 'all' | undefined,
                     page: pagination.page,
                     limit: pagination.limit,
                 }),
@@ -115,7 +116,7 @@ export default function FeedbackPage() {
             ]);
 
             if (feedbackResult.success && feedbackResult.data) {
-                setFeedbackList(feedbackResult.data.feedbackList || []);
+                setFeedbackList(feedbackResult.data.feedback || []);
                 setPagination((prev) => ({
                     ...prev,
                     total: feedbackResult.data?.total || 0,
@@ -191,7 +192,7 @@ export default function FeedbackPage() {
                             <div>
                                 <p className="text-neutral-500 text-sm">Total Feedback</p>
                                 <p className="text-2xl font-bold text-neutral-900">
-                                    {stats?.totalFeedback || 0}
+                                    {stats?.total || 0}
                                 </p>
                             </div>
                         </div>
@@ -223,7 +224,7 @@ export default function FeedbackPage() {
                             <div>
                                 <p className="text-neutral-500 text-sm">Needs Attention</p>
                                 <p className="text-2xl font-bold text-neutral-900">
-                                    {stats?.needsAttention || 0}
+                                    {stats?.pendingReview || 0}
                                 </p>
                             </div>
                         </div>
@@ -237,9 +238,9 @@ export default function FeedbackPage() {
                                 <CheckCircle className="h-5 w-5 text-green-600" />
                             </div>
                             <div>
-                                <p className="text-neutral-500 text-sm">Resolved This Week</p>
+                                <p className="text-neutral-500 text-sm">This Month</p>
                                 <p className="text-2xl font-bold text-neutral-900">
-                                    {stats?.resolvedThisWeek || 0}
+                                    {stats?.thisMonth || 0}
                                 </p>
                             </div>
                         </div>
@@ -455,16 +456,16 @@ export default function FeedbackPage() {
                                         </span>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium text-neutral-900 truncate">
-                                                {collector.full_name}
+                                                {collector.name}
                                             </p>
                                             <p className="text-xs text-neutral-500">
-                                                {collector.total_feedback} reviews
+                                                {collector.totalFeedback} reviews
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
                                             <span className="text-sm font-medium text-neutral-900">
-                                                {collector.average_rating.toFixed(1)}
+                                                {collector.averageRating.toFixed(1)}
                                             </span>
                                         </div>
                                     </div>
@@ -489,7 +490,7 @@ export default function FeedbackPage() {
                         setSelectedFeedback(null);
                     }}
                     feedbackId={selectedFeedback.id}
-                    onSuccess={loadData}
+                    onUpdate={loadData}
                 />
             )}
         </div>

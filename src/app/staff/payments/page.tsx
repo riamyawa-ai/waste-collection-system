@@ -74,15 +74,18 @@ interface Payment {
 
 interface Stats {
     totalRevenue: number;
-    pendingAmount: number;
-    completedToday: number;
-    pendingCount: number;
+    revenueToday: number;
+    revenueWeek: number;
+    revenueMonth: number;
+    pendingVerification: number;
+    verified: number;
+    averageTransaction: number;
+    totalTransactions: number;
 }
 
 interface BarangayRevenue {
     barangay: string;
-    total: number;
-    count: number;
+    revenue: number;
 }
 
 export default function PaymentsPage() {
@@ -111,7 +114,7 @@ export default function PaymentsPage() {
             const [paymentsResult, statsResult, revenueResult] = await Promise.all([
                 getPayments({
                     search: searchQuery || undefined,
-                    status: statusFilter as "pending" | "verified" | "failed" | "refunded" | "all",
+                    status: statusFilter === 'all' ? undefined : statusFilter as "pending" | "verified" | "completed",
                     page: pagination.page,
                     limit: pagination.limit,
                 }),
@@ -222,9 +225,9 @@ export default function PaymentsPage() {
                                 <Clock className="h-5 w-5 text-amber-600" />
                             </div>
                             <div>
-                                <p className="text-neutral-500 text-sm">Pending</p>
+                                <p className="text-neutral-500 text-sm">Today</p>
                                 <p className="text-2xl font-bold text-neutral-900">
-                                    {formatCurrency(stats?.pendingAmount || 0)}
+                                    {formatCurrency(stats?.revenueToday || 0)}
                                 </p>
                             </div>
                         </div>
@@ -240,7 +243,7 @@ export default function PaymentsPage() {
                             <div>
                                 <p className="text-neutral-500 text-sm">Verified Today</p>
                                 <p className="text-2xl font-bold text-neutral-900">
-                                    {stats?.completedToday || 0}
+                                    {stats?.verified || 0}
                                 </p>
                             </div>
                         </div>
@@ -256,7 +259,7 @@ export default function PaymentsPage() {
                             <div>
                                 <p className="text-neutral-500 text-sm">Awaiting Verification</p>
                                 <p className="text-2xl font-bold text-neutral-900">
-                                    {stats?.pendingCount || 0}
+                                    {stats?.pendingVerification || 0}
                                 </p>
                             </div>
                         </div>
@@ -453,11 +456,11 @@ export default function PaymentsPage() {
                                                 {item.barangay}
                                             </p>
                                             <p className="text-xs text-neutral-500">
-                                                {item.count} payments
+                                                Revenue
                                             </p>
                                         </div>
                                         <span className="text-sm font-semibold text-primary-600">
-                                            {formatCurrency(item.total)}
+                                            {formatCurrency(item.revenue)}
                                         </span>
                                     </div>
                                 ))}
@@ -481,7 +484,7 @@ export default function PaymentsPage() {
                         setSelectedPayment(null);
                     }}
                     paymentId={selectedPayment.id}
-                    onSuccess={loadData}
+                    onUpdate={loadData}
                 />
             )}
         </div>
