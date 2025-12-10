@@ -9,6 +9,7 @@ import {
     AcceptRejectModal,
     RecordPaymentModal,
     AssignCollectorModal,
+    ViewRequestModal,
 } from "@/components/staff";
 import { completeRequest } from "@/lib/actions/staff";
 import { Download, RefreshCw } from "lucide-react";
@@ -42,6 +43,7 @@ export default function CollectionsPage() {
     const [selectedRequest, setSelectedRequest] = useState<CollectionRequest | null>(null);
 
     // Modal states
+    const [showViewModal, setShowViewModal] = useState(false);
     const [showAcceptModal, setShowAcceptModal] = useState(false);
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -52,9 +54,8 @@ export default function CollectionsPage() {
     }, []);
 
     const handleView = (request: CollectionRequest) => {
-        // Would open a detailed view modal
-        console.log("View request:", request);
-        toast.info(`Viewing request ${request.request_number}`);
+        setSelectedRequest(request);
+        setShowViewModal(true);
     };
 
     const handleAccept = (request: CollectionRequest) => {
@@ -88,6 +89,7 @@ export default function CollectionsPage() {
     };
 
     const closeAllModals = () => {
+        setShowViewModal(false);
         setShowAcceptModal(false);
         setShowRejectModal(false);
         setShowPaymentModal(false);
@@ -159,6 +161,13 @@ export default function CollectionsPage() {
                 open={showAssignModal}
                 onClose={closeAllModals}
                 onSuccess={handleRefresh}
+                request={selectedRequest}
+            />
+
+            {/* View Request Modal */}
+            <ViewRequestModal
+                open={showViewModal}
+                onClose={closeAllModals}
                 request={selectedRequest}
             />
         </div>

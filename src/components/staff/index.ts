@@ -11,3 +11,4 @@ export { CollectionStatsCards } from './CollectionStatsCards';
 export { AcceptRejectModal } from './AcceptRejectModal';
 export { RecordPaymentModal } from './RecordPaymentModal';
 export { AssignCollectorModal } from './AssignCollectorModal';
+export { ViewRequestModal } from './ViewRequestModal';
