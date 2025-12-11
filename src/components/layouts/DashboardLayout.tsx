@@ -149,7 +149,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
             {/* Actions */}
             <div className="flex items-center gap-3">
               {/* Notifications Center */}
-              <NotificationsCenter />
+              <NotificationsCenter role={role} />
 
               <div className="h-8 w-px bg-neutral-200" />
 

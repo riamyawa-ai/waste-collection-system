@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { DashboardLayout } from '@/components/layouts';
 import { PageHeader } from '@/components/ui';
 import {
   DashboardStats,
@@ -68,7 +67,7 @@ async function RecentActivityWrapper() {
 
 export default function ClientDashboard() {
   return (
-    <DashboardLayout role="client">
+    <>
       <PageHeader
         title="Welcome back!"
         description="Here's an overview of your waste collection requests."
@@ -111,6 +110,6 @@ export default function ClientDashboard() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

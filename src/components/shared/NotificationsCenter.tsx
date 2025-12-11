@@ -125,9 +125,10 @@ function formatTimeAgo(dateString: string): string {
 
 interface NotificationsCenterProps {
     className?: string;
+    role?: "client" | "staff" | "collector" | "admin";
 }
 
-export function NotificationsCenter({ className }: NotificationsCenterProps) {
+export function NotificationsCenter({ className, role = "client" }: NotificationsCenterProps) {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [filter, setFilter] = useState<NotificationType | "all">("all");
@@ -372,7 +373,7 @@ export function NotificationsCenter({ className }: NotificationsCenterProps) {
                         </Button>
                     </div>
                     <Link
-                        href="/client/notifications"
+                        href={`/${role}/notifications`}
                         className="text-xs font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
                         onClick={() => setIsOpen(false)}
                     >

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { Calendar, List, History, RefreshCw, Download, Plus } from 'lucide-react';
 
-import { DashboardLayout } from '@/components/layouts';
 import { PageHeader } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import {
@@ -99,7 +98,7 @@ export default function ClientSchedulePage() {
     ];
 
     return (
-        <DashboardLayout role="client">
+        <>
             <PageHeader
                 title="Collection Schedule"
                 description="View your scheduled collections and history"
@@ -268,6 +267,6 @@ export default function ClientSchedulePage() {
                     </div>
                 )}
             </div>
-        </DashboardLayout>
+        </>
     );
 }
