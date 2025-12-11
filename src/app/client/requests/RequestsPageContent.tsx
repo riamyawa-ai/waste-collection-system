@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Search, SlidersHorizontal, RefreshCw, X } from 'lucide-react';
 
-import { DashboardLayout } from '@/components/layouts';
 import { PageHeader } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -231,7 +230,7 @@ export function RequestsPageContent() {
         statusFilter || priorityFilter || barangayFilter || searchQuery;
 
     return (
-        <DashboardLayout role="client">
+        <>
             <PageHeader
                 title="My Requests"
                 description="View and manage your waste collection requests"
@@ -411,6 +410,6 @@ export function RequestsPageContent() {
                 }}
                 onSuccess={handleEditSuccess}
             />
-        </DashboardLayout>
+        </>
     );
 }

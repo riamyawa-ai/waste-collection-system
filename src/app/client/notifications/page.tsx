@@ -18,7 +18,6 @@ import {
     RefreshCw,
     X,
 } from "lucide-react";
-import { DashboardLayout } from "@/components/layouts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -184,176 +183,174 @@ export default function NotificationsPage() {
     };
 
     return (
-        <DashboardLayout role="client">
-            <div className="space-y-6">
-                {/* Page Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
-                            Notifications
-                        </h1>
-                        <p className="text-neutral-500">
-                            Stay updated with your collection requests and announcements.
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {unreadCount > 0 && (
-                            <Badge className="bg-primary-100 text-primary-700 border-primary-200">
-                                {unreadCount} unread
-                            </Badge>
-                        )}
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={fetchNotifications}
-                            disabled={isLoading}
-                        >
-                            <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
-                            Refresh
-                        </Button>
-                    </div>
+        <div className="space-y-6">
+            {/* Page Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
+                        Notifications
+                    </h1>
+                    <p className="text-neutral-500">
+                        Stay updated with your collection requests and announcements.
+                    </p>
                 </div>
+                <div className="flex items-center gap-2">
+                    {unreadCount > 0 && (
+                        <Badge className="bg-primary-100 text-primary-700 border-primary-200">
+                            {unreadCount} unread
+                        </Badge>
+                    )}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={fetchNotifications}
+                        disabled={isLoading}
+                    >
+                        <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
+                        Refresh
+                    </Button>
+                </div>
+            </div>
 
-                {/* Filters and Actions */}
-                <Card className="border-neutral-200">
-                    <CardContent className="pt-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <Select value={filter} onValueChange={setFilter}>
-                                <SelectTrigger className="w-full sm:w-[200px]">
-                                    <Filter className="h-4 w-4 mr-2" />
-                                    <SelectValue placeholder="Filter notifications" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Notifications</SelectItem>
-                                    <SelectItem value="unread">Unread Only</SelectItem>
-                                    <SelectItem value="request_status_update">Request Updates</SelectItem>
-                                    <SelectItem value="payment_verification">Payment</SelectItem>
-                                    <SelectItem value="collection_reminder">Reminders</SelectItem>
-                                    <SelectItem value="system_announcement">Announcements</SelectItem>
-                                </SelectContent>
-                            </Select>
+            {/* Filters and Actions */}
+            <Card className="border-neutral-200">
+                <CardContent className="pt-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <Select value={filter} onValueChange={setFilter}>
+                            <SelectTrigger className="w-full sm:w-[200px]">
+                                <Filter className="h-4 w-4 mr-2" />
+                                <SelectValue placeholder="Filter notifications" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Notifications</SelectItem>
+                                <SelectItem value="unread">Unread Only</SelectItem>
+                                <SelectItem value="request_status_update">Request Updates</SelectItem>
+                                <SelectItem value="payment_verification">Payment</SelectItem>
+                                <SelectItem value="collection_reminder">Reminders</SelectItem>
+                                <SelectItem value="system_announcement">Announcements</SelectItem>
+                            </SelectContent>
+                        </Select>
 
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleMarkAllAsRead}
-                                    disabled={unreadCount === 0}
-                                >
-                                    <Check className="h-4 w-4 mr-2" />
-                                    Mark All Read
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleClearRead}
-                                    className="text-neutral-500"
-                                >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Clear Read
-                                </Button>
-                            </div>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleMarkAllAsRead}
+                                disabled={unreadCount === 0}
+                            >
+                                <Check className="h-4 w-4 mr-2" />
+                                Mark All Read
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleClearRead}
+                                className="text-neutral-500"
+                            >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Clear Read
+                            </Button>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </CardContent>
+            </Card>
 
-                {/* Notifications List */}
-                <Card className="border-neutral-200">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Bell className="h-5 w-5 text-primary-600" />
-                            All Notifications
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        {isLoading ? (
-                            <div className="flex items-center justify-center py-12">
-                                <RefreshCw className="h-8 w-8 animate-spin text-primary-600" />
-                            </div>
-                        ) : filteredNotifications.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                                <BellOff className="h-12 w-12 text-neutral-300 mb-4" />
-                                <p className="text-neutral-500">No notifications</p>
-                                <p className="text-sm text-neutral-400 mt-1">
-                                    {filter === "unread"
-                                        ? "You're all caught up!"
-                                        : "Notifications will appear here when you receive them."}
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="divide-y">
-                                {filteredNotifications.map((notification) => {
-                                    const TypeIcon = typeConfig[notification.type]?.icon || Bell;
-                                    return (
+            {/* Notifications List */}
+            <Card className="border-neutral-200">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Bell className="h-5 w-5 text-primary-600" />
+                        All Notifications
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <RefreshCw className="h-8 w-8 animate-spin text-primary-600" />
+                        </div>
+                    ) : filteredNotifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+                            <BellOff className="h-12 w-12 text-neutral-300 mb-4" />
+                            <p className="text-neutral-500">No notifications</p>
+                            <p className="text-sm text-neutral-400 mt-1">
+                                {filter === "unread"
+                                    ? "You're all caught up!"
+                                    : "Notifications will appear here when you receive them."}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="divide-y">
+                            {filteredNotifications.map((notification) => {
+                                const TypeIcon = typeConfig[notification.type]?.icon || Bell;
+                                return (
+                                    <div
+                                        key={notification.id}
+                                        className={cn(
+                                            "flex gap-4 p-4 cursor-pointer hover:bg-neutral-50 transition-colors",
+                                            !notification.is_read && "bg-primary-50/50"
+                                        )}
+                                        onClick={() => handleNotificationClick(notification)}
+                                    >
                                         <div
-                                            key={notification.id}
                                             className={cn(
-                                                "flex gap-4 p-4 cursor-pointer hover:bg-neutral-50 transition-colors",
-                                                !notification.is_read && "bg-primary-50/50"
+                                                "flex-shrink-0 h-12 w-12 rounded-full flex items-center justify-center",
+                                                typeConfig[notification.type]?.className || "bg-neutral-100 text-neutral-600"
                                             )}
-                                            onClick={() => handleNotificationClick(notification)}
                                         >
-                                            <div
-                                                className={cn(
-                                                    "flex-shrink-0 h-12 w-12 rounded-full flex items-center justify-center",
-                                                    typeConfig[notification.type]?.className || "bg-neutral-100 text-neutral-600"
-                                                )}
-                                            >
-                                                <TypeIcon className="h-6 w-6" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between gap-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <p
-                                                            className={cn(
-                                                                "text-base",
-                                                                !notification.is_read
-                                                                    ? "font-semibold text-neutral-900"
-                                                                    : "font-medium text-neutral-700"
-                                                            )}
-                                                        >
-                                                            {notification.title}
-                                                        </p>
-                                                        {!notification.is_read && (
-                                                            <div className="h-2 w-2 rounded-full bg-primary-500" />
-                                                        )}
-                                                    </div>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteNotification(notification.id);
-                                                        }}
-                                                        className="text-neutral-400 hover:text-red-500 transition-colors p-1"
-                                                    >
-                                                        <X className="h-4 w-4" />
-                                                    </button>
-                                                </div>
-                                                <p className="text-sm text-neutral-600 mt-1">
-                                                    {notification.message}
-                                                </p>
-                                                <div className="flex items-center gap-3 mt-2">
-                                                    <Badge
-                                                        variant="outline"
+                                            <TypeIcon className="h-6 w-6" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <p
                                                         className={cn(
-                                                            "text-xs",
-                                                            typeConfig[notification.type]?.className
+                                                            "text-base",
+                                                            !notification.is_read
+                                                                ? "font-semibold text-neutral-900"
+                                                                : "font-medium text-neutral-700"
                                                         )}
                                                     >
-                                                        {typeConfig[notification.type]?.label || notification.type}
-                                                    </Badge>
-                                                    <span className="text-xs text-neutral-400">
-                                                        {formatTimeAgo(notification.created_at)}
-                                                    </span>
+                                                        {notification.title}
+                                                    </p>
+                                                    {!notification.is_read && (
+                                                        <div className="h-2 w-2 rounded-full bg-primary-500" />
+                                                    )}
                                                 </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteNotification(notification.id);
+                                                    }}
+                                                    className="text-neutral-400 hover:text-red-500 transition-colors p-1"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                            <p className="text-sm text-neutral-600 mt-1">
+                                                {notification.message}
+                                            </p>
+                                            <div className="flex items-center gap-3 mt-2">
+                                                <Badge
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "text-xs",
+                                                        typeConfig[notification.type]?.className
+                                                    )}
+                                                >
+                                                    {typeConfig[notification.type]?.label || notification.type}
+                                                </Badge>
+                                                <span className="text-xs text-neutral-400">
+                                                    {formatTimeAgo(notification.created_at)}
+                                                </span>
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
-        </DashboardLayout>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
     );
 }

@@ -20,7 +20,6 @@ import {
     MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
-import { DashboardLayout } from '@/components/layouts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -101,34 +100,30 @@ export default function RequestDetailPage() {
 
     if (isLoading) {
         return (
-            <DashboardLayout role="client">
-                <div className="flex items-center justify-center py-24">
-                    <RefreshCw className="h-8 w-8 animate-spin text-primary-600" />
-                </div>
-            </DashboardLayout>
+            <div className="flex items-center justify-center py-24">
+                <RefreshCw className="h-8 w-8 animate-spin text-primary-600" />
+            </div>
         );
     }
 
     if (error || !request) {
         return (
-            <DashboardLayout role="client">
-                <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <FileText className="h-12 w-12 text-neutral-300 mb-4" />
-                    <h2 className="text-xl font-semibold text-neutral-900 mb-2">Request Not Found</h2>
-                    <p className="text-neutral-500 mb-6">{error || 'The request you are looking for does not exist.'}</p>
-                    <Link href="/client/requests">
-                        <Button>
-                            <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back to Requests
-                        </Button>
-                    </Link>
-                </div>
-            </DashboardLayout>
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+                <FileText className="h-12 w-12 text-neutral-300 mb-4" />
+                <h2 className="text-xl font-semibold text-neutral-900 mb-2">Request Not Found</h2>
+                <p className="text-neutral-500 mb-6">{error || 'The request you are looking for does not exist.'}</p>
+                <Link href="/client/requests">
+                    <Button>
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Requests
+                    </Button>
+                </Link>
+            </div>
         );
     }
 
     return (
-        <DashboardLayout role="client">
+        <>
             <div className="space-y-6">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -399,6 +394,6 @@ export default function RequestDetailPage() {
                     onSuccess={handleCancelSuccess}
                 />
             )}
-        </DashboardLayout>
+        </>
     );
 }

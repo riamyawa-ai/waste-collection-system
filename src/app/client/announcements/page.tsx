@@ -16,7 +16,6 @@ import {
     CheckCheck,
     RefreshCw,
 } from "lucide-react";
-import { DashboardLayout } from "@/components/layouts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -146,205 +145,203 @@ export default function AnnouncementsPage() {
     };
 
     return (
-        <DashboardLayout role="client">
-            <div className="space-y-6">
-                {/* Page Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
-                            Service Announcements
-                        </h1>
-                        <p className="text-neutral-500">
-                            Stay updated with the latest news and service updates.
-                        </p>
-                    </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={fetchAnnouncements}
-                        disabled={isLoading}
-                    >
-                        <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
-                        Refresh
-                    </Button>
+        <div className="space-y-6">
+            {/* Page Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
+                        Service Announcements
+                    </h1>
+                    <p className="text-neutral-500">
+                        Stay updated with the latest news and service updates.
+                    </p>
                 </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchAnnouncements}
+                    disabled={isLoading}
+                >
+                    <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
+                    Refresh
+                </Button>
+            </div>
 
-                {/* Filters */}
-                <Card className="border-neutral-200">
-                    <CardContent className="pt-6">
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-                                <Input
-                                    placeholder="Search announcements..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                            <Select value={typeFilter} onValueChange={setTypeFilter}>
-                                <SelectTrigger className="w-full sm:w-[180px]">
-                                    <Filter className="h-4 w-4 mr-2" />
-                                    <SelectValue placeholder="Filter by type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Types</SelectItem>
-                                    <SelectItem value="info">Information</SelectItem>
-                                    <SelectItem value="success">Success</SelectItem>
-                                    <SelectItem value="warning">Warning</SelectItem>
-                                    <SelectItem value="maintenance">Maintenance</SelectItem>
-                                    <SelectItem value="event">Event</SelectItem>
-                                </SelectContent>
-                            </Select>
+            {/* Filters */}
+            <Card className="border-neutral-200">
+                <CardContent className="pt-6">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                            <Input
+                                placeholder="Search announcements..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-10"
+                            />
                         </div>
+                        <Select value={typeFilter} onValueChange={setTypeFilter}>
+                            <SelectTrigger className="w-full sm:w-[180px]">
+                                <Filter className="h-4 w-4 mr-2" />
+                                <SelectValue placeholder="Filter by type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Types</SelectItem>
+                                <SelectItem value="info">Information</SelectItem>
+                                <SelectItem value="success">Success</SelectItem>
+                                <SelectItem value="warning">Warning</SelectItem>
+                                <SelectItem value="maintenance">Maintenance</SelectItem>
+                                <SelectItem value="event">Event</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Announcements List */}
+            {isLoading ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                    {[1, 2, 3, 4].map((i) => (
+                        <Card key={i} className="animate-pulse">
+                            <CardHeader>
+                                <div className="h-5 bg-neutral-200 rounded w-3/4"></div>
+                                <div className="h-4 bg-neutral-100 rounded w-1/2 mt-2"></div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="h-20 bg-neutral-100 rounded"></div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            ) : sortedAnnouncements.length === 0 ? (
+                <Card className="border-neutral-200">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                        <Megaphone className="h-12 w-12 text-neutral-300 mb-4" />
+                        <p className="text-neutral-500">No announcements found</p>
+                        <p className="text-sm text-neutral-400 mt-1">
+                            Check back later for updates and news.
+                        </p>
                     </CardContent>
                 </Card>
-
-                {/* Announcements List */}
-                {isLoading ? (
-                    <div className="grid gap-4 md:grid-cols-2">
-                        {[1, 2, 3, 4].map((i) => (
-                            <Card key={i} className="animate-pulse">
-                                <CardHeader>
-                                    <div className="h-5 bg-neutral-200 rounded w-3/4"></div>
-                                    <div className="h-4 bg-neutral-100 rounded w-1/2 mt-2"></div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="h-20 bg-neutral-100 rounded"></div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                ) : sortedAnnouncements.length === 0 ? (
-                    <Card className="border-neutral-200">
-                        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                            <Megaphone className="h-12 w-12 text-neutral-300 mb-4" />
-                            <p className="text-neutral-500">No announcements found</p>
-                            <p className="text-sm text-neutral-400 mt-1">
-                                Check back later for updates and news.
-                            </p>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <div className="grid gap-4 md:grid-cols-2">
-                        {sortedAnnouncements.map((announcement) => {
-                            const TypeIcon = typeConfig[announcement.type]?.icon || Info;
-                            return (
-                                <Card
-                                    key={announcement.id}
-                                    className={cn(
-                                        "border-neutral-200 hover:shadow-md transition-all cursor-pointer",
-                                        announcement.priority === "urgent" && "border-l-4 border-l-red-500",
-                                        announcement.priority === "important" && "border-l-4 border-l-blue-500"
-                                    )}
-                                    onClick={() => handleViewAnnouncement(announcement)}
-                                >
-                                    <CardHeader className="pb-2">
-                                        <div className="flex items-start justify-between gap-2">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                {announcement.priority === "urgent" && (
-                                                    <Pin className="h-4 w-4 text-red-600" />
-                                                )}
-                                                <Badge
-                                                    variant="outline"
-                                                    className={cn("text-xs", typeConfig[announcement.type]?.className)}
-                                                >
-                                                    <TypeIcon className="h-3 w-3 mr-1" />
-                                                    {typeConfig[announcement.type]?.label || announcement.type}
-                                                </Badge>
-                                                {announcement.priority !== "normal" && (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={cn("text-xs", priorityConfig[announcement.priority]?.className)}
-                                                    >
-                                                        {priorityConfig[announcement.priority]?.label}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <CardTitle className="text-lg mt-2 line-clamp-2">
-                                            {announcement.title}
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-sm text-neutral-600 line-clamp-3">
-                                            {announcement.content}
-                                        </p>
-                                    </CardContent>
-                                    <CardFooter className="pt-0">
-                                        <div className="flex items-center gap-2 text-xs text-neutral-500">
-                                            <Clock className="h-3 w-3" />
-                                            {new Date(announcement.publish_date).toLocaleDateString()}
-                                        </div>
-                                    </CardFooter>
-                                </Card>
-                            );
-                        })}
-                    </div>
-                )}
-
-                {/* Announcement Detail Modal */}
-                <Dialog
-                    open={!!selectedAnnouncement}
-                    onOpenChange={(open) => !open && setSelectedAnnouncement(null)}
-                >
-                    <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-                        {selectedAnnouncement && (
-                            <>
-                                <DialogHeader>
-                                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                                        <Badge
-                                            variant="outline"
-                                            className={cn(typeConfig[selectedAnnouncement.type]?.className)}
-                                        >
-                                            {React.createElement(typeConfig[selectedAnnouncement.type]?.icon || Info, {
-                                                className: "h-3 w-3 mr-1",
-                                            })}
-                                            {typeConfig[selectedAnnouncement.type]?.label}
-                                        </Badge>
-                                        {selectedAnnouncement.priority !== "normal" && (
+            ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                    {sortedAnnouncements.map((announcement) => {
+                        const TypeIcon = typeConfig[announcement.type]?.icon || Info;
+                        return (
+                            <Card
+                                key={announcement.id}
+                                className={cn(
+                                    "border-neutral-200 hover:shadow-md transition-all cursor-pointer",
+                                    announcement.priority === "urgent" && "border-l-4 border-l-red-500",
+                                    announcement.priority === "important" && "border-l-4 border-l-blue-500"
+                                )}
+                                onClick={() => handleViewAnnouncement(announcement)}
+                            >
+                                <CardHeader className="pb-2">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            {announcement.priority === "urgent" && (
+                                                <Pin className="h-4 w-4 text-red-600" />
+                                            )}
                                             <Badge
                                                 variant="outline"
-                                                className={cn(priorityConfig[selectedAnnouncement.priority]?.className)}
+                                                className={cn("text-xs", typeConfig[announcement.type]?.className)}
                                             >
-                                                {priorityConfig[selectedAnnouncement.priority]?.label}
+                                                <TypeIcon className="h-3 w-3 mr-1" />
+                                                {typeConfig[announcement.type]?.label || announcement.type}
                                             </Badge>
-                                        )}
+                                            {announcement.priority !== "normal" && (
+                                                <Badge
+                                                    variant="outline"
+                                                    className={cn("text-xs", priorityConfig[announcement.priority]?.className)}
+                                                >
+                                                    {priorityConfig[announcement.priority]?.label}
+                                                </Badge>
+                                            )}
+                                        </div>
                                     </div>
-                                    <DialogTitle className="text-xl">
-                                        {selectedAnnouncement.title}
-                                    </DialogTitle>
-                                    <DialogDescription className="flex items-center gap-4 text-sm">
-                                        <span className="flex items-center gap-1">
-                                            <CalendarIcon className="h-4 w-4" />
-                                            Published: {new Date(selectedAnnouncement.publish_date).toLocaleDateString()}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <Clock className="h-4 w-4" />
-                                            Expires: {new Date(selectedAnnouncement.expiry_date).toLocaleDateString()}
-                                        </span>
-                                    </DialogDescription>
-                                </DialogHeader>
-
-                                <div className="py-4">
-                                    <div className="prose prose-sm max-w-none text-neutral-700">
-                                        <p className="whitespace-pre-wrap">{selectedAnnouncement.content}</p>
+                                    <CardTitle className="text-lg mt-2 line-clamp-2">
+                                        {announcement.title}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-sm text-neutral-600 line-clamp-3">
+                                        {announcement.content}
+                                    </p>
+                                </CardContent>
+                                <CardFooter className="pt-0">
+                                    <div className="flex items-center gap-2 text-xs text-neutral-500">
+                                        <Clock className="h-3 w-3" />
+                                        {new Date(announcement.publish_date).toLocaleDateString()}
                                     </div>
-                                </div>
+                                </CardFooter>
+                            </Card>
+                        );
+                    })}
+                </div>
+            )}
 
-                                <div className="flex items-center justify-end pt-4 border-t">
-                                    <Button
+            {/* Announcement Detail Modal */}
+            <Dialog
+                open={!!selectedAnnouncement}
+                onOpenChange={(open) => !open && setSelectedAnnouncement(null)}
+            >
+                <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+                    {selectedAnnouncement && (
+                        <>
+                            <DialogHeader>
+                                <div className="flex items-center gap-2 flex-wrap mb-2">
+                                    <Badge
                                         variant="outline"
-                                        onClick={() => setSelectedAnnouncement(null)}
+                                        className={cn(typeConfig[selectedAnnouncement.type]?.className)}
                                     >
-                                        Close
-                                    </Button>
+                                        {React.createElement(typeConfig[selectedAnnouncement.type]?.icon || Info, {
+                                            className: "h-3 w-3 mr-1",
+                                        })}
+                                        {typeConfig[selectedAnnouncement.type]?.label}
+                                    </Badge>
+                                    {selectedAnnouncement.priority !== "normal" && (
+                                        <Badge
+                                            variant="outline"
+                                            className={cn(priorityConfig[selectedAnnouncement.priority]?.className)}
+                                        >
+                                            {priorityConfig[selectedAnnouncement.priority]?.label}
+                                        </Badge>
+                                    )}
                                 </div>
-                            </>
-                        )}
-                    </DialogContent>
-                </Dialog>
-            </div>
-        </DashboardLayout>
+                                <DialogTitle className="text-xl">
+                                    {selectedAnnouncement.title}
+                                </DialogTitle>
+                                <DialogDescription className="flex items-center gap-4 text-sm">
+                                    <span className="flex items-center gap-1">
+                                        <CalendarIcon className="h-4 w-4" />
+                                        Published: {new Date(selectedAnnouncement.publish_date).toLocaleDateString()}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <Clock className="h-4 w-4" />
+                                        Expires: {new Date(selectedAnnouncement.expiry_date).toLocaleDateString()}
+                                    </span>
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="py-4">
+                                <div className="prose prose-sm max-w-none text-neutral-700">
+                                    <p className="whitespace-pre-wrap">{selectedAnnouncement.content}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end pt-4 border-t">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setSelectedAnnouncement(null)}
+                                >
+                                    Close
+                                </Button>
+                            </div>
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
+        </div>
     );
 }
