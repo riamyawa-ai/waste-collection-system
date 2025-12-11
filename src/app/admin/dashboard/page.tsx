@@ -20,7 +20,6 @@ import {
   Activity,
   FileText,
   ClipboardList,
-  Calendar,
   Clock,
   CheckCircle2,
   AlertCircle,
@@ -28,8 +27,6 @@ import {
   ArrowUpRight,
   BarChart3,
   PieChart,
-  Wallet,
-  Star,
   Building2
 } from 'lucide-react';
 import Link from 'next/link';
@@ -165,7 +162,14 @@ function MiniBarChart({ data, labels }: { data: number[]; labels: string[] }) {
 // Donut Chart Component
 function DonutChart({ data, colors, labels }: { data: number[]; colors: string[]; labels: string[] }) {
   const total = data.reduce((a, b) => a + b, 0);
-  let currentAngle = 0;
+
+  // Pre-calculate cumulative offsets to avoid reassigning during render
+  const offsets = data.reduce<number[]>((acc, value, index) => {
+    const prevOffset = index === 0 ? 0 : acc[index - 1];
+    const prevPercentage = index === 0 ? 0 : (total > 0 ? (data[index - 1] / total) * 100 : 0);
+    acc.push(prevOffset + prevPercentage);
+    return acc;
+  }, []);
 
   return (
     <div className="flex items-center gap-6">
@@ -174,8 +178,7 @@ function DonutChart({ data, colors, labels }: { data: number[]; colors: string[]
           {data.map((value, index) => {
             const percentage = total > 0 ? (value / total) * 100 : 0;
             const strokeDasharray = `${percentage} ${100 - percentage}`;
-            const strokeDashoffset = -currentAngle;
-            currentAngle += percentage;
+            const strokeDashoffset = -offsets[index];
 
             return (
               <circle
@@ -299,7 +302,7 @@ export default function AdminDashboardPage() {
       }
 
       // Calculate growth rate
-      const lastMonthUsers = profilesResult.data?.filter(p => {
+      const lastMonthUsers = profilesResult.data?.filter(_p => {
         // Simplified - using total users
         return true;
       }).length || 0;
@@ -340,7 +343,7 @@ export default function AdminDashboardPage() {
         type: 'request' as const,
         description: `Request ${r.request_number} - ${r.status}`,
         timestamp: r.created_at || new Date().toISOString(),
-        user: (r.client as any)?.full_name,
+        user: (r.client as unknown as Record<string, string> | null)?.full_name,
       }));
 
       setRecentActivities(activities);

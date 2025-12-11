@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getUserById } from "@/lib/actions/staff";
 import {
     Dialog,
@@ -19,7 +19,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Separator } from "@/components/ui/separator";
 import {
     Mail,
     Phone,
@@ -116,7 +115,7 @@ export function ViewUserModal({ open, onClose, userId }: ViewUserModalProps) {
     const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState<UserData | null>(null);
 
-    async function fetchUserDetails() {
+    const fetchUserDetails = useCallback(async () => {
         if (!userId) return;
 
         setLoading(true);
@@ -125,13 +124,14 @@ export function ViewUserModal({ open, onClose, userId }: ViewUserModalProps) {
             setUserData(result.data as unknown as UserData);
         }
         setLoading(false);
-    }
+    }, [userId]);
 
     useEffect(() => {
         if (open && userId) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             void fetchUserDetails();
         }
-    }, [open, userId]);
+    }, [open, userId, fetchUserDetails]);
 
     const getInitials = (name: string) => {
         return name
