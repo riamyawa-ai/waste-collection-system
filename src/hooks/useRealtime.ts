@@ -302,8 +302,13 @@ export function useRealtimeSubscription<T>(
  * Hook to check realtime connection status
  */
 export function useRealtimeStatus() {
-    const [isConnected, setIsConnected] = useState(true);
-    const [lastConnected, setLastConnected] = useState<Date | null>(null);
+    // Initialize with actual navigator status to avoid setState in effect
+    const [isConnected, setIsConnected] = useState(() =>
+        typeof navigator !== 'undefined' ? navigator.onLine : true
+    );
+    const [lastConnected, setLastConnected] = useState<Date | null>(() =>
+        typeof navigator !== 'undefined' && navigator.onLine ? new Date() : null
+    );
 
     useEffect(() => {
         const handleOnline = () => {
@@ -317,12 +322,6 @@ export function useRealtimeStatus() {
 
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
-
-        // Initial status
-        setIsConnected(navigator.onLine);
-        if (navigator.onLine) {
-            setLastConnected(new Date());
-        }
 
         return () => {
             window.removeEventListener('online', handleOnline);
