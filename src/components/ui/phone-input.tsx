@@ -1,5 +1,8 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
+// Phone input needs to sync display value with external value prop changes
+
 import { forwardRef, useState, useEffect } from "react";
 import { Phone } from "lucide-react";
 import { Input } from "./input";
@@ -51,13 +54,18 @@ function formatPhoneNumber(value: string): string {
 
 export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
     ({ className, showIcon = true, error, onChange, value = "", ...props }, ref) => {
-        const [displayValue, setDisplayValue] = useState("");
+        // Initialize with formatted value
+        const [displayValue, setDisplayValue] = useState(() =>
+            value ? formatPhoneNumber(value) : ""
+        );
 
+        // Sync displayValue when value prop changes externally
         useEffect(() => {
-            if (value) {
-                setDisplayValue(formatPhoneNumber(value));
+            const formatted = value ? formatPhoneNumber(value) : "";
+            if (formatted !== displayValue) {
+                setDisplayValue(formatted);
             }
-        }, [value]);
+        }, [value, displayValue]);
 
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const inputValue = e.target.value;

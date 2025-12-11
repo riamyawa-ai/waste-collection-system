@@ -157,7 +157,7 @@ export async function signUp(formData: RegisterFormData): Promise<AuthActionResu
     }
 
     const { email, password, firstName, lastName, phone, barangay, address } = validation.data;
-    const fullName = `${firstName} ${lastName}`;
+    const _fullName = `${firstName} ${lastName}`;
 
     const supabase = await createClient();
 

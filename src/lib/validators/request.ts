@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { PANABO_BARANGAYS } from '@/constants/barangays';
-import { PRIORITY_LEVELS, ALL_TIME_SLOTS } from '@/constants/status';
+import { ALL_TIME_SLOTS } from '@/constants/status';
 
 /**
  * Schema for creating a new collection request

@@ -40,7 +40,7 @@ export async function getCollectorDashboardStats() {
     }
 
     // Get today's date for filtering
-    const today = new Date().toISOString().split('T')[0];
+    const _today = new Date().toISOString().split('T')[0];
 
     // Get assigned requests counts
     const { data: requests } = await supabase

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { DASHBOARD_ROUTES, USER_ROLES, type UserRole } from "@/constants";
 
 // Route protection configuration
-const PROTECTED_ROUTES = {
+const _PROTECTED_ROUTES = {
   admin: ["/admin"],
   staff: ["/staff"],
   client: ["/client"],

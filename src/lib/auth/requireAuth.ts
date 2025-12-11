@@ -1,4 +1,4 @@
-import { getCurrentUser, hasRole } from "./helpers";
+import { getCurrentUser } from "./helpers";
 import { redirect } from "next/navigation";
 import { DASHBOARD_ROUTES, type UserRole } from "@/constants";
 

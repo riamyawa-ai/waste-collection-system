@@ -9,6 +9,7 @@
 
 /* eslint-disable react-hooks/refs */
 /* eslint-disable react-hooks/purity */
+/* eslint-disable react-hooks/use-memo */
 
 import { useCallback, useRef, useEffect, useState, DependencyList } from 'react';
 
@@ -143,7 +144,6 @@ export function useStableCallback<T extends (...args: unknown[]) => unknown>(cal
         callbackRef.current = callback;
     }, [callback]);
 
-    // eslint-disable-next-line react-hooks/use-memo
     return useCallback(
         ((...args) => callbackRef.current(...args)) as T,
         []

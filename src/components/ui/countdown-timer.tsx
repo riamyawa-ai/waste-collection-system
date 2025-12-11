@@ -1,5 +1,8 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
+// Timer components legitimately need to call setState in effects for interval-based updates
+
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +42,7 @@ export function CountdownTimer({
         return () => clearInterval(timer);
     }, [timeLeft, isRunning, onComplete]);
 
+    // Reset function exposed for external use
     const reset = useCallback((newSeconds?: number) => {
         setTimeLeft(newSeconds ?? seconds);
         setIsRunning(true);
@@ -135,6 +139,9 @@ export function CountdownTimer({
         </div>
     );
 }
+
+// Export reset function type for consumers
+export type CountdownTimerReset = (newSeconds?: number) => void;
 
 // Simple inline countdown for buttons
 export function InlineCountdown({

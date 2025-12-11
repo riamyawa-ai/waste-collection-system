@@ -18,6 +18,24 @@ declare module 'react-map-gl' {
         originalEvent?: Event;
     }
 
+    export interface MapMouseEvent {
+        lngLat: { lng: number; lat: number };
+        point: { x: number; y: number };
+        originalEvent: MouseEvent;
+        target: MapboxMap;
+        features?: GeoJSON.Feature[];
+    }
+
+    export interface MarkerEvent {
+        lngLat: { lng: number; lat: number };
+        originalEvent: MouseEvent;
+    }
+
+    export interface MarkerDragEvent {
+        lngLat: { lng: number; lat: number };
+        originalEvent: MouseEvent | TouchEvent;
+    }
+
     export interface MapRef {
         getMap(): MapboxMap;
         getCenter(): { lng: number; lat: number };
@@ -43,8 +61,8 @@ declare module 'react-map-gl' {
         bearing?: number;
         style?: React.CSSProperties;
         onMove?: (evt: ViewStateChangeEvent) => void;
-        onClick?: (evt: any) => void;
-        onLoad?: (evt: any) => void;
+        onClick?: (evt: MapMouseEvent) => void;
+        onLoad?: (evt: { target: MapboxMap }) => void;
         attributionControl?: boolean;
         maxBounds?: LngLatBoundsLike;
         children?: React.ReactNode;
@@ -54,18 +72,18 @@ declare module 'react-map-gl' {
         longitude: number;
         latitude: number;
         anchor?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-        onClick?: (evt: any) => void;
+        onClick?: (evt: MarkerEvent) => void;
         draggable?: boolean;
-        onDragStart?: (evt: any) => void;
-        onDrag?: (evt: any) => void;
-        onDragEnd?: (evt: any) => void;
+        onDragStart?: (evt: MarkerDragEvent) => void;
+        onDrag?: (evt: MarkerDragEvent) => void;
+        onDragEnd?: (evt: MarkerDragEvent) => void;
         children?: React.ReactNode;
     }
 
     export interface SourceProps {
         id: string;
         type: 'geojson' | 'vector' | 'raster' | 'image' | 'video';
-        data?: any;
+        data?: GeoJSON.FeatureCollection | GeoJSON.Feature | GeoJSON.Geometry | string;
         url?: string;
         tiles?: string[];
         children?: React.ReactNode;
@@ -75,9 +93,9 @@ declare module 'react-map-gl' {
         id: string;
         type: 'fill' | 'line' | 'symbol' | 'circle' | 'heatmap' | 'fill-extrusion' | 'raster' | 'hillshade' | 'background';
         source?: string;
-        paint?: Record<string, any>;
-        layout?: Record<string, any>;
-        filter?: any[];
+        paint?: Record<string, unknown>;
+        layout?: Record<string, unknown>;
+        filter?: (string | number | boolean | unknown[])[];
         minzoom?: number;
         maxzoom?: number;
     }
