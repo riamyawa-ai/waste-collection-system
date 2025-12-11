@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -64,9 +64,9 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
         if (open && feedbackId) {
             loadFeedback();
         }
-    }, [open, feedbackId]);
+    }, [open, feedbackId, loadFeedback]);
 
-    const loadFeedback = async () => {
+    const loadFeedback = useCallback(async () => {
         setLoading(true);
         try {
             const result = await getFeedbackById(feedbackId);
@@ -79,7 +79,7 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
         } finally {
             setLoading(false);
         }
-    };
+    }, [feedbackId]);
 
     const handleSubmitResponse = async () => {
         if (!response.trim()) {

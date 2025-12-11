@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { getAnnouncementById } from '@/lib/actions/announcement';
 import { format } from 'date-fns';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 
 interface ViewAnnouncementModalProps {
     open: boolean;
@@ -52,13 +53,7 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
     const [loading, setLoading] = useState(true);
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
 
-    useEffect(() => {
-        if (open && announcementId) {
-            loadAnnouncement();
-        }
-    }, [open, announcementId]);
-
-    const loadAnnouncement = async () => {
+    const loadAnnouncement = useCallback(async () => {
         setLoading(true);
         try {
             const result = await getAnnouncementById(announcementId);
@@ -70,7 +65,13 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
         } finally {
             setLoading(false);
         }
-    };
+    }, [announcementId]);
+
+    useEffect(() => {
+        if (open && announcementId) {
+            loadAnnouncement();
+        }
+    }, [open, announcementId, loadAnnouncement]);
 
     const getTypeBadge = (type: string) => {
         const styles: Record<string, string> = {
@@ -153,11 +154,12 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
 
                             {/* Image */}
                             {announcement.image_url && (
-                                <div className="rounded-lg overflow-hidden border border-gray-200">
-                                    <img
+                                <div className="rounded-lg overflow-hidden border border-gray-200 relative h-48 w-full">
+                                    <OptimizedImage
                                         src={announcement.image_url}
                                         alt={announcement.title}
-                                        className="w-full h-48 object-cover"
+                                        fill
+                                        className="object-cover"
                                     />
                                 </div>
                             )}

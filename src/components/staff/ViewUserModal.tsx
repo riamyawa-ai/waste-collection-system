@@ -116,12 +116,6 @@ export function ViewUserModal({ open, onClose, userId }: ViewUserModalProps) {
     const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState<UserData | null>(null);
 
-    useEffect(() => {
-        if (open && userId) {
-            fetchUserDetails();
-        }
-    }, [open, userId]);
-
     async function fetchUserDetails() {
         if (!userId) return;
 
@@ -132,6 +126,12 @@ export function ViewUserModal({ open, onClose, userId }: ViewUserModalProps) {
         }
         setLoading(false);
     }
+
+    useEffect(() => {
+        if (open && userId) {
+            void fetchUserDetails();
+        }
+    }, [open, userId]);
 
     const getInitials = (name: string) => {
         return name

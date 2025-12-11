@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -77,9 +77,9 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
         if (open && paymentId) {
             loadPayment();
         }
-    }, [open, paymentId]);
+    }, [open, paymentId, loadPayment]);
 
-    const loadPayment = async () => {
+    const loadPayment = useCallback(async () => {
         setLoading(true);
         try {
             const result = await getPaymentById(paymentId);
@@ -92,7 +92,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
         } finally {
             setLoading(false);
         }
-    };
+    }, [paymentId]);
 
     const handleVerify = async () => {
         setActionLoading(true);

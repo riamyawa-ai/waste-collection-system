@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getUserStats } from "@/lib/actions/staff";
 import { StatCard } from "@/components/ui";
-import { Users, UserCheck, UserX, UserMinus, Briefcase, Home, Truck } from "lucide-react";
+import { Users, UserCheck, Home, Truck } from "lucide-react";
 
 interface UserStats {
     total: number;

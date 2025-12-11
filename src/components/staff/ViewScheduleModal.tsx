@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -69,9 +69,9 @@ export function ViewScheduleModal({ open, onClose, scheduleId }: ViewScheduleMod
         if (open && scheduleId) {
             loadSchedule();
         }
-    }, [open, scheduleId]);
+    }, [open, scheduleId, loadSchedule]);
 
-    const loadSchedule = async () => {
+    const loadSchedule = useCallback(async () => {
         setLoading(true);
         try {
             const result = await getScheduleById(scheduleId);
@@ -84,7 +84,7 @@ export function ViewScheduleModal({ open, onClose, scheduleId }: ViewScheduleMod
         } finally {
             setLoading(false);
         }
-    };
+    }, [scheduleId]);
 
     const getStatusBadge = (status: string) => {
         const styles: Record<string, string> = {
