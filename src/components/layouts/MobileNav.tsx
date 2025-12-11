@@ -9,7 +9,7 @@ import {
   X,
   LayoutDashboard,
   FileText,
-  Map,
+
   Bell,
   Settings,
   Recycle,

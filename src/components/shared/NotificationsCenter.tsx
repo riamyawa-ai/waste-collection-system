@@ -284,7 +284,7 @@ export function NotificationsCenter({ className, role = "client" }: Notification
                             <BellOff className="h-10 w-10 text-neutral-300 mb-3" />
                             <p className="text-sm text-neutral-500">No notifications</p>
                             <p className="text-xs text-neutral-400 mt-1">
-                                You're all caught up!
+                                You&apos;re all caught up!
                             </p>
                         </div>
                     ) : (

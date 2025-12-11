@@ -38,7 +38,7 @@ import {
     type CreateRequestInput,
 } from '@/lib/validators/request';
 import { createRequest } from '@/lib/actions/requests';
-import { PRIORITY_LEVELS, TIME_SLOTS, ALL_TIME_SLOTS } from '@/constants/status';
+import { PRIORITY_LEVELS, TIME_SLOTS } from '@/constants/status';
 
 interface RequestFormProps {
     defaultValues?: Partial<CreateRequestInput>;
@@ -73,7 +73,7 @@ const PRIORITY_OPTIONS = [
 export function RequestForm({ defaultValues, onSuccess, onCancel }: RequestFormProps) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
-    const [photos, setPhotos] = useState<File[]>([]);
+    const [_photos, setPhotos] = useState<File[]>([]);
 
     // Get tomorrow's date as minimum
     const tomorrow = new Date();

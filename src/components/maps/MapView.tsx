@@ -31,7 +31,7 @@ export default function MapView({
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<mapboxgl.Map | null>(null);
     const markersRef = useRef<mapboxgl.Marker[]>([]);
-    const [currentLocation, setCurrentLocation] = useState<[number, number] | null>(null);
+    const [_currentLocation, setCurrentLocation] = useState<[number, number] | null>(null);
 
     useEffect(() => {
         if (!mapContainer.current || map.current) return;

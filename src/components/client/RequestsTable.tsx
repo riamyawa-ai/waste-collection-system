@@ -11,7 +11,7 @@ import {
     ChevronRight,
     MoreHorizontal,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+// import { cn } from '@/lib/utils'; // Not currently used
 import { StatusBadge } from '@/components/ui/status-badge';
 import { PriorityBadge } from '@/components/ui/priority-badge';
 import { Button } from '@/components/ui/button';

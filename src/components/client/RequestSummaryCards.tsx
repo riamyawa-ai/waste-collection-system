@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { Clock, CheckCircle2, XCircle, Truck, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle2, XCircle, Truck } from 'lucide-react';
 
 interface RequestCounts {
     pending: number;

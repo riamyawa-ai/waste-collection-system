@@ -78,7 +78,7 @@ interface UnifiedProfilePageProps {
     role: "admin" | "staff" | "client" | "collector";
 }
 
-export function UnifiedProfilePage({ role }: UnifiedProfilePageProps) {
+export function UnifiedProfilePage({ role: _role }: UnifiedProfilePageProps) {
     // Profile state
     const [profile, setProfile] = useState<Profile | null>(null);
     const [stats, setStats] = useState<AccountStats | null>(null);
@@ -160,7 +160,7 @@ export function UnifiedProfilePage({ role }: UnifiedProfilePageProps) {
             } else {
                 setSaveMessage({ type: 'error', text: result.error || 'Failed to update profile' });
             }
-        } catch (error) {
+        } catch (_error) {
             setSaveMessage({ type: 'error', text: 'An unexpected error occurred' });
         } finally {
             setIsSaving(false);
@@ -188,7 +188,7 @@ export function UnifiedProfilePage({ role }: UnifiedProfilePageProps) {
             } else {
                 setPasswordMessage({ type: 'error', text: result.error || 'Failed to change password' });
             }
-        } catch (error) {
+        } catch (_error) {
             setPasswordMessage({ type: 'error', text: 'An unexpected error occurred' });
         } finally {
             setIsChangingPassword(false);
@@ -205,7 +205,7 @@ export function UnifiedProfilePage({ role }: UnifiedProfilePageProps) {
             } else {
                 alert(result.error || 'Failed to delete account');
             }
-        } catch (error) {
+        } catch (_error) {
             alert('An unexpected error occurred');
         } finally {
             setIsDeleting(false);
