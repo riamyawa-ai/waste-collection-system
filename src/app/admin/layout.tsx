@@ -15,6 +15,7 @@ export default function AdminLayout({
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
+    const [userRole, setUserRole] = useState<'admin' | 'staff'>('admin');
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -36,11 +37,15 @@ export default function AdminLayout({
                 .eq('id', user.id)
                 .single();
 
-            if (profile?.role !== 'admin') {
+            // Allow both admin and staff to access admin pages
+            // Admin pages include: users, collections, settings, reports, logs
+            if (!profile || !['admin', 'staff'].includes(profile.role)) {
                 router.push('/unauthorized');
                 return;
             }
 
+            // Store the actual user role for sidebar display
+            setUserRole(profile.role as 'admin' | 'staff');
             setIsAuthorized(true);
             setIsLoading(false);
         };
@@ -60,5 +65,5 @@ export default function AdminLayout({
         return null;
     }
 
-    return <DashboardLayout role="admin">{children}</DashboardLayout>;
+    return <DashboardLayout role={userRole}>{children}</DashboardLayout>;
 }

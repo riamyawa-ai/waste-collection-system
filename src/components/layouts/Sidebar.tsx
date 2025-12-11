@@ -51,12 +51,13 @@ const navItemsByRole: Record<string, NavItem[]> = {
   ],
   staff: [
     { label: "Dashboard", href: "/staff/dashboard", icon: LayoutDashboard },
-    { label: "Collections", href: "/staff/collections", icon: FileText },
-    { label: "Manage Users", href: "/staff/users", icon: Users },
-    { label: "Payments", href: "/staff/payments", icon: CreditCard },
-    { label: "Announcements", href: "/staff/announcements", icon: Megaphone },
-    { label: "Feedback", href: "/staff/feedback", icon: MessageSquare },
-    { label: "Schedule", href: "/staff/schedule", icon: Calendar },
+    { label: "Collections", href: "/admin/collections", icon: FileText },
+    { label: "Manage Users", href: "/admin/users", icon: Users },
+    { label: "Payments", href: "/admin/payments", icon: CreditCard },
+    { label: "Announcements", href: "/admin/announcements", icon: Megaphone },
+    { label: "Feedback", href: "/admin/feedback", icon: MessageSquare },
+    { label: "Schedule", href: "/admin/schedule", icon: Calendar },
+    { label: "Profile", href: "/staff/profile", icon: Settings },
   ],
   collector: [
     { label: "Dashboard", href: "/collector/dashboard", icon: LayoutDashboard },
@@ -68,11 +69,14 @@ const navItemsByRole: Record<string, NavItem[]> = {
   ],
   admin: [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { label: "Users", href: "/staff/users", icon: Users },
-    { label: "Collections", href: "/staff/collections", icon: FileText },
+    { label: "Users", href: "/admin/users", icon: Users },
+    { label: "Collections", href: "/admin/collections", icon: FileText },
+    { label: "Payments", href: "/admin/payments", icon: CreditCard },
+    { label: "Announcements", href: "/admin/announcements", icon: Megaphone },
     { label: "Reports", href: "/admin/reports", icon: BarChart3 },
     { label: "System Logs", href: "/admin/logs", icon: Bell },
     { label: "Settings", href: "/admin/settings", icon: Settings },
+    { label: "Profile", href: "/admin/profile", icon: Settings },
   ],
 };
 
