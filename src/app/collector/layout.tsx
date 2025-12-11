@@ -7,7 +7,7 @@ import { Database } from '@/types/database.types';
 import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-export default function AdminLayout({
+export default function CollectorLayout({
     children,
 }: {
     children: React.ReactNode;
@@ -36,7 +36,7 @@ export default function AdminLayout({
                 .eq('id', user.id)
                 .single();
 
-            if (profile?.role !== 'admin') {
+            if (profile?.role !== 'collector') {
                 router.push('/unauthorized');
                 return;
             }
@@ -60,5 +60,5 @@ export default function AdminLayout({
         return null;
     }
 
-    return <DashboardLayout role="admin">{children}</DashboardLayout>;
+    return <DashboardLayout role="collector">{children}</DashboardLayout>;
 }

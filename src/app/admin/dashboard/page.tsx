@@ -221,30 +221,26 @@ export default function AdminDashboardPage() {
           title="Total Users"
           value={stats?.totalUsers || 0}
           icon={Users}
-          trend={`+${stats?.userGrowthRate || 0}% this month`}
-          trendUp={true}
-          variant="primary"
+          trend={{ value: stats?.userGrowthRate || 0, isPositive: true }}
+          description="this month"
         />
         <StatCard
           title="Revenue (All Time)"
           value={`₱${(stats?.totalRevenueAllTime || 0).toLocaleString()}`}
           icon={DollarSign}
           description={`₱${(stats?.revenueThisMonth || 0).toLocaleString()} this month`}
-          variant="success"
         />
         <StatCard
           title="Collections Today"
           value={stats?.totalCollectionsToday || 0}
           icon={Truck}
           description={`${stats?.totalCollectionsThisWeek || 0} this week`}
-          variant="info"
         />
         <StatCard
           title="Active Collectors"
           value={stats?.activeCollectors || 0}
           icon={UserCheck}
           description="Currently on duty"
-          variant="warning"
         />
       </div>
 
@@ -255,27 +251,23 @@ export default function AdminDashboardPage() {
           value={stats?.pendingRequests || 0}
           icon={Clock}
           description="Awaiting review"
-          variant="warning"
         />
         <StatCard
           title="Collections This Month"
           value={stats?.totalCollectionsThisMonth || 0}
           icon={CheckCircle2}
-          variant="success"
         />
         <StatCard
           title="User Growth"
           value={`${stats?.userGrowthRate || 0}%`}
           icon={TrendingUp}
           description="This month"
-          variant="primary"
         />
         <StatCard
           title="System Status"
           value="Online"
           icon={Activity}
           description="All systems operational"
-          variant="success"
         />
       </div>
 
