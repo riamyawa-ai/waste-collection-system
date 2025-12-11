@@ -81,7 +81,7 @@ export function EditUserModal({ open, onClose, onSuccess, user }: EditUserModalP
             } else {
                 toast.error(result.error || "Failed to update user");
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("An error occurred while updating the user");
         } finally {
             setIsLoading(false);
@@ -96,7 +96,7 @@ export function EditUserModal({ open, onClose, onSuccess, user }: EditUserModalP
                 <DialogHeader>
                     <DialogTitle>Edit User</DialogTitle>
                     <DialogDescription>
-                        Update user details for {user.email}. Click save when you're done.
+                        Update user details for {user.email}. Click save when you&apos;re done.
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="grid gap-4 py-4">

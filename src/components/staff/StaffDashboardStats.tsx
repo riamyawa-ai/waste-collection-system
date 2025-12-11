@@ -1,16 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { StatCard, EcoCard, EcoCardContent } from "@/components/ui";
+import { StatCard } from "@/components/ui";
 import {
-    Users,
-    FileText,
     Clock,
-    CheckCircle2,
-    TrendingUp,
     DollarSign,
     Truck,
-    AlertTriangle,
+    Users,
 } from "lucide-react";
 import { getStaffDashboardStats } from "@/lib/actions/staff";
 

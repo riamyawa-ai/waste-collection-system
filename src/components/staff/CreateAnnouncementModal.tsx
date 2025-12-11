@@ -103,7 +103,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
             } else {
                 toast.error(result.error || 'Failed to create announcement');
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('An error occurred');
         } finally {
             setLoading(false);

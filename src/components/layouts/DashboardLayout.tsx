@@ -3,6 +3,7 @@
 import { useState, useEffect, createContext } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
@@ -161,9 +162,11 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 >
                   <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
                     {user?.avatar_url ? (
-                      <img
+                      <Image
                         src={user.avatar_url}
                         alt={user.full_name}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full object-cover"
                       />
                     ) : (

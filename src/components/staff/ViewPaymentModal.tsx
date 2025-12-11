@@ -105,7 +105,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
             } else {
                 toast.error(result.error || 'Failed to verify payment');
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('An error occurred');
         } finally {
             setActionLoading(false);
@@ -123,7 +123,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
             } else {
                 toast.error(result.error || 'Failed to complete payment');
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('An error occurred');
         } finally {
             setActionLoading(false);
@@ -144,7 +144,7 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
             } else {
                 toast.error(result.error || 'Failed to save notes');
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('An error occurred');
         } finally {
             setActionLoading(false);

@@ -38,7 +38,7 @@ export function DeleteUserModal({ open, onClose, onSuccess, user }: DeleteUserMo
             } else {
                 toast.error(result.error || "Failed to delete user");
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("An error occurred");
         } finally {
             setIsLoading(false);

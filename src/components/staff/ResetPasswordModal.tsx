@@ -36,7 +36,7 @@ export function ResetPasswordModal({ open, onClose, user }: ResetPasswordModalPr
             } else {
                 toast.error(result.error || "Failed to reset password");
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("An error occurred");
         } finally {
             setIsLoading(false);

@@ -101,7 +101,7 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
             } else {
                 toast.error(result.error || 'Failed to submit response');
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('An error occurred');
         } finally {
             setSubmitting(false);

@@ -4,14 +4,10 @@ import { useEffect, useState } from "react";
 import { getCollectionStats } from "@/lib/actions/staff";
 import { StatCard } from "@/components/ui";
 import {
-    FileText,
     Clock,
-    CheckCircle2,
-    XCircle,
     Truck,
     CreditCard,
-    Users,
-    AlertTriangle,
+    CheckCircle2,
 } from "lucide-react";
 
 interface CollectionStats {

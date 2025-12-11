@@ -76,7 +76,7 @@ export function RecordPaymentModal({
             } else {
                 toast.error(result.error || "Failed to record payment");
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("An error occurred");
         }
         setLoading(false);

@@ -65,7 +65,8 @@ export function AssignCollectorModal({
     useEffect(() => {
         if (open) {
             fetchCollectors();
-        }, [open]);
+        }
+    }, [open]);
 
     const handleSubmit = async () => {
         if (!request || !selectedCollector) {
