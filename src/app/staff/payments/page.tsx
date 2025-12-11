@@ -104,11 +104,7 @@ export default function PaymentsPage() {
         totalPages: 0,
     });
 
-    useEffect(() => {
-        loadData();
-    }, [statusFilter, pagination.page]);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const [paymentsResult, statsResult, revenueResult] = await Promise.all([
@@ -138,16 +134,20 @@ export default function PaymentsPage() {
             if (revenueResult.success && revenueResult.data) {
                 setRevenueByBarangay(revenueResult.data);
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("Failed to load payments");
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchQuery, statusFilter, pagination.page, pagination.limit]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleRefresh = useCallback(() => {
         loadData();
-    }, [statusFilter, pagination.page]);
+    }, [loadData]);
 
     const handleSearch = () => {
         setPagination((prev) => ({ ...prev, page: 1 }));

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday } from 'date-fns';
-import { Calendar, Clock, MapPin, ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, Truck } from 'lucide-react';
+import { Calendar, Clock, MapPin, ChevronLeft, ChevronRight, CheckCircle2, Truck } from 'lucide-react';
 import { SCHEDULE_STATUS_COLORS, SCHEDULE_STATUS_LABELS } from '@/constants/status';
 
 interface Schedule {
@@ -30,7 +30,7 @@ export default function CollectorSchedulePage() {
     const [schedules, setSchedules] = useState<Schedule[]>([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-    const [isLoading, setIsLoading] = useState(true);
+    const [_isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchSchedules = async () => {
@@ -124,8 +124,8 @@ export default function CollectorSchedulePage() {
                                         key={day.toISOString()}
                                         onClick={() => setSelectedDate(day)}
                                         className={`h-16 p-1 rounded-lg text-left transition-colors ${isToday(day) ? 'bg-green-100 border-2 border-green-500' :
-                                                isSelected ? 'bg-blue-100 border-2 border-blue-500' :
-                                                    hasSchedule ? 'bg-gray-50 hover:bg-gray-100' : 'hover:bg-gray-50'
+                                            isSelected ? 'bg-blue-100 border-2 border-blue-500' :
+                                                hasSchedule ? 'bg-gray-50 hover:bg-gray-100' : 'hover:bg-gray-50'
                                             }`}
                                     >
                                         <div className={`text-sm font-medium ${isToday(day) ? 'text-green-700' : ''}`}>{format(day, 'd')}</div>

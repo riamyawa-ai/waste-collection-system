@@ -117,7 +117,7 @@ export default function FeedbackPage() {
 
             if (pendingResult.success && pendingResult.data) {
                 // Transform the data to match expected interface
-                const transformed = (pendingResult.data as unknown[]).map(item => ({
+                const transformed = (pendingResult.data as Record<string, unknown>[]).map(item => ({
                     ...item,
                     assigned_collector: Array.isArray(item.assigned_collector)
                         ? item.assigned_collector[0] || null
@@ -126,7 +126,7 @@ export default function FeedbackPage() {
                 setPendingFeedback(transformed as PendingFeedbackRequest[]);
             }
             if (historyResult.success && historyResult.data) {
-                const transformed = (historyResult.data as unknown[]).map(item => ({
+                const transformed = (historyResult.data as Record<string, unknown>[]).map(item => ({
                     ...item,
                     request: Array.isArray(item.request) ? item.request[0] || null : item.request,
                     collector: Array.isArray(item.collector) ? item.collector[0] || null : item.collector,

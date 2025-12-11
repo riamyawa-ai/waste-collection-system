@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Clock, CheckCircle2, Truck, TrendingUp } from 'lucide-react';
+import { FileText, Clock, CheckCircle2, Truck } from 'lucide-react';
 import { StatCard } from '@/components/ui';
 
 interface DashboardStatsProps {

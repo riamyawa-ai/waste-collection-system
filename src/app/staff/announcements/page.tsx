@@ -94,11 +94,7 @@ export default function AnnouncementsPage() {
         totalPages: 0,
     });
 
-    useEffect(() => {
-        loadData();
-    }, [typeFilter, statusFilter, pagination.page]);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const [announcementsResult, statsResult] = await Promise.all([
@@ -124,16 +120,20 @@ export default function AnnouncementsPage() {
             if (statsResult.success && statsResult.data) {
                 setStats(statsResult.data);
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("Failed to load announcements");
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchQuery, typeFilter, statusFilter, pagination.page, pagination.limit]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleRefresh = useCallback(() => {
         loadData();
-    }, [typeFilter, statusFilter, pagination.page]);
+    }, [loadData]);
 
     const handleSearch = () => {
         setPagination((prev) => ({ ...prev, page: 1 }));

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/constants";
 
 export function EmailVerificationSuccess() {
-    const searchParams = useSearchParams();
+    const _searchParams = useSearchParams();
     const [countdown, setCountdown] = useState(5);
 
     useEffect(() => {

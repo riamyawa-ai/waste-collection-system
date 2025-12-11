@@ -97,11 +97,7 @@ export default function FeedbackPage() {
         totalPages: 0,
     });
 
-    useEffect(() => {
-        loadData();
-    }, [ratingFilter, statusFilter, pagination.page]);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const [feedbackResult, statsResult, performanceResult] = await Promise.all([
@@ -131,16 +127,20 @@ export default function FeedbackPage() {
             if (performanceResult.success && performanceResult.data) {
                 setCollectors(performanceResult.data);
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("Failed to load feedback");
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchQuery, ratingFilter, statusFilter, pagination.page, pagination.limit]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleRefresh = useCallback(() => {
         loadData();
-    }, [ratingFilter, statusFilter, pagination.page]);
+    }, [loadData]);
 
     const handleSearch = () => {
         setPagination((prev) => ({ ...prev, page: 1 }));

@@ -97,11 +97,7 @@ export default function SchedulesPage() {
         totalPages: 0,
     });
 
-    useEffect(() => {
-        loadData();
-    }, [statusFilter, pagination.page]);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const [schedulesResult, statsResult] = await Promise.all([
@@ -126,16 +122,20 @@ export default function SchedulesPage() {
             if (statsResult.success && statsResult.data) {
                 setStats(statsResult.data);
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("Failed to load schedules");
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchQuery, statusFilter, pagination.page, pagination.limit]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleRefresh = useCallback(() => {
         loadData();
-    }, [statusFilter, pagination.page]);
+    }, [loadData]);
 
     const handleSearch = () => {
         setPagination((prev) => ({ ...prev, page: 1 }));
