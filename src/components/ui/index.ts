@@ -48,3 +48,6 @@ export * from "./barangay-select";
 export * from "./countdown-timer";
 export * from "./rate-limit-warning";
 
+// Performance optimized components
+export * from "./optimized-image";
+export * from "./virtual-list";
