@@ -70,8 +70,6 @@ const navItemsByRole: Record<string, NavItem[]> = {
   admin: [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
-    { label: "Collections", href: "/admin/collections", icon: FileText },
-    { label: "Payments", href: "/admin/payments", icon: CreditCard },
     { label: "Announcements", href: "/admin/announcements", icon: Megaphone },
     { label: "Reports", href: "/admin/reports", icon: BarChart3 },
     { label: "System Logs", href: "/admin/logs", icon: Bell },

@@ -339,7 +339,7 @@ export default function AdminDashboardPage() {
         id: r.id,
         type: 'request' as const,
         description: `Request ${r.request_number} - ${r.status}`,
-        timestamp: r.created_at,
+        timestamp: r.created_at || new Date().toISOString(),
         user: (r.client as any)?.full_name,
       }));
 
@@ -538,30 +538,7 @@ export default function AdminDashboardPage() {
                 <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </Button>
             </Link>
-            <Link href="/admin/collections">
-              <Button variant="outline" className="w-full justify-between group">
-                <span className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Collection Requests
-                </span>
-                {stats?.pendingRequests ? (
-                  <Badge variant="destructive" className="text-xs">
-                    {stats.pendingRequests}
-                  </Badge>
-                ) : (
-                  <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                )}
-              </Button>
-            </Link>
-            <Link href="/admin/payments">
-              <Button variant="outline" className="w-full justify-between group">
-                <span className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4" />
-                  Payment Records
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </Button>
-            </Link>
+
             <Link href="/admin/reports">
               <Button variant="outline" className="w-full justify-between group">
                 <span className="flex items-center gap-2">
