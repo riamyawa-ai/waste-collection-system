@@ -1,58 +1,120 @@
 /**
  * Client-side caching utilities for API responses
- * Provides memory caching with TTL support
+ * Provides memory caching with TTL support, LRU eviction, and stale-while-revalidate
  */
 
 interface CacheEntry<T> {
     data: T;
     timestamp: number;
     ttl: number;
+    lastAccessed: number;
+    staleTime?: number; // For stale-while-revalidate pattern
+}
+
+interface CacheStats {
+    size: number;
+    hits: number;
+    misses: number;
+    hitRate: number;
+    keys: string[];
 }
 
 class MemoryCache {
     private cache = new Map<string, CacheEntry<unknown>>();
     private maxSize: number;
+    private hits = 0;
+    private misses = 0;
 
     constructor(maxSize = 100) {
         this.maxSize = maxSize;
     }
 
     /**
-     * Get value from cache
+     * Get value from cache with LRU tracking
      */
     get<T>(key: string): T | null {
+        const entry = this.cache.get(key) as CacheEntry<T> | undefined;
+
+        if (!entry) {
+            this.misses++;
+            return null;
+        }
+
+        const now = Date.now();
+
+        // Check if expired
+        if (now - entry.timestamp > entry.ttl) {
+            this.cache.delete(key);
+            this.misses++;
+            return null;
+        }
+
+        // Update last accessed time for LRU
+        entry.lastAccessed = now;
+        this.hits++;
+
+        return entry.data;
+    }
+
+    /**
+     * Get stale entry (for stale-while-revalidate pattern)
+     */
+    getStale<T>(key: string): { data: T; isStale: boolean } | null {
         const entry = this.cache.get(key) as CacheEntry<T> | undefined;
 
         if (!entry) {
             return null;
         }
 
-        // Check if expired
-        if (Date.now() - entry.timestamp > entry.ttl) {
+        const now = Date.now();
+        const isStale = now - entry.timestamp > (entry.staleTime || entry.ttl);
+        const isExpired = now - entry.timestamp > entry.ttl;
+
+        if (isExpired) {
             this.cache.delete(key);
             return null;
         }
 
-        return entry.data;
+        entry.lastAccessed = now;
+        return { data: entry.data, isStale };
     }
 
     /**
-     * Set value in cache with TTL
+     * Set value in cache with TTL and LRU eviction
      */
-    set<T>(key: string, data: T, ttlMs: number = 60000): void {
-        // Evict oldest entries if at max size
+    set<T>(key: string, data: T, ttlMs: number = 60000, staleTimeMs?: number): void {
+        // Evict LRU entries if at max size
         if (this.cache.size >= this.maxSize) {
-            const firstKey = this.cache.keys().next().value;
-            if (firstKey) {
-                this.cache.delete(firstKey);
+            this.evictLRU();
+        }
+
+        const now = Date.now();
+        this.cache.set(key, {
+            data,
+            timestamp: now,
+            ttl: ttlMs,
+            lastAccessed: now,
+            staleTime: staleTimeMs,
+        });
+    }
+
+    /**
+     * Evict least recently used entry
+     */
+    private evictLRU(): void {
+        let oldestKey: string | null = null;
+        let oldestTime = Infinity;
+
+        for (const [key, entry] of this.cache.entries()) {
+            if (entry.lastAccessed < oldestTime) {
+                oldestTime = entry.lastAccessed;
+                oldestKey = key;
             }
         }
 
-        this.cache.set(key, {
-            data,
-            timestamp: Date.now(),
-            ttl: ttlMs,
-        });
+        if (oldestKey) {
+            this.cache.delete(oldestKey);
+        }
     }
 
     /**
@@ -66,11 +128,30 @@ class MemoryCache {
      * Delete all keys matching a pattern
      */
     deletePattern(pattern: string): void {
+        const keysToDelete: string[] = [];
         for (const key of this.cache.keys()) {
             if (key.includes(pattern)) {
-                this.cache.delete(key);
+                keysToDelete.push(key);
             }
         }
+        keysToDelete.forEach(key => this.cache.delete(key));
+    }
+
+    /**
+     * Delete expired entries (manual cleanup)
+     */
+    cleanup(): number {
+        const now = Date.now();
+        let removed = 0;
+
+        for (const [key, entry] of this.cache.entries()) {
+            if (now - entry.timestamp > entry.ttl) {
+                this.cache.delete(key);
+                removed++;
+            }
+        }
+
+        return removed;
     }
 
     /**
@@ -78,16 +159,41 @@ class MemoryCache {
      */
     clear(): void {
         this.cache.clear();
+        this.hits = 0;
+        this.misses = 0;
     }
 
     /**
-     * Get cache stats
+     * Get cache stats with hit rate
      */
-    getStats(): { size: number; keys: string[] } {
+    getStats(): CacheStats {
+        const total = this.hits + this.misses;
         return {
             size: this.cache.size,
+            hits: this.hits,
+            misses: this.misses,
+            hitRate: total > 0 ? (this.hits / total) * 100 : 0,
             keys: Array.from(this.cache.keys()),
         };
+    }
+
+    /**
+     * Check if key exists (without affecting stats)
+     */
+    has(key: string): boolean {
+        const entry = this.cache.get(key);
+        if (!entry) return false;
+        return Date.now() - entry.timestamp <= entry.ttl;
+    }
+
+    /**
+     * Get remaining TTL for a key
+     */
+    getTTL(key: string): number | null {
+        const entry = this.cache.get(key);
+        if (!entry) return null;
+        const remaining = entry.ttl - (Date.now() - entry.timestamp);
+        return remaining > 0 ? remaining : null;
     }
 }
 
@@ -96,10 +202,20 @@ export const appCache = new MemoryCache(200);
 
 // Cache TTL presets (in milliseconds)
 export const CACHE_TTL = {
+    INSTANT: 5 * 1000,      // 5 seconds (for rapidly changing data)
     SHORT: 30 * 1000,       // 30 seconds
     MEDIUM: 5 * 60 * 1000,  // 5 minutes  
     LONG: 15 * 60 * 1000,   // 15 minutes
     HOUR: 60 * 60 * 1000,   // 1 hour
+    DAY: 24 * 60 * 60 * 1000, // 24 hours (for static data)
+} as const;
+
+// Stale time presets (for stale-while-revalidate)
+export const STALE_TIME = {
+    INSTANT: 0,
+    SHORT: 10 * 1000,       // 10 seconds
+    MEDIUM: 60 * 1000,      // 1 minute
+    LONG: 5 * 60 * 1000,    // 5 minutes
 } as const;
 
 /**
@@ -123,6 +239,67 @@ export async function withCache<T>(
     appCache.set(key, data, ttl);
 
     return data;
+}
+
+/**
+ * Stale-while-revalidate cache strategy
+ * Returns stale data immediately while fetching fresh data in background
+ */
+export async function withSWR<T>(
+    key: string,
+    fetchFn: () => Promise<T>,
+    options: {
+        ttl?: number;
+        staleTime?: number;
+        onRevalidate?: (data: T) => void;
+    } = {}
+): Promise<T> {
+    const { ttl = CACHE_TTL.MEDIUM, staleTime = STALE_TIME.MEDIUM, onRevalidate } = options;
+
+    const cached = appCache.getStale<T>(key);
+
+    if (cached) {
+        if (cached.isStale) {
+            // Return stale data immediately, revalidate in background
+            fetchFn().then((freshData) => {
+                appCache.set(key, freshData, ttl, staleTime);
+                onRevalidate?.(freshData);
+            }).catch(() => {
+                // Silently fail background revalidation
+            });
+        }
+        return cached.data;
+    }
+
+    // No cache, fetch fresh
+    const data = await fetchFn();
+    appCache.set(key, data, ttl, staleTime);
+    return data;
+}
+
+/**
+ * Prefetch data into cache (for warming)
+ */
+export async function prefetch<T>(
+    key: string,
+    fetchFn: () => Promise<T>,
+    ttl: number = CACHE_TTL.MEDIUM
+): Promise<void> {
+    if (!appCache.has(key)) {
+        const data = await fetchFn();
+        appCache.set(key, data, ttl);
+    }
+}
+
+/**
+ * Batch prefetch multiple cache entries
+ */
+export async function batchPrefetch(
+    entries: Array<{ key: string; fetchFn: () => Promise<unknown>; ttl?: number }>
+): Promise<void> {
+    await Promise.allSettled(
+        entries.map(({ key, fetchFn, ttl }) => prefetch(key, fetchFn, ttl))
+    );
 }
 
 /**
@@ -154,4 +331,9 @@ export const CacheKeys = {
         `schedules:${userId || 'all'}`,
     stats: (type: string, userId?: string) =>
         `stats:${type}:${userId || 'all'}`,
+    collectors: (status?: string) =>
+        `collectors:${status || 'all'}`,
+    barangays: () => 'barangays:list',
+    dashboard: (role: string, userId: string) =>
+        `dashboard:${role}:${userId}`,
 };

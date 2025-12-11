@@ -245,3 +245,213 @@ export function useEventListener<K extends keyof WindowEventMap>(
         };
     }, [eventName, element, options]);
 }
+
+/**
+ * Async state hook - safely updates state after async operations
+ * Prevents "setState on unmounted component" warnings
+ */
+export function useAsyncState<T>(initialValue: T): [
+    T,
+    (value: T | ((prev: T) => T)) => void,
+    boolean
+] {
+    const [state, setState] = useState<T>(initialValue);
+    const [isLoading, setIsLoading] = useState(false);
+    const isMounted = useIsMounted();
+
+    const safeSetState = useCallback((value: T | ((prev: T) => T)) => {
+        if (isMounted()) {
+            setState(value);
+        }
+    }, [isMounted]);
+
+    return [state, safeSetState, isLoading];
+}
+
+/**
+ * Throttled callback hook - limits callback execution rate
+ */
+export function useThrottledCallback<T extends (...args: unknown[]) => void>(
+    callback: T,
+    limit: number,
+    deps: DependencyList = []
+): T {
+    const lastRan = useRef<number>(0);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const lastArgs = useRef<Parameters<T> | null>(null);
+
+    const throttledCallback = useCallback(
+        (...args: Parameters<T>) => {
+            const now = Date.now();
+
+            if (now - lastRan.current >= limit) {
+                callback(...args);
+                lastRan.current = now;
+            } else {
+                // Store args and schedule execution at limit
+                lastArgs.current = args;
+
+                if (!timeoutRef.current) {
+                    timeoutRef.current = setTimeout(() => {
+                        if (lastArgs.current) {
+                            callback(...lastArgs.current);
+                            lastRan.current = Date.now();
+                            lastArgs.current = null;
+                        }
+                        timeoutRef.current = null;
+                    }, limit - (now - lastRan.current));
+                }
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [callback, limit, ...deps]
+    ) as T;
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
+
+    return throttledCallback;
+}
+
+/**
+ * Idle callback hook - executes callback during browser idle time
+ * Useful for non-critical operations like analytics, prefetching
+ */
+export function useIdleCallback(
+    callback: () => void,
+    options: { timeout?: number } = {}
+): void {
+    const { timeout = 1000 } = options;
+    const callbackRef = useRef(callback);
+
+    useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        let handle: number;
+
+        if ('requestIdleCallback' in window) {
+            handle = window.requestIdleCallback(
+                () => callbackRef.current(),
+                { timeout }
+            );
+
+            return () => window.cancelIdleCallback(handle);
+        } else {
+            // Fallback for Safari
+            const timeoutHandle = setTimeout(() => callbackRef.current(), 1);
+            return () => clearTimeout(timeoutHandle);
+        }
+    }, [timeout]);
+}
+
+/**
+ * Network status hook - for connection-aware features
+ */
+export function useNetworkStatus(): {
+    isOnline: boolean;
+    isSlowConnection: boolean;
+    connectionType: string | null;
+} {
+    const [status, setStatus] = useState({
+        isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
+        isSlowConnection: false,
+        connectionType: null as string | null,
+    });
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const updateNetworkStatus = () => {
+            const connection = (navigator as Navigator & {
+                connection?: { effectiveType?: string; saveData?: boolean }
+            }).connection;
+
+            setStatus({
+                isOnline: navigator.onLine,
+                isSlowConnection: connection?.effectiveType === '2g' ||
+                    connection?.effectiveType === 'slow-2g' ||
+                    connection?.saveData === true,
+                connectionType: connection?.effectiveType || null,
+            });
+        };
+
+        updateNetworkStatus();
+
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+
+        const connection = (navigator as Navigator & {
+            connection?: EventTarget
+        }).connection;
+
+        if (connection) {
+            connection.addEventListener('change', updateNetworkStatus);
+        }
+
+        return () => {
+            window.removeEventListener('online', updateNetworkStatus);
+            window.removeEventListener('offline', updateNetworkStatus);
+            if (connection) {
+                connection.removeEventListener('change', updateNetworkStatus);
+            }
+        };
+    }, []);
+
+    return status;
+}
+
+/**
+ * Deferred value hook - defers non-urgent updates
+ * Similar to React 18's useDeferredValue but with control
+ */
+export function useDeferredValue<T>(value: T, delay: number = 300): T {
+    const [deferredValue, setDeferredValue] = useState(value);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setDeferredValue(value);
+        }, delay);
+
+        return () => clearTimeout(timeoutId);
+    }, [value, delay]);
+
+    return deferredValue;
+}
+
+/**
+ * Render count hook - for debugging performance issues
+ */
+export function useRenderCount(componentName?: string): number {
+    const renderCount = useRef(0);
+
+    useEffect(() => {
+        renderCount.current += 1;
+        if (componentName && process.env.NODE_ENV === 'development') {
+            console.log(`${componentName} rendered ${renderCount.current} times`);
+        }
+    });
+
+    return renderCount.current;
+}
+
+/**
+ * Previous render performed check - for optimistic UI
+ */
+export function useIsFirstRender(): boolean {
+    const isFirst = useRef(true);
+
+    useEffect(() => {
+        isFirst.current = false;
+    }, []);
+
+    return isFirst.current;
+}
