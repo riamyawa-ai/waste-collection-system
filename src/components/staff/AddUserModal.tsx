@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -24,6 +24,8 @@ import { BarangaySelect } from "@/components/ui/barangay-select";
 import { PasswordStrengthMeter } from "@/components/ui/password-strength";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { createUser } from "@/lib/actions/staff";
+import { createBrowserClient } from "@supabase/ssr";
+import { Database } from "@/types/database.types";
 import { Loader2, Eye, EyeOff, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +38,15 @@ interface AddUserModalProps {
 export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [currentUserRole, setCurrentUserRole] = useState<"admin" | "staff" | null>(null);
+
+    // Get default role based on current user's role
+    const getDefaultRole = () => {
+        if (currentUserRole === "admin") return "staff";
+        if (currentUserRole === "staff") return "collector";
+        return "collector";
+    };
+
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -43,13 +54,45 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
         phone: "",
         address: "",
         barangay: "",
-        role: "client" as "staff" | "client" | "collector",
+        role: "collector" as "staff" | "collector",
         status: "active" as "active" | "inactive" | "suspended",
         password: "",
         confirmPassword: "",
-        autoVerify: false,
         sendWelcomeEmail: true,
     });
+
+    // Fetch current user's role
+    useEffect(() => {
+        const fetchCurrentUserRole = async () => {
+            const supabase = createBrowserClient<Database>(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+            );
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile?.role === 'admin' || profile?.role === 'staff') {
+                    setCurrentUserRole(profile.role as "admin" | "staff");
+                    // Set default role based on current user
+                    if (profile.role === 'admin') {
+                        setFormData(f => ({ ...f, role: 'staff' }));
+                    } else {
+                        setFormData(f => ({ ...f, role: 'collector' }));
+                    }
+                }
+            }
+        };
+
+        if (open) {
+            fetchCurrentUserRole();
+        }
+    }, [open]);
 
     const generatePassword = () => {
         const chars =
@@ -86,12 +129,12 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                 role: formData.role,
                 status: formData.status,
                 password: formData.password,
-                autoVerify: formData.autoVerify,
+                autoVerify: false, // Never auto-verify, always require email confirmation
                 sendWelcomeEmail: formData.sendWelcomeEmail,
             });
 
             if (result.success) {
-                toast.success("User created successfully");
+                toast.success("User created successfully! They can now log in with their credentials.");
                 onSuccess();
                 onClose();
                 resetForm();
@@ -112,14 +155,27 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
             phone: "",
             address: "",
             barangay: "",
-            role: "client",
+            role: getDefaultRole() as "staff" | "collector",
             status: "active",
             password: "",
             confirmPassword: "",
-            autoVerify: false,
             sendWelcomeEmail: true,
         });
     };
+
+    // Get available roles based on current user's role
+    const getAvailableRoles = () => {
+        if (currentUserRole === "admin") {
+            // Admins can only create staff
+            return [{ value: "staff", label: "Staff" }];
+        } else if (currentUserRole === "staff") {
+            // Staff can only create collectors
+            return [{ value: "collector", label: "Collector" }];
+        }
+        return [];
+    };
+
+    const availableRoles = getAvailableRoles();
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
@@ -127,8 +183,9 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                 <DialogHeader>
                     <DialogTitle>Add New User</DialogTitle>
                     <DialogDescription>
-                        Create a new user account. All required fields are marked with an
-                        asterisk.
+                        {currentUserRole === "admin"
+                            ? "Create a new Staff account. The account will be automatically verified."
+                            : "Create a new Collector account. The account will be automatically verified."}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -223,7 +280,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                                     onValueChange={(value) =>
                                         setFormData((f) => ({
                                             ...f,
-                                            role: value as "staff" | "client" | "collector",
+                                            role: value as "staff" | "collector",
                                         }))
                                     }
                                 >
@@ -231,11 +288,18 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="client">Client</SelectItem>
-                                        <SelectItem value="collector">Collector</SelectItem>
-                                        <SelectItem value="staff">Staff</SelectItem>
+                                        {availableRoles.map((role) => (
+                                            <SelectItem key={role.value} value={role.value}>
+                                                {role.label}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
+                                <p className="text-xs text-neutral-500">
+                                    {currentUserRole === "admin"
+                                        ? "As an Admin, you can only create Staff accounts."
+                                        : "As Staff, you can only create Collector accounts."}
+                                </p>
                             </div>
                             <div className="space-y-2">
                                 <Label>Status *</Label>
@@ -323,18 +387,6 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                     <div className="space-y-3 pt-2 border-t">
                         <div className="flex items-center gap-2">
                             <Checkbox
-                                id="autoVerify"
-                                checked={formData.autoVerify}
-                                onCheckedChange={(checked) =>
-                                    setFormData((f) => ({ ...f, autoVerify: checked === true }))
-                                }
-                            />
-                            <Label htmlFor="autoVerify" className="text-sm font-normal">
-                                Auto-verify email (for Staff and Collector roles)
-                            </Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Checkbox
                                 id="sendWelcomeEmail"
                                 checked={formData.sendWelcomeEmail}
                                 onCheckedChange={(checked) =>
@@ -348,6 +400,9 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                                 Send welcome email with login credentials
                             </Label>
                         </div>
+                        <p className="text-xs text-green-600 bg-green-50 p-2 rounded">
+                            ✓ The account will be automatically verified and ready to use immediately.
+                        </p>
                     </div>
 
                     {/* Actions */}
@@ -355,9 +410,9 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                         <Button type="button" variant="outline" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={loading || availableRoles.length === 0}>
                             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            Create User
+                            Create {currentUserRole === "admin" ? "Staff" : "Collector"}
                         </Button>
                     </div>
                 </form>

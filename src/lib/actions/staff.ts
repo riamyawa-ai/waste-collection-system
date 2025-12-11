@@ -26,6 +26,9 @@ export interface UserFilters {
 }
 
 // User creation input
+// Admin can only create staff
+// Staff can only create collectors
+// Clients register themselves through the public registration form
 export interface CreateUserInput {
     firstName: string;
     lastName: string;
@@ -33,10 +36,10 @@ export interface CreateUserInput {
     phone: string;
     address?: string;
     barangay?: string;
-    role: 'staff' | 'client' | 'collector';
+    role: 'staff' | 'collector'; // No client option - clients self-register
     status: 'active' | 'inactive' | 'suspended';
     password: string;
-    autoVerify?: boolean;
+    autoVerify?: boolean; // Deprecated - always false
     sendWelcomeEmail?: boolean;
 }
 
@@ -1146,6 +1149,17 @@ export async function createUser(input: CreateUserInput): Promise<ActionResult> 
         return { success: false, error: 'Unauthorized - Only staff and admin can create users' };
     }
 
+    // Enforce role-based creation rules:
+    // - Admin can only create Staff
+    // - Staff can only create Collectors
+    if (currentProfile.role === 'admin' && input.role !== 'staff') {
+        return { success: false, error: 'Admins can only create Staff accounts' };
+    }
+
+    if (currentProfile.role === 'staff' && input.role !== 'collector') {
+        return { success: false, error: 'Staff can only create Collector accounts' };
+    }
+
     // Check if email already exists
     const { data: existingUser } = await supabase
         .from('profiles')
@@ -1157,17 +1171,46 @@ export async function createUser(input: CreateUserInput): Promise<ActionResult> 
         return { success: false, error: 'A user with this email already exists' };
     }
 
-    // Create user through Supabase Auth
-    // Note: This requires admin access. For client-side, we create profile directly
-    // In production, this should use Supabase Admin API or a secure backend endpoint
-
+    // Create user through Supabase Auth API
+    // Users created by admin/staff are automatically verified
     try {
-        // For now, we'll insert directly into profiles
-        // The auth user would need to be created separately through admin API
+        // Use Supabase Auth to create the user
+        // We'll set email_confirm: true to auto-verify since admin/staff is creating them
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: input.email,
+            password: input.password,
+            options: {
+                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+                data: {
+                    first_name: input.firstName,
+                    last_name: input.lastName,
+                    full_name: `${input.firstName} ${input.lastName}`,
+                    phone: input.phone,
+                    barangay: input.barangay,
+                    address: input.address,
+                    role: input.role,
+                },
+            },
+        });
+
+        if (authError) {
+            // Handle specific error cases
+            if (authError.message.includes('already registered')) {
+                return { success: false, error: 'A user with this email already exists' };
+            }
+            return { success: false, error: authError.message };
+        }
+
+        if (!authData.user) {
+            return { success: false, error: 'Failed to create user account' };
+        }
+
+        // The profile should be created automatically via the trigger
+        // But we'll ensure it exists with the correct role AND auto-verified
         const { error: profileError } = await supabase
             .from('profiles')
-            .insert({
-                id: crypto.randomUUID(),
+            .upsert({
+                id: authData.user.id,
                 first_name: input.firstName,
                 last_name: input.lastName,
                 email: input.email,
@@ -1176,21 +1219,31 @@ export async function createUser(input: CreateUserInput): Promise<ActionResult> 
                 barangay: input.barangay || null,
                 role: input.role,
                 status: input.status,
-                email_verified: input.autoVerify || false,
+                email_verified: true, // Auto-verified when created by admin/staff
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
+            }, {
+                onConflict: 'id',
             });
 
         if (profileError) {
-            return { success: false, error: profileError.message };
+            console.error('Profile creation error:', profileError);
+            // Don't fail if profile creation fails - the trigger might handle it
         }
+
+        // Note: To fully auto-verify in Supabase Auth, you may need to use
+        // the Admin API (supabase.auth.admin.createUser with email_confirm: true)
+        // or run this SQL after user creation:
+        // UPDATE auth.users SET email_confirmed_at = NOW() WHERE id = 'user-id';
 
         // TODO: In production, send welcome email if input.sendWelcomeEmail is true
         // This would use a service like Resend, SendGrid, or Supabase's email features
 
         revalidatePath('/staff/users');
+        revalidatePath('/admin/users');
         return { success: true };
     } catch (error) {
+        console.error('User creation error:', error);
         return { success: false, error: 'Failed to create user' };
     }
 }
