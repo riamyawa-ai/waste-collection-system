@@ -43,7 +43,7 @@ export function CountdownTimer({
     }, [timeLeft, isRunning, onComplete]);
 
     // Reset function exposed for external use
-    const reset = useCallback((newSeconds?: number) => {
+    const _reset = useCallback((newSeconds?: number) => {
         setTimeLeft(newSeconds ?? seconds);
         setIsRunning(true);
     }, [seconds]);
