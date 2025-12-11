@@ -52,13 +52,20 @@ export default function CollectorRequestsPage() {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const fetchRequests = useCallback(async () => {
-        setIsLoading(true);
         const result = await getAssignedRequests({ limit: 50 });
         if (result.data) setRequests(result.data as unknown as Request[]);
-        setIsLoading(false);
     }, []);
 
-    useEffect(() => { fetchRequests(); }, [fetchRequests]);
+    useEffect(() => {
+        let isMounted = true;
+        const loadData = async () => {
+            setIsLoading(true);
+            await fetchRequests();
+            if (isMounted) setIsLoading(false);
+        };
+        loadData();
+        return () => { isMounted = false; };
+    }, [fetchRequests]);
 
     const handleAccept = async (request: Request) => {
         setIsProcessing(true);

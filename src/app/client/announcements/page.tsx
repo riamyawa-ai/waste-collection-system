@@ -10,15 +10,13 @@ import {
     Calendar as CalendarIcon,
     Filter,
     Search,
-    Bell,
     Clock,
     Pin,
-    CheckCheck,
     RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
     Dialog,

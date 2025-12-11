@@ -134,7 +134,7 @@ export default function PaymentsPage() {
         return () => clearTimeout(timer);
     }, [searchQuery, fetchData]);
 
-    const handlePrintReceipt = (payment: Payment) => {
+    const handlePrintReceipt = (_payment: Payment) => {
         window.print();
     };
 

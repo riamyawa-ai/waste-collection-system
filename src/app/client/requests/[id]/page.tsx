@@ -54,7 +54,7 @@ interface RequestDetail {
 }
 
 export default function RequestDetailPage() {
-    const router = useRouter();
+    const _router = useRouter();
     const params = useParams();
     const requestId = params.id as string;
 
@@ -74,7 +74,7 @@ export default function RequestDetailPage() {
             } else {
                 setError(result.error || 'Request not found');
             }
-        } catch (err) {
+        } catch (_err) {
             setError('Failed to load request details');
         } finally {
             setIsLoading(false);

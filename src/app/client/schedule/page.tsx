@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Calendar, List, History, RefreshCw, Download, Plus } from 'lucide-react';
 
 import { PageHeader } from '@/components/ui';

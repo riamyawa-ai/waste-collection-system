@@ -4,16 +4,14 @@ import { useState, useEffect, useCallback } from "react";
 import {
     Star,
     MessageSquare,
-    Calendar,
     User,
     ThumbsUp,
     Clock,
     RefreshCw,
     Send,
-    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -119,7 +117,7 @@ export default function FeedbackPage() {
 
             if (pendingResult.success && pendingResult.data) {
                 // Transform the data to match expected interface
-                const transformed = (pendingResult.data as any[]).map(item => ({
+                const transformed = (pendingResult.data as unknown[]).map(item => ({
                     ...item,
                     assigned_collector: Array.isArray(item.assigned_collector)
                         ? item.assigned_collector[0] || null
@@ -128,7 +126,7 @@ export default function FeedbackPage() {
                 setPendingFeedback(transformed as PendingFeedbackRequest[]);
             }
             if (historyResult.success && historyResult.data) {
-                const transformed = (historyResult.data as any[]).map(item => ({
+                const transformed = (historyResult.data as unknown[]).map(item => ({
                     ...item,
                     request: Array.isArray(item.request) ? item.request[0] || null : item.request,
                     collector: Array.isArray(item.collector) ? item.collector[0] || null : item.collector,
@@ -172,7 +170,7 @@ export default function FeedbackPage() {
             } else {
                 setSubmitMessage({ type: 'error', text: result.error || 'Failed to submit feedback' });
             }
-        } catch (error) {
+        } catch (_error) {
             setSubmitMessage({ type: 'error', text: 'An unexpected error occurred' });
         } finally {
             setIsSubmitting(false);

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
-import { Star, MessageSquare, TrendingUp, Calendar, User } from 'lucide-react';
+import { Star, MessageSquare, User } from 'lucide-react';
 
 interface Feedback {
     id: string;
@@ -164,7 +164,7 @@ export default function CollectorFeedbackPage() {
                                             </div>
                                         </div>
                                         {feedback.comments && (
-                                            <p className="text-gray-600 text-sm bg-white p-3 rounded border">"{feedback.comments}"</p>
+                                            <p className="text-gray-600 text-sm bg-white p-3 rounded border">&ldquo;{feedback.comments}&rdquo;</p>
                                         )}
                                     </div>
                                 ))}

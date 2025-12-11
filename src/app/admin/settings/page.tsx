@@ -13,16 +13,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
-    Settings,
     Building,
     Mail,
     Shield,
     Clock,
-    Globe,
-    Bell,
     Save,
     RefreshCw,
-    Lock,
     Key,
     AlertTriangle
 } from 'lucide-react';

@@ -8,7 +8,6 @@ import { StatCard } from '@/components/ui/stat-card';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { clockIn, clockOut, getCollectorDashboardStats, getAssignedRequests } from '@/lib/actions/collector';
 import { toast } from 'sonner';
@@ -127,16 +126,26 @@ export default function CollectorDashboardPage() {
         totalDurationToday: totalDuration,
       });
     }
-
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    fetchData();
+    let isMounted = true;
+
+    const loadData = async () => {
+      await fetchData();
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
 
     // Refresh every minute for duration updates
     const interval = setInterval(fetchData, 60000);
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [fetchData]);
 
   const handleClockIn = async () => {
@@ -289,7 +298,7 @@ export default function CollectorDashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Timer className="h-5 w-5 text-green-600" />
-              Today's Shift
+              Today&apos;s Shift
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
