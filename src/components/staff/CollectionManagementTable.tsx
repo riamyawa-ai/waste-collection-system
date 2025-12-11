@@ -117,7 +117,7 @@ export function CollectionManagementTable({
     }, [filters]);
 
     useEffect(() => {
-        // Use void to handle the promise and avoid setState synchronously warning
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching data on filters change is a valid pattern
         void fetchRequests();
     }, [fetchRequests]);
 

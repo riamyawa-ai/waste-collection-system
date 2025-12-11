@@ -64,7 +64,7 @@ export function AssignCollectorModal({
 
     useEffect(() => {
         if (open) {
-            // Use void to handle the promise and avoid setState synchronously warning
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching data when modal opens is a valid pattern
             void fetchCollectors();
         }
     }, [open, fetchCollectors]);
