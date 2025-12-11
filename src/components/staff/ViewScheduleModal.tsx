@@ -65,12 +65,6 @@ export function ViewScheduleModal({ open, onClose, scheduleId }: ViewScheduleMod
     const [schedule, setSchedule] = useState<Schedule | null>(null);
     const [stops, setStops] = useState<Stop[]>([]);
 
-    useEffect(() => {
-        if (open && scheduleId) {
-            loadSchedule();
-        }
-    }, [open, scheduleId, loadSchedule]);
-
     const loadSchedule = useCallback(async () => {
         setLoading(true);
         try {
@@ -85,6 +79,12 @@ export function ViewScheduleModal({ open, onClose, scheduleId }: ViewScheduleMod
             setLoading(false);
         }
     }, [scheduleId]);
+
+    useEffect(() => {
+        if (open && scheduleId) {
+            loadSchedule();
+        }
+    }, [open, scheduleId, loadSchedule]);
 
     const getStatusBadge = (status: string) => {
         const styles: Record<string, string> = {

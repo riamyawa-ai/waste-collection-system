@@ -60,12 +60,6 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
     const [feedback, setFeedback] = useState<Feedback | null>(null);
     const [response, setResponse] = useState('');
 
-    useEffect(() => {
-        if (open && feedbackId) {
-            loadFeedback();
-        }
-    }, [open, feedbackId, loadFeedback]);
-
     const loadFeedback = useCallback(async () => {
         setLoading(true);
         try {
@@ -80,6 +74,12 @@ export function ViewFeedbackModal({ open, onClose, feedbackId, onUpdate }: ViewF
             setLoading(false);
         }
     }, [feedbackId]);
+
+    useEffect(() => {
+        if (open && feedbackId) {
+            loadFeedback();
+        }
+    }, [open, feedbackId, loadFeedback]);
 
     const handleSubmitResponse = async () => {
         if (!response.trim()) {

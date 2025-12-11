@@ -73,12 +73,6 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
     const [notes, setNotes] = useState('');
     const [isEditing, setIsEditing] = useState(false);
 
-    useEffect(() => {
-        if (open && paymentId) {
-            loadPayment();
-        }
-    }, [open, paymentId, loadPayment]);
-
     const loadPayment = useCallback(async () => {
         setLoading(true);
         try {
@@ -93,6 +87,12 @@ export function ViewPaymentModal({ open, onClose, paymentId, onUpdate }: ViewPay
             setLoading(false);
         }
     }, [paymentId]);
+
+    useEffect(() => {
+        if (open && paymentId) {
+            loadPayment();
+        }
+    }, [open, paymentId, loadPayment]);
 
     const handleVerify = async () => {
         setActionLoading(true);
