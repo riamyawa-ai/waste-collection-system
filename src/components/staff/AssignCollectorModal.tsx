@@ -65,9 +65,7 @@ export function AssignCollectorModal({
     useEffect(() => {
         if (open) {
             fetchCollectors();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open]);
+        }, [open]);
 
     const handleSubmit = async () => {
         if (!request || !selectedCollector) {
