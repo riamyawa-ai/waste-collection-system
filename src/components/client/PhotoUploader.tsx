@@ -28,7 +28,7 @@ export function PhotoUploader({
     const [uploadError, setUploadError] = useState<string | null>(null);
 
     const onDrop = useCallback(
-        (acceptedFiles: File[], rejectedFiles: unknown[]) => {
+        (acceptedFiles: File[], _rejectedFiles: unknown[]) => {
             setUploadError(null);
 
             // Check if adding files would exceed max

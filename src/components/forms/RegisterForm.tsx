@@ -46,6 +46,7 @@ export function RegisterForm() {
         },
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form's watch() is expected to not be memoizable
     const password = watch("password");
 
     const onSubmit = (data: RegisterFormData) => {

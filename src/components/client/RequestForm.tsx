@@ -101,7 +101,9 @@ export function RequestForm({ defaultValues, onSuccess, onCancel }: RequestFormP
         },
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form's watch() is expected to not be memoizable
     const selectedPriority = watch('priority');
+    // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form's watch() is expected to not be memoizable
     const specialInstructions = watch('special_instructions') || '';
 
     const onSubmit = (data: CreateRequestInput) => {

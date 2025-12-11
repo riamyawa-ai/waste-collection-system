@@ -124,7 +124,9 @@ export function EditRequestModal({
         },
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form's watch() is expected to not be memoizable
     const selectedPriority = watch('priority');
+    // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form's watch() is expected to not be memoizable
     const specialInstructions = watch('special_instructions') || '';
 
     // Reset form when request changes or modal opens

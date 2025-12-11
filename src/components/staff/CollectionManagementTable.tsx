@@ -117,7 +117,8 @@ export function CollectionManagementTable({
     }, [filters]);
 
     useEffect(() => {
-        fetchRequests();
+        // Use void to handle the promise and avoid setState synchronously warning
+        void fetchRequests();
     }, [fetchRequests]);
 
     const getStatusBadgeClasses = (status: string) => {

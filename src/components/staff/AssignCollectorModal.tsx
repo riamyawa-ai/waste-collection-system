@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
     Dialog,
     DialogContent,
@@ -53,20 +53,21 @@ export function AssignCollectorModal({
     const [selectedCollector, setSelectedCollector] = useState<string>("");
     const [instructions, setInstructions] = useState("");
 
-    const fetchCollectors = async () => {
+    const fetchCollectors = useCallback(async () => {
         setLoading(true);
         const result = await getAvailableCollectors();
         if (result.success && result.data) {
             setCollectors(result.data);
         }
         setLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
         if (open) {
-            fetchCollectors();
+            // Use void to handle the promise and avoid setState synchronously warning
+            void fetchCollectors();
         }
-    }, [open]);
+    }, [open, fetchCollectors]);
 
     const handleSubmit = async () => {
         if (!request || !selectedCollector) {
