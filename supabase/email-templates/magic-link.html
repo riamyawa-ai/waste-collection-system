@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Link - EcoCollect</title>
+</head>
+
+<body
+    style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0fdf4; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+        style="background-color: #f0fdf4;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+                    style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); overflow: hidden;">
+
+                    <!-- Header with Logo -->
+                    <tr>
+                        <td
+                            style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 32px 40px; text-align: center;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <div
+                                            style="display: inline-block; width: 60px; height: 60px; background-color: rgba(255, 255, 255, 0.2); border-radius: 12px; margin-bottom: 16px; line-height: 60px;">
+                                            <span style="font-size: 32px;">♻️</span>
+                                        </div>
+                                        <h1
+                                            style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">
+                                            EcoCollect
+                                        </h1>
+                                        <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 14px;">
+                                            Waste Collection Management System
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Main Content -->
+                    <tr>
+                        <td style="padding: 40px;">
+                            <!-- Icon -->
+                            <div style="text-align: center; margin-bottom: 24px;">
+                                <div
+                                    style="display: inline-block; width: 80px; height: 80px; background-color: #dbeafe; border-radius: 50%; line-height: 80px;">
+                                    <span style="font-size: 40px;">🪄</span>
+                                </div>
+                            </div>
+
+                            <!-- Heading -->
+                            <h2
+                                style="margin: 0 0 16px 0; color: #166534; font-size: 28px; font-weight: 700; text-align: center; letter-spacing: -0.5px;">
+                                Sign In to EcoCollect
+                            </h2>
+
+                            <!-- Description -->
+                            <p style="margin: 0 0 24px 0; color: #4b5563; font-size: 16px; text-align: center;">
+                                Click the magic link below to securely sign in to your EcoCollect account. No password
+                                needed!
+                            </p>
+
+                            <!-- CTA Button -->
+                            <div style="text-align: center; margin: 32px 0;">
+                                <a href="{{ .ConfirmationURL }}"
+                                    style="display: inline-block; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 14px 0 rgba(22, 163, 74, 0.4);">
+                                    ✨ Sign In Now
+                                </a>
+                            </div>
+
+                            <!-- Alternative Link -->
+                            <p style="margin: 24px 0 0 0; color: #6b7280; font-size: 14px; text-align: center;">
+                                If the button doesn't work, copy and paste this link into your browser:
+                            </p>
+                            <p style="margin: 8px 0 0 0; text-align: center; word-break: break-all;">
+                                <a href="{{ .ConfirmationURL }}"
+                                    style="color: #16a34a; font-size: 12px; text-decoration: underline;">
+                                    {{ .ConfirmationURL }}
+                                </a>
+                            </p>
+
+                            <!-- Divider -->
+                            <hr style="margin: 32px 0; border: none; border-top: 1px solid #e5e7eb;">
+
+                            <!-- Security Notice -->
+                            <div
+                                style="background-color: #dbeafe; border-radius: 8px; padding: 16px; border-left: 4px solid #3b82f6;">
+                                <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                                    <strong>ℹ️ Note:</strong> This magic link will expire in 1 hour for security
+                                    reasons. After that, you'll need to request a new one.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 12px;">
+                                            This email was sent by EcoCollect Waste Collection System
+                                        </p>
+                                        <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 12px;">
+                                            Panabo City, Davao del Norte, Philippines
+                                        </p>
+                                        <p style="margin: 16px 0 0 0; color: #9ca3af; font-size: 11px;">
+                                            If you didn't request this sign-in link, you can safely ignore this email.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                </table>
+
+                <!-- Bottom Links -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+                    style="max-width: 600px; margin: 24px auto 0;">
+                    <tr>
+                        <td style="text-align: center;">
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                                © 2025 EcoCollect. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>
