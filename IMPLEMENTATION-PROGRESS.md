@@ -21,8 +21,9 @@
 
 ## Collector Features
 1. ✅ Add completed requests table (added "Completed" tab to collector requests page)
-2. ⬜ Match calendar design with client's calendar
+2. ✅ Match calendar design with client's calendar (created ScheduleCalendar component matching CollectionCalendar design)
 3. ✅ Add attendance history view (created /collector/attendance page)
+4. ✅ Fix schedule display issue (changed scheduled_date to start_date to match database schema)
 
 ## Staff Features
 1. ✅ Dashboard overview (requests, collectors, payments)
@@ -30,6 +31,7 @@
 3. ✅ Payment verification
 4. ✅ Redesign create schedule modal (implemented side-by-side layout with map)
    - ✅ Fixed map display issue (container height fix)
+   - ✅ Added map style switcher (Streets/Satellite toggle)
 
 ## Staff Fixes
 1. ✅ Fix "Revenue by Barangay" not displaying data (updated to include verified + completed payments)
@@ -78,6 +80,7 @@
 - **Attendance table**: Has `total_duration` as computed INTERVAL column ✅
 - **All RLS policies**: Use `get_user_role()` SECURITY DEFINER function to prevent recursion ✅
 - **Announcements table**: Has `enable_maintenance_mode` boolean column ✅
+- **Collection Schedules table**: Uses `start_date` (not `scheduled_date`) ✅
 
 ### Sessions Completed
 - Session 1: Fixed CreateScheduleModal UUID error
@@ -85,4 +88,6 @@
 - Session 3: Added Completed requests tab for collectors, Updated filter logic for proper status handling, SQL verification
 - Session 4: Fixed client feedback collector name display, Implemented dynamic welcome messages for all dashboards, Made admin settings operational with database storage, Implemented admin reports with PDF/Excel/CSV export functionality
 - Session 5: Created Admin Announcements page, Integrated maintenance mode toggle with announcement creation (maintenance type can enable system-wide maintenance), Fixed map display in CreateScheduleModal (container height issue)
+- Session 6: Fixed collector schedule display by changing scheduled_date to start_date, Created ScheduleCalendar component matching client's CollectionCalendar design, Added map style switcher to MapboxRouteEditor, Created ViewScheduleModal for collectors with map integration
+
 
