@@ -8,13 +8,12 @@
 ---
 
 ## System-Wide Features
-1. ✅ Notification bell → redirects to notifications page (pages exist for all roles: client/collector/staff/admin)
-2. ✅ "Welcome" message for new users (first login) instead of "Welcome Back!" (dynamic welcome on client/collector/admin dashboards)
-3. ⬜ System maintenance mode alert (block selected user types from logging in)
-4. ⬜ Announcement page for admins & staff (with photos + effective and expiry timestamps)
-5. ⬜ Cross-role notifications (collectors get ratings, clients get request updates, etc.)
-6. ✅ Revenue cards (admin/staff) → only show completed requests data (fixed getRevenueByBarangay)
-7. ⬜ Consistent modal designs across all users
+1. ⬜ Notifications & Announcements (Partially done: DB tables exist, need UI pages)
+   - ✅ Notification bell in sidebar
+   - ⬜ Cross-role notifications (logic needed)
+   - ⬜ Announcement page for admins & staff
+2. ✅ System maintenance mode alert - implemented with admin settings toggle and global alert
+3. ⬜ Consistent modal designs (confirmation, success states)
 
 ## Client Fixes
 1. ✅ Fix: Collector name not displaying in feedback history (removed is_anonymous check, collector always shown)
@@ -27,7 +26,7 @@
 ## Staff Fixes
 1. ⬜ Redesign create schedule modal (two-section layout: inputs left, map right)
 2. ✅ Fix "Revenue by Barangay" not displaying data (updated to include verified + completed payments)
-3. 🟡 Fix client column showing "unknown" (backend is correct, issue is likely data/RLS-related)
+3. ✅ Fix client column showing "unknown" (Fixed RLS policy for profiles access)
 4. ✅ Fix Feedback page: rating stars + comments not displaying (fixed field names: overall_rating, comments)
 5. ✅ Fix UUID error when creating a schedule (convert 'unassigned'/'none' to undefined)
 
