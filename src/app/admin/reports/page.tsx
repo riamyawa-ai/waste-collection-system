@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 import {
     FileText,
     Download,
@@ -20,19 +21,37 @@ import {
     TrendingUp,
     Clock,
     FileSpreadsheet,
-    File
+    File,
+    Loader2
 } from 'lucide-react';
+import {
+    generateCollectionReport,
+    generatePaymentReport,
+    generateAttendanceReport,
+    generateRequestReport,
+    type ReportData
+} from '@/lib/actions/reports';
+import { generatePDF, generateCSV, generateExcel } from '@/lib/utils/reportGenerator';
 
 type ReportType = 'collections' | 'payments' | 'attendance' | 'requests';
 type Period = 'today' | 'week' | 'month' | 'quarter' | 'year' | 'custom';
 type ExportFormat = 'pdf' | 'excel' | 'csv';
+
+interface GeneratedReport {
+    id: string;
+    type: ReportType;
+    period: Period;
+    generatedAt: Date;
+    status: 'ready' | 'generating';
+    data?: ReportData;
+}
 
 interface ReportCardProps {
     title: string;
     description: string;
     icon: React.ElementType;
     type: ReportType;
-    onGenerate: (type: ReportType, period: Period) => void;
+    onGenerate: (type: ReportType, period: Period) => Promise<void>;
 }
 
 function ReportCard({ title, description, icon: Icon, type, onGenerate }: ReportCardProps) {
@@ -41,8 +60,11 @@ function ReportCard({ title, description, icon: Icon, type, onGenerate }: Report
 
     const handleGenerate = async () => {
         setIsGenerating(true);
-        await onGenerate(type, selectedPeriod);
-        setTimeout(() => setIsGenerating(false), 1500);
+        try {
+            await onGenerate(type, selectedPeriod);
+        } finally {
+            setIsGenerating(false);
+        }
     };
 
     return (
@@ -83,7 +105,7 @@ function ReportCard({ title, description, icon: Icon, type, onGenerate }: Report
                     >
                         {isGenerating ? (
                             <>
-                                <Clock className="h-4 w-4 mr-2 animate-spin" />
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                 Generating...
                             </>
                         ) : (
@@ -100,28 +122,68 @@ function ReportCard({ title, description, icon: Icon, type, onGenerate }: Report
 }
 
 export default function ReportsPage() {
-    const [generatedReports, setGeneratedReports] = useState<Array<{
-        id: string;
-        type: ReportType;
-        period: Period;
-        generatedAt: Date;
-        status: 'ready' | 'generating';
-    }>>([]);
+    const [generatedReports, setGeneratedReports] = useState<GeneratedReport[]>([]);
 
     const handleGenerateReport = async (type: ReportType, period: Period) => {
-        const newReport = {
-            id: `${type}-${period}-${Date.now()}`,
-            type,
-            period,
-            generatedAt: new Date(),
-            status: 'ready' as const,
-        };
-        setGeneratedReports(prev => [newReport, ...prev]);
+        let result;
+
+        // Call appropriate report generation function
+        switch (type) {
+            case 'collections':
+                result = await generateCollectionReport(period);
+                break;
+            case 'payments':
+                result = await generatePaymentReport(period);
+                break;
+            case 'attendance':
+                result = await generateAttendanceReport(period);
+                break;
+            case 'requests':
+                result = await generateRequestReport(period);
+                break;
+        }
+
+        if (result?.success && result.data) {
+            const newReport: GeneratedReport = {
+                id: `${type}-${period}-${Date.now()}`,
+                type,
+                period,
+                generatedAt: new Date(),
+                status: 'ready',
+                data: result.data,
+            };
+            setGeneratedReports(prev => [newReport, ...prev]);
+            toast.success(`${getReportTypeLabel(type)} generated successfully`);
+        } else {
+            toast.error(result?.error || 'Failed to generate report');
+        }
     };
 
-    const handleExport = (format: ExportFormat) => {
-        // TODO: Implement actual export
-        console.log(`Exporting as ${format}`);
+    const handleExport = (report: GeneratedReport, format: ExportFormat) => {
+        if (!report.data) {
+            toast.error('No report data available');
+            return;
+        }
+
+        try {
+            switch (format) {
+                case 'pdf':
+                    generatePDF(report.data);
+                    toast.success('PDF opened in new window for printing');
+                    break;
+                case 'excel':
+                    generateExcel(report.data);
+                    toast.success('Excel file downloaded');
+                    break;
+                case 'csv':
+                    generateCSV(report.data);
+                    toast.success('CSV file downloaded');
+                    break;
+            }
+        } catch (error) {
+            console.error('Export error:', error);
+            toast.error('Failed to export report');
+        }
     };
 
     const getReportTypeLabel = (type: ReportType) => {
@@ -272,19 +334,19 @@ export default function ReportsPage() {
                                                 </Badge>
                                                 {report.status === 'ready' && (
                                                     <>
-                                                        <Button variant="outline" size="sm" onClick={() => handleExport('pdf')}>
+                                                        <Button variant="outline" size="sm" onClick={() => handleExport(report, 'pdf')}>
                                                             <File className="h-4 w-4 mr-1" />
                                                             PDF
                                                         </Button>
-                                                        <Button variant="outline" size="sm" onClick={() => handleExport('excel')}>
+                                                        <Button variant="outline" size="sm" onClick={() => handleExport(report, 'excel')}>
                                                             <FileSpreadsheet className="h-4 w-4 mr-1" />
                                                             Excel
                                                         </Button>
-                                                        <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
+                                                        <Button variant="outline" size="sm" onClick={() => handleExport(report, 'csv')}>
                                                             <Download className="h-4 w-4 mr-1" />
                                                             CSV
                                                         </Button>
-                                                        <Button variant="outline" size="sm">
+                                                        <Button variant="outline" size="sm" onClick={() => handleExport(report, 'pdf')} title="Print">
                                                             <Printer className="h-4 w-4" />
                                                         </Button>
                                                     </>
