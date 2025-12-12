@@ -4,10 +4,10 @@ import { defineConfig, devices } from '@playwright/test';
  * Playwright E2E Test Configuration
  * 
  * Configured for:
- * - Single worker execution (prevents multiple browser instances)
- * - Sequential test execution (batch mode)
- * - Chromium-only for faster execution
- * - Mobile viewport testing with shared browser
+ * - 3 parallel workers for faster execution
+ * - Parallel test execution within files
+ * - Chromium and mobile Chrome testing
+ * - Trace, screenshot, and video on failure
  * 
  * @see https://playwright.dev/docs/test-configuration
  */
@@ -15,8 +15,8 @@ export default defineConfig({
   // Test directory
   testDir: './e2e',
 
-  // Run tests in files SEQUENTIALLY (one after another)
-  fullyParallel: false,
+  // Run tests in parallel for faster execution
+  fullyParallel: true,
 
   // Fail the build on CI if you accidentally left test.only in the source code
   forbidOnly: !!process.env.CI,
@@ -24,8 +24,8 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
 
-  // Use SINGLE WORKER to prevent opening multiple browsers
-  workers: 1,
+  // Use 3 workers for parallel test execution (adjust based on your machine)
+  workers: process.env.CI ? 2 : 3,
 
   // Reporter configuration
   reporter: [
