@@ -158,7 +158,7 @@ test.describe('Mobile Responsiveness', () => {
         }
     });
 
-    test('should handle orientation change gracefully', async ({ page, context }) => {
+    test('should handle orientation change gracefully', async ({ page }) => {
         // Start in portrait
         await page.setViewportSize({ width: 393, height: 851 });
         await page.goto(routes.home);

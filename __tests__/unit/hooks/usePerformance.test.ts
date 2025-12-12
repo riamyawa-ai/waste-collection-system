@@ -25,13 +25,18 @@ function useDebounce<T>(value: T, delay: number): T {
 
 /**
  * usePrevious - Returns the previous value
+ * Uses state-based approach to avoid accessing ref during render
  */
 function usePrevious<T>(value: T): T | undefined {
-    const ref = React.useRef<T>();
-    React.useEffect(() => {
-        ref.current = value;
-    }, [value]);
-    return ref.current;
+    const [current, setCurrent] = React.useState<T>(value);
+    const [previous, setPrevious] = React.useState<T | undefined>(undefined);
+
+    if (current !== value) {
+        setPrevious(current);
+        setCurrent(value);
+    }
+
+    return previous;
 }
 
 /**
