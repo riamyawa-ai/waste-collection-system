@@ -89,7 +89,7 @@ describe('Auth Validators', () => {
             const result = emailSchema.safeParse('invalid-email');
             expect(result.success).toBe(false);
             if (!result.success) {
-                expect(result.error.errors[0].message).toBe('Invalid email format');
+                expect(result.error.issues[0].message).toBe('Invalid email format');
             }
         });
     });
@@ -175,7 +175,7 @@ describe('Auth Validators', () => {
             const result = passwordSchema.safeParse('Pass1!');
             expect(result.success).toBe(false);
             if (!result.success) {
-                expect(result.error.errors[0].message).toBe('Password must be at least 8 characters');
+                expect(result.error.issues[0].message).toBe('Password must be at least 8 characters');
             }
         });
 
@@ -215,7 +215,7 @@ describe('Auth Validators', () => {
             });
             expect(result.success).toBe(false);
             if (!result.success) {
-                const confirmError = result.error.errors.find(e => e.path.includes('confirmPassword'));
+                const confirmError = result.error.issues.find(e => e.path.includes('confirmPassword'));
                 expect(confirmError?.message).toBe('Passwords do not match');
             }
         });
@@ -278,7 +278,7 @@ describe('Auth Validators', () => {
             });
             expect(result.success).toBe(false);
             if (!result.success) {
-                expect(result.error.errors[0].message).toBe('Password is required');
+                expect(result.error.issues[0].message).toBe('Password is required');
             }
         });
 

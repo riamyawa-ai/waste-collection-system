@@ -205,7 +205,7 @@ test.describe('Mobile Responsiveness', () => {
 });
 
 test.describe('Mobile - Touch Interactions', () => {
-    test.use({ ...devices['Pixel 5'] });
+    // Note: Uses Pixel 5 configuration from top-level test.use()
 
     test('should handle tap on buttons', async ({ page }) => {
         await page.goto(routes.login);
