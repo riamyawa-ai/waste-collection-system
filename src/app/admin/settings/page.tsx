@@ -134,7 +134,7 @@ export default function SystemSettingsPage() {
                 </div>
             ) : (
                 <Tabs defaultValue="general" className="space-y-6">
-                    <TabsList className="grid w-full max-w-2xl grid-cols-4">
+                    <TabsList className="grid w-full max-w-3xl grid-cols-5">
                         <TabsTrigger value="general" className="flex items-center gap-2">
                             <Building className="h-4 w-4" />
                             General
@@ -150,6 +150,10 @@ export default function SystemSettingsPage() {
                         <TabsTrigger value="email" className="flex items-center gap-2">
                             <Mail className="h-4 w-4" />
                             Email
+                        </TabsTrigger>
+                        <TabsTrigger value="maintenance" className="flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4" />
+                            Maintenance
                         </TabsTrigger>
                     </TabsList>
 
@@ -492,6 +496,91 @@ export default function SystemSettingsPage() {
                                         Test Connection
                                     </Button>
                                     <Button onClick={() => handleSave('email')} disabled={isSaving}>
+                                        <Save className="h-4 w-4 mr-2" />
+                                        {isSaving ? 'Saving...' : 'Save Changes'}
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    {/* Maintenance Mode Settings */}
+                    <TabsContent value="maintenance">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                                    Maintenance Mode
+                                </CardTitle>
+                                <CardDescription>
+                                    Enable maintenance mode to temporarily restrict access to the system.
+                                    Only users with allowed roles can log in during maintenance.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="flex items-center justify-between p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                    <div className="flex items-center gap-3">
+                                        <AlertTriangle className="h-6 w-6 text-amber-600" />
+                                        <div>
+                                            <Label className="text-base font-medium">Maintenance Mode</Label>
+                                            <p className="text-sm text-gray-500">
+                                                When enabled, users will see a maintenance banner and restricted roles cannot log in.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Switch
+                                        id="maintenanceMode"
+                                        checked={false}
+                                        onCheckedChange={async (checked) => {
+                                            const { toggleMaintenanceMode } = await import('@/lib/actions/settings');
+                                            const result = await toggleMaintenanceMode(checked);
+                                            if (result.success) {
+                                                toast.success(`Maintenance mode ${checked ? 'enabled' : 'disabled'}`);
+                                            } else {
+                                                toast.error(result.error || 'Failed to update maintenance mode');
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="maintenanceMessage">Maintenance Message</Label>
+                                    <Textarea
+                                        id="maintenanceMessage"
+                                        placeholder="System is under maintenance. Please try again later."
+                                        rows={3}
+                                        className="resize-none"
+                                    />
+                                    <p className="text-xs text-gray-500">
+                                        This message will be displayed to users on the login page and as an error message.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Allowed Roles During Maintenance</Label>
+                                    <p className="text-sm text-gray-500 mb-3">
+                                        Users with these roles can still log in during maintenance mode.
+                                    </p>
+                                    <div className="grid gap-2 md:grid-cols-2">
+                                        {['admin', 'staff', 'collector', 'client'].map((role) => (
+                                            <div key={role} className="flex items-center gap-2 p-2 border rounded">
+                                                <Switch
+                                                    id={`allow-${role}`}
+                                                    defaultChecked={role === 'admin'}
+                                                    disabled={role === 'admin'}
+                                                />
+                                                <Label htmlFor={`allow-${role}`} className="capitalize cursor-pointer">
+                                                    {role}
+                                                    {role === 'admin' && <span className="text-xs text-gray-400 ml-1">(always allowed)</span>}
+                                                </Label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <Separator />
+                                <div className="flex justify-end">
+                                    <Button onClick={() => handleSave('general')} disabled={isSaving}>
                                         <Save className="h-4 w-4 mr-2" />
                                         {isSaving ? 'Saving...' : 'Save Changes'}
                                     </Button>

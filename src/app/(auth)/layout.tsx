@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { APP_NAME } from "@/constants";
+import { MaintenanceBanner } from "@/components/shared/MaintenanceAlert";
 
 export const metadata: Metadata = {
   title: `Authentication | ${APP_NAME}`,
@@ -13,6 +14,9 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary-50 via-white to-primary-50/30">
+      {/* Maintenance Banner */}
+      <MaintenanceBanner />
+
       {/* Background decorative elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-primary-200/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
@@ -36,3 +40,4 @@ export default function AuthLayout({
     </div>
   );
 }
+

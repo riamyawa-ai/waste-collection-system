@@ -138,6 +138,36 @@ export async function signIn(formData: LoginFormData): Promise<AuthActionResult>
         .single();
 
     const role = (profile?.role as UserRole) || USER_ROLES.CLIENT;
+
+    // Check maintenance mode
+    try {
+        const { data: maintenanceSettings } = await supabase
+            .from("system_settings")
+            .select("value")
+            .eq("key", "maintenance")
+            .single();
+
+        if (maintenanceSettings?.value) {
+            const maintenance = maintenanceSettings.value as {
+                enabled: boolean;
+                message: string;
+                allowedRoles: string[];
+            };
+
+            if (maintenance.enabled && !maintenance.allowedRoles.includes(role)) {
+                // Sign out the user since they shouldn't have access
+                await supabase.auth.signOut();
+                return {
+                    success: false,
+                    error: maintenance.message || "System is under maintenance. Please try again later.",
+                };
+            }
+        }
+    } catch (e) {
+        // If maintenance check fails, allow login (fail open)
+        console.error("Maintenance check error:", e);
+    }
+
     const redirectTo = DASHBOARD_ROUTES[role] || DASHBOARD_ROUTES.client;
 
     return {

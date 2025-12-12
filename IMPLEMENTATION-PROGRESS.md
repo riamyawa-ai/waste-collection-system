@@ -11,7 +11,7 @@
 1. ✅ Notification bell → redirects to notifications page (pages exist for all roles: client/collector/staff/admin)
 2. ✅ "Welcome" message for new users (first login) instead of "Welcome Back!" (dynamic welcome on client/collector/admin dashboards)
 3. ⬜ System maintenance mode alert (block selected user types from logging in)
-4. ⬜ Announcement page for admins & staff (with photos + effective timestamp)
+4. ⬜ Announcement page for admins & staff (with photos + effective and expiry timestamps)
 5. ⬜ Cross-role notifications (collectors get ratings, clients get request updates, etc.)
 6. ✅ Revenue cards (admin/staff) → only show completed requests data (fixed getRevenueByBarangay)
 7. ⬜ Consistent modal designs across all users
@@ -33,7 +33,7 @@
 
 ## Admin Features
 1. ⬜ Announcement page (same features as staff, with image posting)
-2. 🟡 Functional reports feature (PDF export) - in progress
+2. ✅ Functional reports feature (PDF export) - created server actions for all report types + PDF/Excel/CSV export
 3. ✅ Make admin settings fully operational (created system_settings table, server actions, integrated with frontend)
 
 ---
@@ -76,3 +76,4 @@
 - Session 1: Fixed CreateScheduleModal UUID error
 - Session 2: Fixed Staff Feedback page field mapping, Revenue by Barangay filter, Added Collector Attendance page
 - Session 3: Added Completed requests tab for collectors, Updated filter logic for proper status handling, SQL verification
+- Session 4: Fixed client feedback collector name display, Implemented dynamic welcome messages for all dashboards, Made admin settings operational with database storage, Implemented admin reports with PDF/Excel/CSV export functionality
