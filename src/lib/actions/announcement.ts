@@ -253,7 +253,13 @@ export async function createAnnouncement(input: CreateAnnouncementInput): Promis
         await sendAnnouncementNotifications(announcement.id, input.targetAudience, announcement.title);
     }
 
+    // If maintenance mode is enabled with this announcement, sync with system settings
+    if (input.enableMaintenanceMode && input.publishImmediately && input.type === 'maintenance') {
+        await syncMaintenanceModeWithSettings(true, input.content);
+    }
+
     revalidatePath('/staff/announcements');
+    revalidatePath('/admin/announcements');
     return { success: true, data: { id: announcement.id } };
 }
 
@@ -471,4 +477,56 @@ async function sendAnnouncementNotifications(
     }));
 
     await supabase.from('notifications').insert(notifications);
+}
+
+// Helper function to sync maintenance mode with system settings
+async function syncMaintenanceModeWithSettings(enabled: boolean, message: string) {
+    const supabase = await createClient();
+
+    try {
+        // Get current maintenance settings
+        const { data: currentSettings } = await supabase
+            .from('system_settings')
+            .select('value')
+            .eq('key', 'maintenance')
+            .single();
+
+        const currentMaintenance = (currentSettings?.value || {
+            enabled: false,
+            message: 'System is under maintenance.',
+            allowedRoles: ['admin'],
+            scheduledStart: null,
+            scheduledEnd: null,
+        }) as {
+            enabled: boolean;
+            message: string;
+            allowedRoles: string[];
+            scheduledStart: string | null;
+            scheduledEnd: string | null;
+        };
+
+        const newMaintenance = {
+            ...currentMaintenance,
+            enabled,
+            message: message || currentMaintenance.message,
+        };
+
+        // Get authenticated user
+        const { data: { user } } = await supabase.auth.getUser();
+
+        await supabase
+            .from('system_settings')
+            .upsert(
+                {
+                    key: 'maintenance',
+                    value: newMaintenance,
+                    category: 'maintenance',
+                    updated_at: new Date().toISOString(),
+                    updated_by: user?.id,
+                },
+                { onConflict: 'key' }
+            );
+    } catch (error) {
+        console.error('Error syncing maintenance mode:', error);
+    }
 }

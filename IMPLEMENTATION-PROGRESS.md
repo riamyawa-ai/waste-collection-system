@@ -11,8 +11,9 @@
 1. ⬜ Notifications & Announcements (Partially done: DB tables exist, need UI pages)
    - ✅ Notification bell in sidebar
    - ⬜ Cross-role notifications (logic needed)
-   - ⬜ Announcement page for admins & staff
+   - ✅ Announcement page for admins & staff (both roles can now create/manage announcements)
 2. ✅ System maintenance mode alert - implemented with admin settings toggle and global alert
+   - ✅ Integrated maintenance mode with announcements (maintenance type announcements can enable system-wide maintenance mode)
 3. ⬜ Consistent modal designs (confirmation, success states)
 
 ## Client Fixes
@@ -27,7 +28,8 @@
 1. ✅ Dashboard overview (requests, collectors, payments)
 2. ✅ Schedule management (assigning collectors)
 3. ✅ Payment verification
-4. ✅ Redesign create schedule modal (implemented side-by-side layout)
+4. ✅ Redesign create schedule modal (implemented side-by-side layout with map)
+   - ✅ Fixed map display issue (container height fix)
 
 ## Staff Fixes
 1. ✅ Fix "Revenue by Barangay" not displaying data (updated to include verified + completed payments)
@@ -36,7 +38,7 @@
 4. ✅ Fix UUID error when creating a schedule (convert 'unassigned'/'none' to undefined)
 
 ## Admin Features
-1. ⬜ Announcement page (same features as staff, with image posting)
+1. ✅ Announcement page (same features as staff, with image posting and maintenance mode toggle)
 2. ✅ Functional reports feature (PDF export) - created server actions for all report types + PDF/Excel/CSV export
 3. ✅ Make admin settings fully operational (created system_settings table, server actions, integrated with frontend)
 
@@ -75,9 +77,12 @@
 - **Payments table**: Uses `payment_status` enum (pending, verified, completed) ✅
 - **Attendance table**: Has `total_duration` as computed INTERVAL column ✅
 - **All RLS policies**: Use `get_user_role()` SECURITY DEFINER function to prevent recursion ✅
+- **Announcements table**: Has `enable_maintenance_mode` boolean column ✅
 
 ### Sessions Completed
 - Session 1: Fixed CreateScheduleModal UUID error
 - Session 2: Fixed Staff Feedback page field mapping, Revenue by Barangay filter, Added Collector Attendance page
 - Session 3: Added Completed requests tab for collectors, Updated filter logic for proper status handling, SQL verification
 - Session 4: Fixed client feedback collector name display, Implemented dynamic welcome messages for all dashboards, Made admin settings operational with database storage, Implemented admin reports with PDF/Excel/CSV export functionality
+- Session 5: Created Admin Announcements page, Integrated maintenance mode toggle with announcement creation (maintenance type can enable system-wide maintenance), Fixed map display in CreateScheduleModal (container height issue)
+

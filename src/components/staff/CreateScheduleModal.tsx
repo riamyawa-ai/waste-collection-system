@@ -469,33 +469,35 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                     </div>
 
                     {/* Right Side - Interactive Map */}
-                    <div className="hidden lg:block flex-1 relative bg-gray-100 h-full overflow-hidden">
-                        <MapboxRouteEditor
-                            stops={stops.map(s => ({
-                                id: s.id,
-                                locationName: s.locationName,
-                                locationType: s.locationType,
-                                address: s.address,
-                                barangay: s.barangay,
-                                latitude: s.latitude || 0,
-                                longitude: s.longitude || 0,
-                            }))}
-                            onStopsChange={(newStops) => {
-                                // Map back to full Stop objects
-                                const updatedStops: Stop[] = newStops.map(ns => ({
-                                    id: ns.id,
-                                    locationName: ns.locationName,
-                                    locationType: ns.locationType,
-                                    address: ns.address,
-                                    barangay: ns.barangay,
-                                    latitude: ns.latitude,
-                                    longitude: ns.longitude
-                                }));
-                                setStops(updatedStops);
-                            }}
-                            showSampleLocations={true}
-                            height="100%"
-                        />
+                    <div className="hidden lg:flex flex-1 relative bg-gray-100 min-h-0" style={{ minHeight: '400px' }}>
+                        <div className="absolute inset-0">
+                            <MapboxRouteEditor
+                                stops={stops.map(s => ({
+                                    id: s.id,
+                                    locationName: s.locationName,
+                                    locationType: s.locationType,
+                                    address: s.address,
+                                    barangay: s.barangay,
+                                    latitude: s.latitude || 0,
+                                    longitude: s.longitude || 0,
+                                }))}
+                                onStopsChange={(newStops) => {
+                                    // Map back to full Stop objects
+                                    const updatedStops: Stop[] = newStops.map(ns => ({
+                                        id: ns.id,
+                                        locationName: ns.locationName,
+                                        locationType: ns.locationType,
+                                        address: ns.address,
+                                        barangay: ns.barangay,
+                                        latitude: ns.latitude,
+                                        longitude: ns.longitude
+                                    }));
+                                    setStops(updatedStops);
+                                }}
+                                showSampleLocations={true}
+                                height="100%"
+                            />
+                        </div>
 
                         {/* Map Overlay Instructions */}
                         <div className="absolute top-4 left-4 right-4 z-10 pointer-events-none">

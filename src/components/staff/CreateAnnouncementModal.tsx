@@ -20,8 +20,9 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { Megaphone, Users, AlertTriangle } from 'lucide-react';
+import { Megaphone, Users, AlertTriangle, Wrench, Info } from 'lucide-react';
 import { createAnnouncement } from '@/lib/actions/announcement';
 
 interface CreateAnnouncementModalProps {
@@ -60,6 +61,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
     const [publishImmediately, setPublishImmediately] = useState(true);
     const [sendEmailNotification, setSendEmailNotification] = useState(false);
     const [sendPushNotification, setSendPushNotification] = useState(true);
+    const [enableMaintenanceMode, setEnableMaintenanceMode] = useState(false);
 
     const handleAudienceChange = (value: string) => {
         if (value === 'all') {
@@ -94,6 +96,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                 publishImmediately,
                 sendEmailNotification,
                 sendPushNotification,
+                enableMaintenanceMode: type === 'maintenance' ? enableMaintenanceMode : false,
             });
 
             if (result.success) {
@@ -121,6 +124,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
         setPublishImmediately(true);
         setSendEmailNotification(false);
         setSendPushNotification(true);
+        setEnableMaintenanceMode(false);
     };
 
     return (
@@ -281,6 +285,36 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                 </div>
                             </div>
                         </div>
+
+                        {/* Maintenance Mode Option - Only shown for maintenance type */}
+                        {type === 'maintenance' && (
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Wrench className="h-4 w-4 text-orange-600" />
+                                    <Label className="text-gray-700 font-medium">System Maintenance Mode</Label>
+                                </div>
+
+                                <Alert className="bg-orange-50 border-orange-200">
+                                    <Info className="h-4 w-4 text-orange-600" />
+                                    <AlertDescription className="text-orange-800 text-sm">
+                                        Enabling maintenance mode will display a system-wide alert banner to all users
+                                        (except those with allowed roles). Users may be restricted from certain actions
+                                        during maintenance.
+                                    </AlertDescription>
+                                </Alert>
+
+                                <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 bg-orange-50/50">
+                                    <Checkbox
+                                        id="enableMaintenanceMode"
+                                        checked={enableMaintenanceMode}
+                                        onCheckedChange={(checked) => setEnableMaintenanceMode(!!checked)}
+                                    />
+                                    <Label htmlFor="enableMaintenanceMode" className="text-orange-700 cursor-pointer font-medium">
+                                        Enable system maintenance mode alert
+                                    </Label>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </ScrollArea>
 
