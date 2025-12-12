@@ -159,7 +159,7 @@ export function ViewScheduleModal({ open, onClose, scheduleId }: ViewScheduleMod
                                             <div className="flex items-center gap-3">
                                                 <Calendar className="h-4 w-4 text-gray-400" />
                                                 <span className="text-sm text-gray-700">
-                                                    {format(new Date(schedule.scheduled_date), 'EEEE, MMMM d, yyyy')}
+                                                    {format(new Date(schedule.start_date), 'EEEE, MMMM d, yyyy')}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-3">
