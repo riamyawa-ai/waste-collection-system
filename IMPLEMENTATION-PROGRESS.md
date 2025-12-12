@@ -20,14 +20,14 @@
 1. ⬜ Fix: Collector name not displaying in feedback history
 
 ## Collector Features
-1. ⬜ Add completed requests table
+1. ✅ Add completed requests table (added "Completed" tab to collector requests page)
 2. ⬜ Match calendar design with client's calendar
 3. ✅ Add attendance history view (created /collector/attendance page)
 
 ## Staff Fixes
 1. ⬜ Redesign create schedule modal (two-section layout: inputs left, map right)
 2. ✅ Fix "Revenue by Barangay" not displaying data (updated to include verified + completed payments)
-3. ⬜ Fix client column showing "unknown"
+3. 🟡 Fix client column showing "unknown" (backend is correct, issue is likely data/RLS-related)
 4. ✅ Fix Feedback page: rating stars + comments not displaying (fixed field names: overall_rating, comments)
 5. ✅ Fix UUID error when creating a schedule (convert 'unassigned'/'none' to undefined)
 
@@ -49,3 +49,4 @@
 ### Sessions Completed
 - Session 1: Fixed CreateScheduleModal UUID error
 - Session 2: Fixed Staff Feedback page field mapping, Revenue by Barangay filter, Added Collector Attendance page
+- Session 3: Added Completed requests tab for collectors, Updated filter logic for proper status handling

@@ -1,5 +1,7 @@
 import { vi } from 'vitest';
 
+export type MockSupabaseClient = ReturnType<typeof createMockSupabaseClient>;
+
 const createMockSupabaseClient = () => ({
     auth: {
         getUser: vi.fn(),
@@ -29,5 +31,27 @@ const createMockSupabaseClient = () => ({
         })),
     }
 });
+
+export const setupAuthMock = (client: MockSupabaseClient, user: { id: string; email: string } | null) => {
+    client.auth.getUser.mockResolvedValue({
+        data: { user },
+        error: null,
+    });
+    client.auth.getSession.mockResolvedValue({
+        data: { session: user ? { user } : null },
+        error: null,
+    });
+};
+
+export const setupQueryMock = (
+    client: MockSupabaseClient,
+    _tableName: string,
+    data: unknown,
+    error: { message: string } | null = null
+) => {
+    const mockChain = client.from();
+    mockChain.single.mockResolvedValue({ data, error });
+    mockChain.maybeSingle.mockResolvedValue({ data, error });
+};
 
 export default createMockSupabaseClient;
