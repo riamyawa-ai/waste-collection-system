@@ -20,7 +20,7 @@ import {
   Calendar,
   Truck,
   BarChart3,
-
+  Clock,
 } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
 import { useState } from "react";
@@ -64,6 +64,7 @@ const navItemsByRole: Record<string, NavItem[]> = {
     { label: "Dashboard", href: "/collector/dashboard", icon: LayoutDashboard },
     { label: "My Requests", href: "/collector/requests", icon: FileText },
     { label: "Schedule", href: "/collector/schedule", icon: Calendar },
+    { label: "Attendance", href: "/collector/attendance", icon: Clock },
     { label: "Feedback", href: "/collector/feedback", icon: MessageSquare },
     { label: "Announcements", href: "/collector/announcements", icon: Megaphone },
     { label: "Notifications", href: "/collector/notifications", icon: Bell },

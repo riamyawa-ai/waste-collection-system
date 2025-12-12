@@ -52,7 +52,8 @@ export default function CollectorRequestsPage() {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const fetchRequests = useCallback(async () => {
-        const result = await getAssignedRequests({ limit: 50 });
+        // Fetch all requests including completed ones
+        const result = await getAssignedRequests({ limit: 100, status: 'all' });
         if (result.data) setRequests(result.data as unknown as Request[]);
     }, []);
 
@@ -132,7 +133,13 @@ export default function CollectorRequestsPage() {
         }
     };
 
-    const filteredRequests = activeTab === 'all' ? requests : requests.filter(r => r.status === activeTab);
+    const filteredRequests = (() => {
+        if (activeTab === 'all') return requests;
+        if (activeTab === 'in_progress') {
+            return requests.filter(r => ['en_route', 'at_location', 'in_progress', 'accepted_by_collector'].includes(r.status));
+        }
+        return requests.filter(r => r.status === activeTab);
+    })();
 
     return (
         <div className="space-y-6 p-6">
@@ -153,6 +160,7 @@ export default function CollectorRequestsPage() {
                             <TabsTrigger value="all">All</TabsTrigger>
                             <TabsTrigger value="assigned">Pending</TabsTrigger>
                             <TabsTrigger value="in_progress">In Progress</TabsTrigger>
+                            <TabsTrigger value="completed">Completed</TabsTrigger>
                         </TabsList>
                         <TabsContent value={activeTab}>
                             {isLoading ? <div className="text-center py-12"><Clock className="h-12 w-12 mx-auto animate-spin text-green-600" /></div> :

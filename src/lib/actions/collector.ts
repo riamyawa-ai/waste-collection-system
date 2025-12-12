@@ -440,12 +440,13 @@ export async function getAssignedRequests(filters?: {
         .order('preferred_date', { ascending: true })
         .range((page - 1) * limit, page * limit - 1);
 
-    if (filters?.status) {
+    if (filters?.status && filters.status !== 'all') {
         query = query.eq('status', filters.status);
-    } else {
+    } else if (!filters?.status) {
         // By default, exclude completed and cancelled
         query = query.not('status', 'in', '("completed","cancelled","rejected")');
     }
+    // If status is 'all', don't add any status filter
 
     const { data, error, count } = await query;
 

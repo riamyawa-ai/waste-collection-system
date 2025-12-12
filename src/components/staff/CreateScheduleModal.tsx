@@ -168,8 +168,8 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                 endDate: endDate || undefined,
                 startTime,
                 endTime,
-                collectorId: collectorId || undefined,
-                backupCollectorId: backupCollectorId || undefined,
+                collectorId: (collectorId && collectorId !== 'unassigned') ? collectorId : undefined,
+                backupCollectorId: (backupCollectorId && backupCollectorId !== 'none') ? backupCollectorId : undefined,
                 specialInstructions,
                 stops: stops.map((stop, index) => ({
                     locationName: stop.locationName,
@@ -259,10 +259,10 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                     <div className="flex flex-col items-center">
                                         <div
                                             className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${isCompleted
-                                                    ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-200/50'
-                                                    : isCurrent
-                                                        ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-200/50 ring-4 ring-emerald-100 scale-110'
-                                                        : 'bg-gray-100 text-gray-400'
+                                                ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-200/50'
+                                                : isCurrent
+                                                    ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-200/50 ring-4 ring-emerald-100 scale-110'
+                                                    : 'bg-gray-100 text-gray-400'
                                                 }`}
                                         >
                                             {isCompleted ? (
@@ -358,8 +358,8 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                         <button
                                             onClick={() => setActiveTab('map')}
                                             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'map'
-                                                    ? 'bg-white text-emerald-700 shadow-sm'
-                                                    : 'text-gray-600 hover:text-gray-900'
+                                                ? 'bg-white text-emerald-700 shadow-sm'
+                                                : 'text-gray-600 hover:text-gray-900'
                                                 }`}
                                         >
                                             <Map className="h-4 w-4" />
@@ -368,8 +368,8 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                         <button
                                             onClick={() => setActiveTab('list')}
                                             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'list'
-                                                    ? 'bg-white text-emerald-700 shadow-sm'
-                                                    : 'text-gray-600 hover:text-gray-900'
+                                                ? 'bg-white text-emerald-700 shadow-sm'
+                                                : 'text-gray-600 hover:text-gray-900'
                                                 }`}
                                         >
                                             <List className="h-4 w-4" />
@@ -403,8 +403,8 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                                         key={type.id}
                                                         onClick={() => handleTypeToggle(type.id)}
                                                         className={`group p-4 rounded-xl border-2 text-sm font-medium transition-all text-left flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 ${isSelected
-                                                                ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-800 shadow-md shadow-emerald-100'
-                                                                : 'border-gray-100 bg-white text-gray-600 hover:border-gray-200'
+                                                            ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-800 shadow-md shadow-emerald-100'
+                                                            : 'border-gray-100 bg-white text-gray-600 hover:border-gray-200'
                                                             }`}
                                                     >
                                                         <span

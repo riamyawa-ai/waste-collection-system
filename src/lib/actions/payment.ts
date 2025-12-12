@@ -365,7 +365,7 @@ export async function getRevenueByBarangay() {
             status,
             request:request_id(barangay)
         `)
-        .eq('status', 'completed');
+        .in('status', ['verified', 'completed']);
 
     if (!payments) {
         return { success: true, data: [] };

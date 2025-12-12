@@ -48,10 +48,11 @@ import { format } from "date-fns";
 
 interface Feedback {
     id: string;
-    rating: number;
-    comment: string | null;
+    overall_rating: number;
+    comments: string | null;
     created_at: string;
-    is_flagged: boolean;
+    status: string;
+    is_anonymous: boolean;
     staff_response: string | null;
     client: {
         id: string;
@@ -61,6 +62,10 @@ interface Feedback {
     collector: {
         id: string;
         full_name: string;
+    } | null;
+    request?: {
+        id: string;
+        request_number: string;
     } | null;
 }
 
@@ -326,17 +331,17 @@ export default function FeedbackPage() {
                                             <TableRow key={feedback.id}>
                                                 <TableCell>
                                                     <div className="flex flex-col gap-1">
-                                                        {renderStars(feedback.rating)}
+                                                        {renderStars(feedback.overall_rating)}
                                                         <Badge
-                                                            className={getRatingBadge(feedback.rating)}
+                                                            className={getRatingBadge(feedback.overall_rating)}
                                                         >
-                                                            {feedback.rating}/5
+                                                            {feedback.overall_rating}/5
                                                         </Badge>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <p className="text-neutral-900 line-clamp-2 max-w-xs">
-                                                        {feedback.comment || "No comment provided"}
+                                                        {feedback.comments || "No comment provided"}
                                                     </p>
                                                 </TableCell>
                                                 <TableCell>
@@ -363,19 +368,19 @@ export default function FeedbackPage() {
                                                     </span>
                                                 </TableCell>
                                                 <TableCell>
-                                                    {feedback.is_flagged ? (
+                                                    {feedback.status === 'flagged' ? (
                                                         <Badge className="bg-red-100 text-red-700">
                                                             <Flag className="h-3 w-3 mr-1" />
                                                             Flagged
                                                         </Badge>
-                                                    ) : feedback.staff_response ? (
+                                                    ) : feedback.status === 'responded' || feedback.staff_response ? (
                                                         <Badge className="bg-green-100 text-green-700">
                                                             <CheckCircle className="h-3 w-3 mr-1" />
                                                             Responded
                                                         </Badge>
                                                     ) : (
                                                         <Badge className="bg-amber-100 text-amber-700">
-                                                            Pending
+                                                            {feedback.status === 'reviewed' ? 'Reviewed' : 'Pending'}
                                                         </Badge>
                                                     )}
                                                 </TableCell>
