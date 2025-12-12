@@ -13,10 +13,12 @@ import {
     Minimize2,
     LocateFixed,
     Loader2,
+    Layers,
 } from 'lucide-react';
 import {
     MAPBOX_ACCESS_TOKEN,
     MAPBOX_STYLE,
+    MAPBOX_STYLES,
     PANABO_CENTER,
     LOCATION_TYPES,
     MAPBOX_POI_CATEGORIES,
@@ -70,11 +72,15 @@ export function MapboxRouteEditor({
     const [locations, setLocations] = useState<MapLocation[]>([]);
     const [loading, setLoading] = useState(false);
     const [isMapLoaded, setIsMapLoaded] = useState(false);
+    const [mapStyle, setMapStyle] = useState<'streets' | 'satellite'>('streets');
     const [viewState, setViewState] = useState({
         longitude: PANABO_CENTER.longitude,
         latitude: PANABO_CENTER.latitude,
-        zoom: 10, // City-wide view for better establishment visibility
+        zoom: 13, // Better zoom for city view with visible landmarks
     });
+
+    // Get current map style URL
+    const currentMapStyle = mapStyle === 'satellite' ? MAPBOX_STYLES.satellite : MAPBOX_STYLES.streets;
 
     // Handle map load
     const handleMapLoad = useCallback(() => {
@@ -337,6 +343,16 @@ export function MapboxRouteEditor({
 
             {/* Controls */}
             <div className="absolute top-2 right-2 z-10 flex gap-2">
+                {/* Map Style Switcher */}
+                <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setMapStyle(mapStyle === 'streets' ? 'satellite' : 'streets')}
+                    className="bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200 shadow-sm"
+                >
+                    <Layers className="h-4 w-4 mr-1" />
+                    {mapStyle === 'streets' ? 'Satellite' : 'Streets'}
+                </Button>
                 {stops.length >= 3 && !readOnly && (
                     <Button
                         size="sm"
@@ -374,7 +390,7 @@ export function MapboxRouteEditor({
                 {...viewState}
                 onMove={(evt: ViewStateChangeEvent) => setViewState(evt.viewState)}
                 onLoad={handleMapLoad}
-                mapStyle={MAPBOX_STYLE}
+                mapStyle={currentMapStyle}
                 mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
                 style={{ width: '100%', height: isFullscreen ? '100vh' : height }}
                 attributionControl={false}

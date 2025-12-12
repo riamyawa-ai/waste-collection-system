@@ -225,9 +225,9 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                     </div>
                 </DialogHeader>
 
-                <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+                <div className="flex flex-1 min-h-0 overflow-hidden flex-col lg:flex-row">
                     {/* Left Sidebar - Form Controls */}
-                    <div className="w-full lg:w-[450px] border-r border-gray-200 bg-gray-50/50 flex flex-col h-full flex-shrink-0 z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]">
+                    <div className="w-full lg:w-[450px] border-r border-gray-200 bg-gray-50/50 flex flex-col min-h-0 lg:h-full flex-shrink-0 z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] max-h-[300px] lg:max-h-none overflow-hidden">
                         <ScrollArea className="flex-1">
                             <div className="p-6 space-y-8">
                                 {/* Basic Info Section */}
@@ -469,38 +469,36 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                     </div>
 
                     {/* Right Side - Interactive Map */}
-                    <div className="hidden lg:flex flex-1 relative bg-gray-100 min-h-0" style={{ minHeight: '400px' }}>
-                        <div className="absolute inset-0">
-                            <MapboxRouteEditor
-                                stops={stops.map(s => ({
-                                    id: s.id,
-                                    locationName: s.locationName,
-                                    locationType: s.locationType,
-                                    address: s.address,
-                                    barangay: s.barangay,
-                                    latitude: s.latitude || 0,
-                                    longitude: s.longitude || 0,
-                                }))}
-                                onStopsChange={(newStops) => {
-                                    // Map back to full Stop objects
-                                    const updatedStops: Stop[] = newStops.map(ns => ({
-                                        id: ns.id,
-                                        locationName: ns.locationName,
-                                        locationType: ns.locationType,
-                                        address: ns.address,
-                                        barangay: ns.barangay,
-                                        latitude: ns.latitude,
-                                        longitude: ns.longitude
-                                    }));
-                                    setStops(updatedStops);
-                                }}
-                                showSampleLocations={true}
-                                height="100%"
-                            />
-                        </div>
+                    <div className="hidden lg:block flex-1 relative bg-emerald-50 min-h-0">
+                        <MapboxRouteEditor
+                            stops={stops.map(s => ({
+                                id: s.id,
+                                locationName: s.locationName,
+                                locationType: s.locationType,
+                                address: s.address,
+                                barangay: s.barangay,
+                                latitude: s.latitude || 0,
+                                longitude: s.longitude || 0,
+                            }))}
+                            onStopsChange={(newStops) => {
+                                // Map back to full Stop objects
+                                const updatedStops: Stop[] = newStops.map(ns => ({
+                                    id: ns.id,
+                                    locationName: ns.locationName,
+                                    locationType: ns.locationType,
+                                    address: ns.address,
+                                    barangay: ns.barangay,
+                                    latitude: ns.latitude,
+                                    longitude: ns.longitude
+                                }));
+                                setStops(updatedStops);
+                            }}
+                            showSampleLocations={true}
+                            height="calc(90vh - 80px)"
+                        />
 
                         {/* Map Overlay Instructions */}
-                        <div className="absolute top-4 left-4 right-4 z-10 pointer-events-none">
+                        <div className="absolute top-16 left-4 z-10 pointer-events-none">
                             <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-gray-200 shadow-sm inline-flex items-center gap-2 text-sm font-medium text-gray-700">
                                 <Navigation className="h-4 w-4 text-emerald-600" />
                                 Click on map or markers to add route stops

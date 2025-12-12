@@ -4,8 +4,8 @@
 // This must be prefixed with NEXT_PUBLIC_ to be available on the client side
 export const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
 
-// Mapbox style URL - Using navigation-day style for clearer roads and better visual appeal
-export const MAPBOX_STYLE = 'mapbox://styles/mapbox/navigation-day-v1';
+// Mapbox style URL - Using streets style for better color contrast and visibility
+export const MAPBOX_STYLE = 'mapbox://styles/mapbox/streets-v12';
 
 // Alternative styles for different use cases
 export const MAPBOX_STYLES = {
