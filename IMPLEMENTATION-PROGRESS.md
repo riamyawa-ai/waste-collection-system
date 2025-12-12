@@ -8,8 +8,8 @@
 ---
 
 ## System-Wide Features
-1. ⬜ Notification bell → redirects to notifications page (modal view)
-2. ⬜ "Welcome" message for new users (first login) instead of "Welcome Back!"
+1. ✅ Notification bell → redirects to notifications page (pages exist for all roles: client/collector/staff/admin)
+2. ✅ "Welcome" message for new users (first login) instead of "Welcome Back!" (dynamic welcome on client/collector/admin dashboards)
 3. ⬜ System maintenance mode alert (block selected user types from logging in)
 4. ⬜ Announcement page for admins & staff (with photos + effective timestamp)
 5. ⬜ Cross-role notifications (collectors get ratings, clients get request updates, etc.)
@@ -17,7 +17,7 @@
 7. ⬜ Consistent modal designs across all users
 
 ## Client Fixes
-1. ⬜ Fix: Collector name not displaying in feedback history
+1. ✅ Fix: Collector name not displaying in feedback history (removed is_anonymous check, collector always shown)
 
 ## Collector Features
 1. ✅ Add completed requests table (added "Completed" tab to collector requests page)
@@ -33,8 +33,8 @@
 
 ## Admin Features
 1. ⬜ Announcement page (same features as staff, with image posting)
-2. ⬜ Functional reports feature (PDF export)
-3. ⬜ Make admin settings fully operational
+2. 🟡 Functional reports feature (PDF export) - in progress
+3. ✅ Make admin settings fully operational (created system_settings table, server actions, integrated with frontend)
 
 ---
 
@@ -46,7 +46,33 @@
 - Backend uses Supabase with server actions
 - Database schema is well-structured with proper enums and RLS policies
 
+### SQL Migration Files Verification (15 files)
+
+| Migration | Purpose | Status |
+|-----------|---------|--------|
+| 001_complete_schema.sql | Main schema with all tables, types, triggers | ✅ Verified |
+| 002_fix_user_trigger.sql | Improved handle_new_user() function | ✅ Verified |
+| 003_fix_rls_recursion.sql | Fixed RLS infinite recursion with get_user_role() | ✅ Verified |
+| 004_sync_existing_users.sql | Sync auth.users → profiles | ✅ Verified |
+| 005_fix_client_cancel_update_rls.sql | Client can cancel pending/accepted requests | ✅ Verified |
+| 006_fix_rls_complete.sql | Complete RLS policy rebuild | ✅ Verified |
+| 007_fix_status_history_trigger.sql | SECURITY DEFINER for status tracking | ✅ Verified |
+| 008_seed_staff_users.sql | Documentation for creating staff users | ✅ Verified |
+| 009_fix_notifications_insert.sql | INSERT policy for notifications | ✅ Verified |
+| 010_fix_staff_update_policy.sql | Proper role checking for staff updates | ✅ Verified |
+| 011_fix_profile_creation_trigger.sql | Improved profile creation with ON CONFLICT | ✅ Verified |
+| 012_create_admin_collector_accounts.sql | Creates test admin/collector accounts | ✅ Verified |
+| 013_set_admin_role.sql | Quick fix for setting admin role | ✅ Verified |
+| 014_auto_verify_admin_created_users.sql | Auto-verify users created by admin | ✅ Verified |
+| 015_add_staff_notes_to_requests.sql | Added staff_notes column | ✅ Verified |
+
+### Key Schema Confirmations
+- **Feedback table**: Uses `overall_rating` (1-5) and `comments` ✅
+- **Payments table**: Uses `payment_status` enum (pending, verified, completed) ✅
+- **Attendance table**: Has `total_duration` as computed INTERVAL column ✅
+- **All RLS policies**: Use `get_user_role()` SECURITY DEFINER function to prevent recursion ✅
+
 ### Sessions Completed
 - Session 1: Fixed CreateScheduleModal UUID error
 - Session 2: Fixed Staff Feedback page field mapping, Revenue by Barangay filter, Added Collector Attendance page
-- Session 3: Added Completed requests tab for collectors, Updated filter logic for proper status handling
+- Session 3: Added Completed requests tab for collectors, Updated filter logic for proper status handling, SQL verification

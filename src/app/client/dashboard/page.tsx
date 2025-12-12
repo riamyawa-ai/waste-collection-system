@@ -14,6 +14,7 @@ import {
   getClientRecentActivity,
   getClientRequests,
 } from '@/lib/actions/requests';
+import { getProfile } from '@/lib/actions/profile';
 import type { RequestStatus } from '@/constants/status';
 
 // Force dynamic rendering since this page uses authentication
@@ -65,13 +66,32 @@ async function RecentActivityWrapper() {
   return <RecentActivity activities={result.data as never[]} />;
 }
 
+// Server component for welcome message
+async function WelcomeHeader() {
+  const profileResult = await getProfile();
+
+  // Check if this is the user's first login (no last_login_at means first visit)
+  const isFirstVisit = !profileResult.data?.last_login_at;
+  const firstName = profileResult.data?.first_name || '';
+
+  const welcomeMessage = isFirstVisit
+    ? `Welcome${firstName ? `, ${firstName}` : ''}!`
+    : `Welcome back${firstName ? `, ${firstName}` : ''}!`;
+
+  return (
+    <PageHeader
+      title={welcomeMessage}
+      description="Here's an overview of your waste collection requests."
+    />
+  );
+}
+
 export default function ClientDashboard() {
   return (
     <>
-      <PageHeader
-        title="Welcome back!"
-        description="Here's an overview of your waste collection requests."
-      />
+      <Suspense fallback={<PageHeader title="Loading..." description="Here's an overview of your waste collection requests." />}>
+        <WelcomeHeader />
+      </Suspense>
 
       {/* Stats Grid */}
       <div className="mt-6">

@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { format, subDays } from 'date-fns';
+import { getProfile } from '@/lib/actions/profile';
 
 interface AdminStats {
   totalUsers: number;
@@ -220,6 +221,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [welcomeMessage, setWelcomeMessage] = useState('Welcome back!');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -264,6 +266,16 @@ export default function AdminDashboardPage() {
           .gte('login_time', today)
           .is('logout_time', null),
       ]);
+
+      // Fetch profile for welcome message
+      const profileResult = await getProfile();
+      if (profileResult.success && profileResult.data) {
+        const isFirstVisit = !profileResult.data.last_login_at;
+        const firstName = profileResult.data.first_name || '';
+        setWelcomeMessage(isFirstVisit
+          ? `Welcome${firstName ? `, ${firstName}` : ''}!`
+          : `Welcome back${firstName ? `, ${firstName}` : ''}!`);
+      }
 
       // Process role counts
       const roleCounts = { admin: 0, staff: 0, client: 0, collector: 0 };
@@ -390,7 +402,7 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <PageHeader
           title="Admin Dashboard"
-          description={`Welcome back! Today is ${format(new Date(), 'EEEE, MMMM d, yyyy')}`}
+          description={`${welcomeMessage} Today is ${format(new Date(), 'EEEE, MMMM d, yyyy')}`}
         />
         <div className="flex gap-2">
           <Link href="/admin/reports">

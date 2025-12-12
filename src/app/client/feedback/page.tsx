@@ -319,9 +319,12 @@ export default function FeedbackPage() {
                                                 {feedback.request?.request_number || '—'}
                                             </TableCell>
                                             <TableCell>
-                                                {feedback.is_anonymous
-                                                    ? <span className="text-neutral-400 italic">Anonymous</span>
-                                                    : feedback.collector?.full_name || '—'}
+                                                <div className="flex items-center gap-2">
+                                                    <User className="h-4 w-4 text-neutral-400" />
+                                                    <span className="text-neutral-700">
+                                                        {feedback.collector?.full_name || 'Unknown Collector'}
+                                                    </span>
+                                                </div>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-0.5">

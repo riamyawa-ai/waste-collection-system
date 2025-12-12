@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { clockIn, clockOut, getCollectorDashboardStats, getAssignedRequests } from '@/lib/actions/collector';
+import { getProfile } from '@/lib/actions/profile';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -74,6 +75,7 @@ export default function CollectorDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isClockingIn, setIsClockingIn] = useState(false);
   const [isClockingOut, setIsClockingOut] = useState(false);
+  const [welcomeMessage, setWelcomeMessage] = useState('Welcome back!');
 
   const fetchData = useCallback(async () => {
     const supabase = createBrowserClient<Database>(
@@ -88,6 +90,16 @@ export default function CollectorDashboardPage() {
     const statsResult = await getCollectorDashboardStats();
     if (statsResult.data) {
       setStats(statsResult.data);
+    }
+
+    // Fetch profile for welcome message
+    const profileResult = await getProfile();
+    if (profileResult.success && profileResult.data) {
+      const isFirstVisit = !profileResult.data.last_login_at;
+      const firstName = profileResult.data.first_name || '';
+      setWelcomeMessage(isFirstVisit
+        ? `Welcome${firstName ? `, ${firstName}` : ''}!`
+        : `Welcome back${firstName ? `, ${firstName}` : ''}!`);
     }
 
     // Fetch assigned requests
@@ -212,7 +224,7 @@ export default function CollectorDashboardPage() {
       <div className="flex items-center justify-between">
         <PageHeader
           title="Collector Dashboard"
-          description={`Welcome back! Today is ${format(new Date(), 'EEEE, MMMM d, yyyy')}`}
+          description={`${welcomeMessage} Today is ${format(new Date(), 'EEEE, MMMM d, yyyy')}`}
         />
 
         {/* Attendance Clock In/Out */}
