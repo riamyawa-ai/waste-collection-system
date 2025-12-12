@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { routes, testRequest } from '../fixtures/test-data';
+import { routes } from '../fixtures/test-data';
 
 /**
  * Request Service E2E Tests

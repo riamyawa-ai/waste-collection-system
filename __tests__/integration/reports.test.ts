@@ -1,12 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-    mockUser,
-    mockCollector,
-    mockRequest,
-    mockCompletedRequest,
-    mockPayment,
-    mockVerifiedPayment,
-} from '@tests/utils/mocks/data';
+import { mockCollector } from '@tests/utils/mocks/data';
 
 /**
  * Admin Reports Integration Tests

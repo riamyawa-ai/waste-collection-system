@@ -187,6 +187,9 @@ test.describe('Mobile Navigation', () => {
             }
         }
 
+        // Log navigation status for debugging
+        console.log('Has navigation element:', hasNavigation);
+
         // It's okay if there's no explicit nav on mobile
         // Just verify page loaded
         const body = page.locator('body');

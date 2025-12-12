@@ -44,6 +44,16 @@ export const mockStaff = {
     role: 'staff' as UserRole,
 };
 
+export const mockAdmin = {
+    ...mockUser,
+    id: 'test-admin-id',
+    email: 'admin@example.com',
+    first_name: 'Admin',
+    last_name: 'Test',
+    full_name: 'Admin Test',
+    role: 'admin' as UserRole,
+};
+
 export const mockRequest = {
     id: 'test-request-id',
     request_number: 'REQ-20241212-0001',
@@ -63,13 +73,32 @@ export const mockRequest = {
 };
 
 export const mockPayment = {
-    id: 'test-payment-id',
+    id: 'test-payment-id-001',
     payment_number: 'PAY-20241212-0001',
     request_id: mockRequest.id,
     client_id: mockUser.id,
     amount: 500,
-    reference_number: 'REF-123456',
+    reference_number: 'REF-123456789',
     status: 'pending' as PaymentStatus,
+    recorded_by: mockStaff.id,
+    receipt_url: null as string | null,
+    date_received: new Date().toISOString(),
+    notes: null as string | null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+};
+
+export const mockCompletedRequest = {
+    ...mockRequest,
+    id: 'test-completed-request-id',
+    request_number: 'REQ-20241212-0002',
+    status: 'completed' as RequestStatus,
+    collector_id: 'test-collector-id',
+};
+
+export const mockVerifiedPayment = {
+    ...mockPayment,
+    id: 'test-verified-payment-id',
+    payment_number: 'PAY-20241212-0002',
+    status: 'verified' as PaymentStatus,
 };

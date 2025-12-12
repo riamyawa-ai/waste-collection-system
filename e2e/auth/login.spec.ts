@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { routes, selectors } from '../fixtures/test-data';
+import { routes } from '../fixtures/test-data';
 
 /**
  * Login Flow E2E Tests
@@ -31,9 +31,10 @@ test.describe('Login Flow', () => {
         // At least email and password inputs should exist on a login page
         const hasEmailInput = await emailInput.isVisible().catch(() => false);
         const hasPasswordInput = await passwordInput.isVisible().catch(() => false);
+        const hasSubmitButton = await submitButton.isVisible().catch(() => false);
 
         // Log what we found for debugging
-        console.log('Login page elements:', { hasHeading, hasEmailInput, hasPasswordInput });
+        console.log('Login page elements:', { hasHeading, hasEmailInput, hasPasswordInput, hasSubmitButton });
 
         // Flexible assertion - at least one form element should exist
         expect(hasEmailInput || hasPasswordInput).toBeTruthy();
