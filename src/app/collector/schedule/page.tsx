@@ -10,8 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday } from 'date-fns';
-import { Calendar, Clock, MapPin, ChevronLeft, ChevronRight, CheckCircle2, Truck } from 'lucide-react';
+import { Calendar, Clock, MapPin, ChevronLeft, ChevronRight, CheckCircle2, Truck, Eye, Map } from 'lucide-react';
 import { SCHEDULE_STATUS_COLORS, SCHEDULE_STATUS_LABELS } from '@/constants/status';
+import { ViewScheduleModal } from '@/components/collector/ViewScheduleModal';
 
 interface Schedule {
     id: string;
@@ -31,6 +32,8 @@ export default function CollectorSchedulePage() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [_isLoading, setIsLoading] = useState(true);
+    const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(null);
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
 
     useEffect(() => {
         const fetchSchedules = async () => {
@@ -182,7 +185,28 @@ export default function CollectorSchedulePage() {
                                                 )}
                                             </div>
                                             <div className="mt-3 flex gap-2">
-                                                <Button size="sm" className="bg-green-600 hover:bg-green-700">View Details</Button>
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-green-600 hover:bg-green-700"
+                                                    onClick={() => {
+                                                        setSelectedScheduleId(schedule.id);
+                                                        setShowScheduleModal(true);
+                                                    }}
+                                                >
+                                                    <Eye className="h-4 w-4 mr-1" />
+                                                    View Details
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        setSelectedScheduleId(schedule.id);
+                                                        setShowScheduleModal(true);
+                                                    }}
+                                                >
+                                                    <Map className="h-4 w-4 mr-1" />
+                                                    View Map
+                                                </Button>
                                             </div>
                                         </div>
                                     ))}
@@ -213,14 +237,25 @@ export default function CollectorSchedulePage() {
                             ) : (
                                 <div className="space-y-3">
                                     {schedules.filter(s => s.status === 'active').map(s => (
-                                        <div key={s.id} className="flex items-center justify-between p-4 rounded-lg border">
-                                            <div>
+                                        <div key={s.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50 transition-colors">
+                                            <div className="flex-1">
                                                 <p className="font-medium">{s.name}</p>
                                                 <p className="text-sm text-gray-500">{format(new Date(s.scheduled_date), 'MMM d, yyyy')} • {s.start_time}</p>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-3">
                                                 <Badge variant="outline">{s.stops_count} stops</Badge>
                                                 {getStatusBadge(s.status)}
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        setSelectedScheduleId(s.id);
+                                                        setShowScheduleModal(true);
+                                                    }}
+                                                >
+                                                    <Map className="h-4 w-4 mr-1" />
+                                                    View Map
+                                                </Button>
                                             </div>
                                         </div>
                                     ))}
@@ -247,6 +282,16 @@ export default function CollectorSchedulePage() {
                     </Tabs>
                 </CardContent>
             </Card>
+
+            {/* View Schedule Modal */}
+            <ViewScheduleModal
+                open={showScheduleModal}
+                onClose={() => {
+                    setShowScheduleModal(false);
+                    setSelectedScheduleId(null);
+                }}
+                scheduleId={selectedScheduleId}
+            />
         </div>
     );
 }
