@@ -60,6 +60,7 @@ export const mockRequest = {
     client_id: mockUser.id,
     requester_name: 'Test User',
     contact_number: '+639123456789',
+    alt_contact_number: null,
     barangay: 'Gredu (Poblacion)',
     address: '123 Test Street',
     priority: 'medium' as PriorityLevel,
@@ -70,6 +71,22 @@ export const mockRequest = {
     collector_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+};
+
+export const mockAssignedRequest = {
+    ...mockRequest,
+    id: 'test-assigned-request-id',
+    status: 'assigned' as RequestStatus,
+    collector_id: mockCollector.id,
+};
+
+export const mockCompletedRequest = {
+    ...mockRequest,
+    id: 'test-completed-request-id',
+    request_number: 'REQ-20241212-0002',
+    status: 'completed' as RequestStatus,
+    collector_id: mockCollector.id,
+    completed_at: new Date().toISOString(),
 };
 
 export const mockPayment = {
@@ -88,17 +105,59 @@ export const mockPayment = {
     updated_at: new Date().toISOString(),
 };
 
-export const mockCompletedRequest = {
-    ...mockRequest,
-    id: 'test-completed-request-id',
-    request_number: 'REQ-20241212-0002',
-    status: 'completed' as RequestStatus,
-    collector_id: 'test-collector-id',
-};
-
 export const mockVerifiedPayment = {
     ...mockPayment,
     id: 'test-verified-payment-id',
     payment_number: 'PAY-20241212-0002',
     status: 'verified' as PaymentStatus,
+};
+
+export const mockFeedback = {
+    id: 'test-feedback-id',
+    request_id: mockCompletedRequest.id,
+    client_id: mockUser.id,
+    collector_id: mockCollector.id,
+    rating: 5,
+    comment: 'Great service!',
+    is_anonymous: false,
+    is_editable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+};
+
+export const mockAnnouncement = {
+    id: 'test-announcement-id',
+    title: 'Test Announcement', // < 100 chars
+    content: 'This is a test announcement content.', // < 2000 chars
+    type: 'info',
+    priority: 'normal',
+    target_audience: ['all'],
+    scheduled_at: null,
+    expires_at: null,
+    created_by: mockStaff.id,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+};
+
+export const mockNotification = {
+    id: 'test-notification-id',
+    user_id: mockUser.id,
+    type: 'request_status_update',
+    title: 'Request Updated',
+    message: 'Your request has been updated.',
+    reference_id: mockRequest.id,
+    reference_type: 'request',
+    is_read: false,
+    created_at: new Date().toISOString(),
+};
+
+export const mockAttendance = {
+    id: 'test-attendance-id',
+    collector_id: mockCollector.id,
+    date: '2024-12-12', // YYYY-MM-DD
+    login_time: '08:00:00',
+    logout_time: '17:00:00',
+    status: 'present',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
 };
