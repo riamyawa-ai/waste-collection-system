@@ -186,11 +186,12 @@ test.describe('Registration Form Validation', () => {
             await page.waitForTimeout(500);
 
             // Check for validation feedback
-            const hasInvalidState = await emailInput.evaluate(el =>
-                el.classList.contains('invalid') ||
-                el.getAttribute('aria-invalid') === 'true' ||
-                !el.validity.valid
-            ).catch(() => false);
+            const hasInvalidState = await emailInput.evaluate(el => {
+                const inputEl = el as HTMLInputElement;
+                return el.classList.contains('invalid') ||
+                    el.getAttribute('aria-invalid') === 'true' ||
+                    (inputEl.validity && !inputEl.validity.valid);
+            }).catch(() => false);
 
             console.log('Email validation triggered:', hasInvalidState);
         }
