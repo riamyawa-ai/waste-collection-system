@@ -23,12 +23,17 @@
 2. ⬜ Match calendar design with client's calendar
 3. ✅ Add attendance history view (created /collector/attendance page)
 
+## Staff Features
+1. ✅ Dashboard overview (requests, collectors, payments)
+2. ✅ Schedule management (assigning collectors)
+3. ✅ Payment verification
+4. ✅ Redesign create schedule modal (implemented side-by-side layout)
+
 ## Staff Fixes
-1. ⬜ Redesign create schedule modal (two-section layout: inputs left, map right)
-2. ✅ Fix "Revenue by Barangay" not displaying data (updated to include verified + completed payments)
-3. ✅ Fix client column showing "unknown" (Fixed RLS policy for profiles access)
-4. ✅ Fix Feedback page: rating stars + comments not displaying (fixed field names: overall_rating, comments)
-5. ✅ Fix UUID error when creating a schedule (convert 'unassigned'/'none' to undefined)
+1. ✅ Fix "Revenue by Barangay" not displaying data (updated to include verified + completed payments)
+2. ✅ Fix client column showing "unknown" (Fixed RLS policy for profiles access)
+3. ✅ Fix Feedback page: rating stars + comments not displaying (fixed field names: overall_rating, comments)
+4. ✅ Fix UUID error when creating a schedule (convert 'unassigned'/'none' to undefined)
 
 ## Admin Features
 1. ⬜ Announcement page (same features as staff, with image posting)

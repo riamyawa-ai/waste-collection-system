@@ -31,13 +31,13 @@ import {
     Clock,
     Users,
     CheckCircle2,
-    ChevronRight,
-    ChevronLeft,
     Sparkles,
     FileText,
     AlertCircle,
     Loader2,
     Star,
+    LayoutGrid,
+    Navigation,
 } from 'lucide-react';
 import { createSchedule } from '@/lib/actions/schedule';
 import { getAvailableCollectors } from '@/lib/actions/staff';
@@ -72,9 +72,7 @@ interface Collector {
 
 export function CreateScheduleModal({ open, onClose, onSuccess }: CreateScheduleModalProps) {
     const [loading, setLoading] = useState(false);
-    const [step, setStep] = useState(1);
     const [collectors, setCollectors] = useState<Collector[]>([]);
-    const [activeTab, setActiveTab] = useState<'map' | 'list'>('map');
 
     // Form state
     const [name, setName] = useState('');
@@ -97,11 +95,10 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
     }, [open]);
 
     useEffect(() => {
-        // Filter locations based on selected types
         if (selectedTypes.length > 0 && !selectedTypes.includes('all')) {
             const filtered = SAMPLE_LOCATIONS.filter(loc => selectedTypes.includes(loc.type));
-            // Auto-add filtered locations as stops
-            setStops(filtered.map((loc) => ({
+            // Add unique stops from selection
+            const manualStops = filtered.map((loc) => ({
                 id: loc.id,
                 locationName: loc.name,
                 locationType: loc.type,
@@ -109,7 +106,8 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                 barangay: loc.barangay,
                 latitude: loc.lat,
                 longitude: loc.lng,
-            })));
+            }));
+            setStops(manualStops);
         } else if (selectedTypes.includes('all')) {
             setStops(SAMPLE_LOCATIONS.map(loc => ({
                 id: loc.id,
@@ -176,8 +174,8 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                     locationType: stop.locationType,
                     address: stop.address,
                     barangay: stop.barangay,
-                    latitude: stop.latitude,
-                    longitude: stop.longitude,
+                    latitude: stop.latitude || 0,
+                    longitude: stop.longitude || 0,
                     stopOrder: index + 1,
                 })),
             });
@@ -197,7 +195,6 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
     };
 
     const resetForm = () => {
-        setStep(1);
         setName('');
         setDescription('');
         setScheduleType('one-time');
@@ -212,570 +209,301 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
         setSpecialInstructions('');
     };
 
-    const steps = [
-        { id: 1, label: 'Route Details', icon: Route, description: 'Name & select stops' },
-        { id: 2, label: 'Schedule Info', icon: Calendar, description: 'Date, time & assign' },
-        { id: 3, label: 'Review & Create', icon: CheckCircle2, description: 'Confirm details' }
-    ];
-
-    const canProceedToStep2 = name.trim() !== '' && stops.length > 0;
-    const canProceedToStep3 = startDate !== '' && startTime !== '' && endTime !== '';
-
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-5xl max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 border-0 shadow-2xl">
-                {/* Glowing Header */}
-                <DialogHeader className="relative px-8 py-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 overflow-hidden">
-                    {/* Decorative elements */}
-                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImRvdHMiIHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNkb3RzKSIvPjwvc3ZnPg==')] opacity-50" />
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
-                    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-teal-400/20 rounded-full blur-2xl" />
-
-                    <div className="relative z-10 flex items-center gap-4">
-                        <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30 shadow-lg">
-                            <Route className="h-7 w-7 text-white" />
+            <DialogContent className="max-w-[95vw] w-full h-[90vh] p-0 gap-0 bg-white overflow-hidden flex flex-col shadow-2xl">
+                {/* Header */}
+                <DialogHeader className="px-6 py-4 border-b border-gray-100 bg-white z-10 flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-emerald-100 rounded-lg">
+                            <Route className="h-5 w-5 text-emerald-600" />
                         </div>
                         <div>
-                            <DialogTitle className="text-2xl font-bold text-white tracking-tight">
-                                Create Collection Schedule
-                            </DialogTitle>
-                            <p className="text-emerald-100 text-sm mt-1">
-                                Design an optimized waste collection route
-                            </p>
+                            <DialogTitle className="text-xl font-bold text-gray-900">Create Collection Schedule</DialogTitle>
+                            <p className="text-sm text-gray-500">Design a route and assign collectors</p>
                         </div>
                     </div>
                 </DialogHeader>
 
-                {/* Modern Step Indicator */}
-                <div className="px-8 py-5 bg-white/80 backdrop-blur-sm border-b border-gray-100/80">
-                    <div className="flex items-center justify-between max-w-2xl mx-auto">
-                        {steps.map((s, index) => {
-                            const isCompleted = step > s.id;
-                            const isCurrent = step === s.id;
-                            const StepIcon = s.icon;
-
-                            return (
-                                <div key={s.id} className="flex items-center">
-                                    <div className="flex flex-col items-center">
-                                        <div
-                                            className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${isCompleted
-                                                ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-200/50'
-                                                : isCurrent
-                                                    ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-200/50 ring-4 ring-emerald-100 scale-110'
-                                                    : 'bg-gray-100 text-gray-400'
-                                                }`}
-                                        >
-                                            {isCompleted ? (
-                                                <CheckCircle2 className="h-6 w-6 text-white" />
-                                            ) : (
-                                                <StepIcon className={`h-5 w-5 ${isCurrent ? 'text-white' : 'text-gray-400'}`} />
-                                            )}
-                                            {isCurrent && (
-                                                <span className="absolute -inset-1 rounded-2xl animate-ping bg-emerald-400/30" />
-                                            )}
-                                        </div>
-                                        <span className={`mt-2 text-xs font-semibold tracking-wide ${isCurrent ? 'text-emerald-700' : isCompleted ? 'text-emerald-600' : 'text-gray-400'
-                                            }`}>
-                                            {s.label}
-                                        </span>
-                                        <span className={`text-[10px] ${isCurrent ? 'text-gray-500' : 'text-gray-400'}`}>
-                                            {s.description}
-                                        </span>
+                <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+                    {/* Left Sidebar - Form Controls */}
+                    <div className="w-full lg:w-[450px] border-r border-gray-200 bg-gray-50/50 flex flex-col h-full flex-shrink-0 z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]">
+                        <ScrollArea className="flex-1">
+                            <div className="p-6 space-y-8">
+                                {/* Basic Info Section */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 text-gray-900 font-semibold text-sm uppercase tracking-wider">
+                                        <FileText className="h-4 w-4 text-emerald-600" />
+                                        Route Details
                                     </div>
-                                    {index < steps.length - 1 && (
-                                        <div className={`w-20 h-1 mx-3 rounded-full transition-all duration-500 ${step > s.id ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gray-200'
-                                            }`} />
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Content Area */}
-                <div className="flex-1 overflow-y-auto px-8 py-6">
-                    {/* Step 1: Route Details */}
-                    {step === 1 && (
-                        <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-                            {/* Route Information Card */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                                <div className="px-6 py-4 border-b border-gray-50 bg-gradient-to-r from-gray-50 to-white">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-emerald-100 rounded-xl">
-                                            <FileText className="h-5 w-5 text-emerald-600" />
-                                        </div>
+                                    <div className="space-y-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                                         <div>
-                                            <h3 className="text-lg font-semibold text-gray-900">Route Information</h3>
-                                            <p className="text-sm text-gray-500">Basic details about this collection route</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="p-6 space-y-5">
-                                    <div>
-                                        <Label className="text-gray-700 font-medium text-sm">Schedule Name *</Label>
-                                        <Input
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            placeholder="e.g., Downtown Morning Collection"
-                                            className="mt-2 h-12 bg-gray-50/50 border-gray-200 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500/20 transition-all rounded-xl text-gray-900 placeholder:text-gray-400"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-gray-700 font-medium text-sm">Description</Label>
-                                        <Textarea
-                                            value={description}
-                                            onChange={(e) => setDescription(e.target.value)}
-                                            placeholder="Optional description of the route and collection targets..."
-                                            className="mt-2 bg-gray-50/50 border-gray-200 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500/20 transition-all resize-none rounded-xl min-h-[80px]"
-                                            rows={2}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Stops Selection Card */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                                <div className="px-6 py-4 border-b border-gray-50 bg-gradient-to-r from-gray-50 to-white">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-blue-100 rounded-xl">
-                                                <MapPin className="h-5 w-5 text-blue-600" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-gray-900">Collection Stops</h3>
-                                                <p className="text-sm text-gray-500">Select locations for waste collection</p>
-                                            </div>
-                                        </div>
-                                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 border-0 font-semibold px-3 py-1">
-                                            {stops.length} stops
-                                        </Badge>
-                                    </div>
-                                </div>
-
-                                {/* Tab Switcher */}
-                                <div className="px-6 pt-5">
-                                    <div className="inline-flex p-1 bg-gray-100 rounded-xl">
-                                        <button
-                                            onClick={() => setActiveTab('map')}
-                                            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'map'
-                                                ? 'bg-white text-emerald-700 shadow-sm'
-                                                : 'text-gray-600 hover:text-gray-900'
-                                                }`}
-                                        >
-                                            <Map className="h-4 w-4" />
-                                            Interactive Map
-                                        </button>
-                                        <button
-                                            onClick={() => setActiveTab('list')}
-                                            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'list'
-                                                ? 'bg-white text-emerald-700 shadow-sm'
-                                                : 'text-gray-600 hover:text-gray-900'
-                                                }`}
-                                        >
-                                            <List className="h-4 w-4" />
-                                            Quick Select
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="p-6">
-                                    {activeTab === 'map' && (
-                                        <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-inner bg-gray-50">
-                                            <MapboxRouteEditor
-                                                stops={stops.map(s => ({
-                                                    ...s,
-                                                    latitude: s.latitude || 0,
-                                                    longitude: s.longitude || 0,
-                                                }))}
-                                                onStopsChange={(newStops) => setStops(newStops)}
-                                                showSampleLocations={true}
-                                                height="450px"
+                                            <Label className="text-xs font-medium text-gray-500 mb-1.5 block">Schedule Name *</Label>
+                                            <Input
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                placeholder="e.g. Downtown Sector A"
+                                                className="h-10 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                                             />
                                         </div>
-                                    )}
+                                        <div>
+                                            <Label className="text-xs font-medium text-gray-500 mb-1.5 block">Description</Label>
+                                            <Textarea
+                                                value={description}
+                                                onChange={(e) => setDescription(e.target.value)}
+                                                placeholder="Brief description..."
+                                                className="resize-none min-h-[60px] border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label className="text-xs font-medium text-gray-500 mb-1.5 block">Type</Label>
+                                            <Select value={scheduleType} onValueChange={(v) => setScheduleType(v as typeof scheduleType)}>
+                                                <SelectTrigger className="h-10 border-gray-200">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="one-time">One-time Collection</SelectItem>
+                                                    <SelectItem value="weekly">Weekly Recurring</SelectItem>
+                                                    <SelectItem value="bi-weekly">Bi-weekly Recurring</SelectItem>
+                                                    <SelectItem value="monthly">Monthly Recurring</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                    {activeTab === 'list' && (
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                {/* Timing Section */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 text-gray-900 font-semibold text-sm uppercase tracking-wider">
+                                        <Clock className="h-4 w-4 text-purple-600" />
+                                        Timing
+                                    </div>
+                                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <Label className="text-xs font-medium text-gray-500 mb-1.5 block">Start Date *</Label>
+                                                <Input
+                                                    type="date"
+                                                    value={startDate}
+                                                    onChange={(e) => setStartDate(e.target.value)}
+                                                    className="h-9 border-gray-200 text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs font-medium text-gray-500 mb-1.5 block">End Date</Label>
+                                                <Input
+                                                    type="date"
+                                                    value={endDate}
+                                                    onChange={(e) => setEndDate(e.target.value)}
+                                                    className="h-9 border-gray-200 text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <Label className="text-xs font-medium text-gray-500 mb-1.5 block">Start Time</Label>
+                                                <Input
+                                                    type="time"
+                                                    value={startTime}
+                                                    onChange={(e) => setStartTime(e.target.value)}
+                                                    className="h-9 border-gray-200 text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs font-medium text-gray-500 mb-1.5 block">End Time</Label>
+                                                <Input
+                                                    type="time"
+                                                    value={endTime}
+                                                    onChange={(e) => setEndTime(e.target.value)}
+                                                    className="h-9 border-gray-200 text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Stops Section */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2 text-gray-900 font-semibold text-sm uppercase tracking-wider">
+                                            <MapPin className="h-4 w-4 text-blue-600" />
+                                            Stops ({stops.length})
+                                        </div>
+                                        <Badge variant="outline" className="bg-white">
+                                            {stops.length > 0 ? `${stops.length} Selected` : 'None'}
+                                        </Badge>
+                                    </div>
+
+                                    {/* Quick Select Types */}
+                                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3">
+                                        <Label className="text-xs font-medium text-gray-500 block">Quick Filters</Label>
+                                        <div className="flex flex-wrap gap-2">
                                             {LOCATION_TYPES.map((type) => {
                                                 const isSelected = selectedTypes.includes(type.id);
                                                 return (
                                                     <button
                                                         key={type.id}
                                                         onClick={() => handleTypeToggle(type.id)}
-                                                        className={`group p-4 rounded-xl border-2 text-sm font-medium transition-all text-left flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 ${isSelected
-                                                            ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-800 shadow-md shadow-emerald-100'
-                                                            : 'border-gray-100 bg-white text-gray-600 hover:border-gray-200'
+                                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border flex items-center gap-1.5 ${isSelected
+                                                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                                                            : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
                                                             }`}
                                                     >
                                                         <span
-                                                            className="w-11 h-11 rounded-xl flex items-center justify-center transition-all group-hover:scale-110"
-                                                            style={{
-                                                                backgroundColor: isSelected ? type.color + '25' : '#f3f4f6',
-                                                                color: type.color
-                                                            }}
-                                                        >
-                                                            <MapPin className="w-5 h-5" />
-                                                        </span>
-                                                        <div className="flex items-center justify-between w-full">
-                                                            <span className={isSelected ? 'font-semibold' : ''}>{type.label}</span>
-                                                            {isSelected && (
-                                                                <span className="w-5 h-5 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm">
-                                                                    <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                                                                </span>
-                                                            )}
-                                                        </div>
+                                                            className="w-2 h-2 rounded-full"
+                                                            style={{ backgroundColor: type.color }}
+                                                        />
+                                                        {type.label}
                                                     </button>
                                                 );
                                             })}
                                         </div>
-                                    )}
+                                    </div>
 
-                                    {/* Selected Stops List */}
+                                    {/* Stops List */}
                                     {stops.length > 0 && (
-                                        <div className="mt-6 bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl border border-gray-200 overflow-hidden">
-                                            <div className="px-4 py-3 border-b border-gray-200/80 flex justify-between items-center bg-white/50">
-                                                <Label className="text-gray-700 font-semibold flex items-center gap-2">
-                                                    <Route className="h-4 w-4 text-emerald-600" />
-                                                    Selected Stops Sequence
-                                                </Label>
-                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md">
-                                                    Drag map markers to reorder
-                                                </span>
-                                            </div>
-                                            <ScrollArea className="h-44 p-3">
-                                                <div className="space-y-2">
-                                                    {stops.map((stop, index) => (
-                                                        <div
-                                                            key={stop.id}
-                                                            className="group flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:border-emerald-200 hover:shadow-md transition-all"
-                                                        >
-                                                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm">
-                                                                {index + 1}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="text-gray-900 text-sm font-medium truncate">
-                                                                    {stop.locationName}
-                                                                </p>
-                                                                <p className="text-gray-500 text-xs truncate">
-                                                                    {stop.address}, {stop.barangay}
-                                                                </p>
-                                                            </div>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => removeStop(stop.id)}
-                                                                className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
+                                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                            <div className="max-h-[200px] overflow-y-auto p-2 space-y-1">
+                                                {stops.map((stop, index) => (
+                                                    <div key={stop.id} className="group flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                                                        <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
+                                                            {index + 1}
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            </ScrollArea>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-gray-900 truncate">{stop.locationName}</p>
+                                                            <p className="text-xs text-gray-500 truncate">{stop.barangay}</p>
+                                                        </div>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => removeStop(stop.id)}
+                                                            className="h-7 w-7 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                        </div>
-                    )}
 
-                    {/* Step 2: Schedule Details */}
-                    {step === 2 && (
-                        <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-                            {/* Timing & Frequency Card */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                                <div className="px-6 py-4 border-b border-gray-50 bg-gradient-to-r from-gray-50 to-white">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-purple-100 rounded-xl">
-                                            <Clock className="h-5 w-5 text-purple-600" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-gray-900">Timing & Frequency</h3>
-                                            <p className="text-sm text-gray-500">When should this collection happen?</p>
-                                        </div>
+                                {/* Assignment Section */}
+                                <div className="space-y-4 pb-4">
+                                    <div className="flex items-center gap-2 text-gray-900 font-semibold text-sm uppercase tracking-wider">
+                                        <Users className="h-4 w-4 text-orange-600" />
+                                        Assignment
                                     </div>
-                                </div>
-                                <div className="p-6 space-y-5">
-                                    <div>
-                                        <Label className="text-gray-700 font-medium text-sm">Frequency *</Label>
-                                        <Select value={scheduleType} onValueChange={(v) => setScheduleType(v as typeof scheduleType)}>
-                                            <SelectTrigger className="mt-2 h-12 bg-gray-50/50 border-gray-200 focus:border-emerald-500 rounded-xl">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="rounded-xl">
-                                                <SelectItem value="one-time" className="rounded-lg">One-time Collection</SelectItem>
-                                                <SelectItem value="weekly" className="rounded-lg">Weekly Recurring</SelectItem>
-                                                <SelectItem value="bi-weekly" className="rounded-lg">Bi-weekly Recurring</SelectItem>
-                                                <SelectItem value="monthly" className="rounded-lg">Monthly Recurring</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
                                         <div>
-                                            <Label className="text-gray-700 font-medium text-sm">Start Date *</Label>
-                                            <Input
-                                                type="date"
-                                                value={startDate}
-                                                onChange={(e) => setStartDate(e.target.value)}
-                                                className="mt-2 h-12 bg-gray-50/50 border-gray-200 focus:border-emerald-500 rounded-xl"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label className="text-gray-700 font-medium text-sm">End Date</Label>
-                                            <Input
-                                                type="date"
-                                                value={endDate}
-                                                onChange={(e) => setEndDate(e.target.value)}
-                                                className="mt-2 h-12 bg-gray-50/50 border-gray-200 focus:border-emerald-500 rounded-xl"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <Label className="text-gray-700 font-medium text-sm">Start Time *</Label>
-                                            <Input
-                                                type="time"
-                                                value={startTime}
-                                                onChange={(e) => setStartTime(e.target.value)}
-                                                className="mt-2 h-12 bg-gray-50/50 border-gray-200 focus:border-emerald-500 rounded-xl"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label className="text-gray-700 font-medium text-sm">End Time *</Label>
-                                            <Input
-                                                type="time"
-                                                value={endTime}
-                                                onChange={(e) => setEndTime(e.target.value)}
-                                                className="mt-2 h-12 bg-gray-50/50 border-gray-200 focus:border-emerald-500 rounded-xl"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Assignment Card */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                                <div className="px-6 py-4 border-b border-gray-50 bg-gradient-to-r from-gray-50 to-white">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-orange-100 rounded-xl">
-                                            <Users className="h-5 w-5 text-orange-600" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-gray-900">Team Assignment</h3>
-                                            <p className="text-sm text-gray-500">Assign collectors to this route</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <Label className="text-gray-700 font-medium text-sm">Primary Collector</Label>
+                                            <Label className="text-xs font-medium text-gray-500 mb-1.5 block">Primary Collector</Label>
                                             <Select value={collectorId} onValueChange={setCollectorId}>
-                                                <SelectTrigger className="mt-2 h-12 bg-gray-50/50 border-gray-200 focus:border-emerald-500 rounded-xl">
+                                                <SelectTrigger className="h-10 border-gray-200">
                                                     <SelectValue placeholder="Select collector" />
                                                 </SelectTrigger>
-                                                <SelectContent className="rounded-xl">
-                                                    <SelectItem value="unassigned" className="rounded-lg">Unassigned</SelectItem>
-                                                    {collectors.map((c) => (
-                                                        <SelectItem key={c.id} value={c.id} className="rounded-lg">
+                                                <SelectContent>
+                                                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                                                    {collectors.map(c => (
+                                                        <SelectItem key={c.id} value={c.id}>
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`w-2 h-2 rounded-full ${c.isOnDuty ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                                                                <span className={`w-2 h-2 rounded-full ${c.isOnDuty ? 'bg-green-500' : 'bg-gray-300'}`} />
                                                                 {c.full_name}
-                                                                {c.averageRating > 0 && (
-                                                                    <span className="flex items-center gap-0.5 text-xs text-amber-600">
-                                                                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                                                        {c.averageRating.toFixed(1)}
-                                                                    </span>
-                                                                )}
                                                             </div>
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                                                <AlertCircle className="h-3 w-3" />
-                                                Responsible for the main route
-                                            </p>
                                         </div>
                                         <div>
-                                            <Label className="text-gray-700 font-medium text-sm">Backup Collector</Label>
+                                            <Label className="text-xs font-medium text-gray-500 mb-1.5 block">Backup (Optional)</Label>
                                             <Select value={backupCollectorId} onValueChange={setBackupCollectorId}>
-                                                <SelectTrigger className="mt-2 h-12 bg-gray-50/50 border-gray-200 focus:border-emerald-500 rounded-xl">
-                                                    <SelectValue placeholder="Optional backup" />
+                                                <SelectTrigger className="h-10 border-gray-200">
+                                                    <SelectValue placeholder="No backup" />
                                                 </SelectTrigger>
-                                                <SelectContent className="rounded-xl">
-                                                    <SelectItem value="none" className="rounded-lg">None</SelectItem>
-                                                    {collectors.filter(c => c.id !== collectorId).map((c) => (
-                                                        <SelectItem key={c.id} value={c.id} className="rounded-lg">
-                                                            {c.full_name}
-                                                        </SelectItem>
+                                                <SelectContent>
+                                                    <SelectItem value="none">None</SelectItem>
+                                                    {collectors.filter(c => c.id !== collectorId).map(c => (
+                                                        <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                                        </div>
+                                        <div>
+                                            <Label className="text-xs font-medium text-gray-500 mb-1.5 block flex items-center gap-1">
                                                 <AlertCircle className="h-3 w-3" />
-                                                Optional backup assignment
-                                            </p>
+                                                Special Instructions
+                                            </Label>
+                                            <Textarea
+                                                value={specialInstructions}
+                                                onChange={(e) => setSpecialInstructions(e.target.value)}
+                                                placeholder="Instructions for the team..."
+                                                className="resize-none h-20 border-gray-200 text-sm"
+                                            />
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </ScrollArea>
+
+                        {/* Footer Actions */}
+                        <div className="p-4 border-t border-gray-200 bg-white space-y-3">
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={loading}
+                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11 font-medium shadow-lg shadow-emerald-200/50"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="h-4 w-4 mr-2" />
+                                        Create Schedule
+                                    </>
+                                )}
+                            </Button>
+                            <Button variant="ghost" onClick={onClose} className="w-full text-gray-500 h-9 text-sm">Cancel</Button>
+                        </div>
+                    </div>
+
+                    {/* Right Side - Interactive Map */}
+                    <div className="hidden lg:block flex-1 relative bg-gray-100 h-full overflow-hidden">
+                        <MapboxRouteEditor
+                            stops={stops.map(s => ({
+                                id: s.id,
+                                locationName: s.locationName,
+                                locationType: s.locationType,
+                                address: s.address,
+                                barangay: s.barangay,
+                                latitude: s.latitude || 0,
+                                longitude: s.longitude || 0,
+                            }))}
+                            onStopsChange={(newStops) => {
+                                // Map back to full Stop objects
+                                const updatedStops: Stop[] = newStops.map(ns => ({
+                                    id: ns.id,
+                                    locationName: ns.locationName,
+                                    locationType: ns.locationType,
+                                    address: ns.address,
+                                    barangay: ns.barangay,
+                                    latitude: ns.latitude,
+                                    longitude: ns.longitude
+                                }));
+                                setStops(updatedStops);
+                            }}
+                            showSampleLocations={true}
+                            height="100%"
+                        />
+
+                        {/* Map Overlay Instructions */}
+                        <div className="absolute top-4 left-4 right-4 z-10 pointer-events-none">
+                            <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-gray-200 shadow-sm inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                                <Navigation className="h-4 w-4 text-emerald-600" />
+                                Click on map or markers to add route stops
                             </div>
                         </div>
-                    )}
-
-                    {/* Step 3: Review & Confirm */}
-                    {step === 3 && (
-                        <div className="animate-fade-in max-w-4xl mx-auto space-y-6">
-                            {/* Success Banner */}
-                            <div className="relative bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500 rounded-2xl p-6 text-white overflow-hidden">
-                                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImRvdHMiIHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNkb3RzKSIvPjwvc3ZnPg==')] opacity-30" />
-                                <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                                <div className="relative flex items-start gap-4">
-                                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                                        <Sparkles className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-lg">Ready to Create Schedule</h4>
-                                        <p className="text-emerald-100 text-sm mt-1">
-                                            Review the details below. Once created, collectors will be notified of their new assignment.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Review Cards Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Overview Card */}
-                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                                    <h3 className="font-semibold text-gray-900 pb-4 border-b border-gray-100 flex items-center gap-2">
-                                        <FileText className="h-4 w-4 text-emerald-600" />
-                                        Schedule Overview
-                                    </h3>
-                                    <div className="space-y-4 pt-4">
-                                        <div>
-                                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</span>
-                                            <p className="text-gray-900 font-semibold mt-1">{name}</p>
-                                        </div>
-                                        <div>
-                                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Type</span>
-                                            <p className="text-gray-900 font-medium capitalize mt-1 flex items-center gap-2">
-                                                <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-0">
-                                                    {scheduleType.replace('-', ' ')}
-                                                </Badge>
-                                            </p>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</span>
-                                                <p className="text-gray-900 font-medium mt-1">{startDate}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Time</span>
-                                                <p className="text-gray-900 font-medium mt-1">{startTime} - {endTime}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Logistics Card */}
-                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                                    <h3 className="font-semibold text-gray-900 pb-4 border-b border-gray-100 flex items-center gap-2">
-                                        <MapPin className="h-4 w-4 text-blue-600" />
-                                        Route Logistics
-                                    </h3>
-                                    <div className="space-y-4 pt-4">
-                                        <div>
-                                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Stops</span>
-                                            <div className="flex items-baseline gap-2 mt-1">
-                                                <span className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{stops.length}</span>
-                                                <span className="text-gray-500 text-sm">locations</span>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Assigned Team</span>
-                                            <div className="mt-2 space-y-2">
-                                                <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                                                    <span className="text-gray-900 font-medium text-sm">
-                                                        {collectors.find(c => c.id === collectorId)?.full_name || 'Unassigned'}
-                                                    </span>
-                                                    <Badge variant="secondary" className="text-xs bg-emerald-100 text-emerald-700 border-0 ml-auto">
-                                                        Primary
-                                                    </Badge>
-                                                </div>
-                                                {backupCollectorId && backupCollectorId !== 'none' && (
-                                                    <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                                                        <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-                                                        <span className="text-gray-700 text-sm">
-                                                            {collectors.find(c => c.id === backupCollectorId)?.full_name}
-                                                        </span>
-                                                        <Badge variant="secondary" className="text-xs bg-gray-200 text-gray-600 border-0 ml-auto">
-                                                            Backup
-                                                        </Badge>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Special Instructions */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                                <Label className="text-gray-700 font-semibold mb-3 flex items-center gap-2">
-                                    <AlertCircle className="h-4 w-4 text-amber-500" />
-                                    Special Instructions
-                                </Label>
-                                <Textarea
-                                    value={specialInstructions}
-                                    onChange={(e) => setSpecialInstructions(e.target.value)}
-                                    placeholder="Any final notes or instructions for the collection team..."
-                                    className="bg-gray-50/50 border-gray-200 focus:border-emerald-500 rounded-xl min-h-[100px]"
-                                    rows={3}
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Modern Footer Actions */}
-                <div className="bg-white/90 backdrop-blur-sm px-8 py-5 border-t border-gray-100 flex justify-between items-center">
-                    <Button
-                        variant="ghost"
-                        onClick={() => step > 1 ? setStep(step - 1) : onClose()}
-                        className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl h-11 px-5"
-                    >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        {step > 1 ? 'Back' : 'Cancel'}
-                    </Button>
-                    <div className="flex items-center gap-4">
-                        <span className="text-sm text-gray-400 font-medium">
-                            Step {step} of 3
-                        </span>
-                        <Button
-                            onClick={() => step < 3 ? setStep(step + 1) : handleSubmit()}
-                            disabled={loading || (step === 1 && !canProceedToStep2) || (step === 2 && !canProceedToStep3)}
-                            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white min-w-[160px] h-11 rounded-xl shadow-lg shadow-emerald-200/50 transition-all hover:shadow-xl hover:shadow-emerald-200/60 disabled:opacity-50 disabled:shadow-none"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    Creating...
-                                </>
-                            ) : step < 3 ? (
-                                <>
-                                    Next Step
-                                    <ChevronRight className="h-4 w-4 ml-1" />
-                                </>
-                            ) : (
-                                <>
-                                    <Sparkles className="h-4 w-4 mr-2" />
-                                    Create Schedule
-                                </>
-                            )}
-                        </Button>
                     </div>
                 </div>
             </DialogContent>
