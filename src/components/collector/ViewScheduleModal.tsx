@@ -51,7 +51,7 @@ interface ScheduleDetails {
     name: string;
     description: string | null;
     schedule_type: string;
-    scheduled_date: string;
+    start_date: string;
     start_time: string;
     end_time: string;
     status: string;

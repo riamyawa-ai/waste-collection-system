@@ -19,7 +19,7 @@ interface Schedule {
     name: string;
     description: string | null;
     schedule_type: string;
-    scheduled_date: string;
+    start_date: string;
     start_time: string;
     end_time: string;
     status: string;
@@ -52,9 +52,9 @@ export default function CollectorSchedulePage() {
                 .from('collection_schedules')
                 .select(`*, stops:schedule_stops(count)`)
                 .or(`assigned_collector_id.eq.${user.id},backup_collector_id.eq.${user.id}`)
-                .gte('scheduled_date', monthStart)
-                .lte('scheduled_date', monthEnd)
-                .order('scheduled_date', { ascending: true });
+                .gte('start_date', monthStart)
+                .lte('start_date', monthEnd)
+                .order('start_date', { ascending: true });
 
             if (data) {
                 setSchedules(data.map(s => ({
@@ -74,7 +74,7 @@ export default function CollectorSchedulePage() {
     });
 
     const getSchedulesForDate = (date: Date) => {
-        return schedules.filter(s => isSameDay(new Date(s.scheduled_date), date));
+        return schedules.filter(s => isSameDay(new Date(s.start_date), date));
     };
 
     const selectedDateSchedules = selectedDate ? getSchedulesForDate(selectedDate) : [];
@@ -240,7 +240,7 @@ export default function CollectorSchedulePage() {
                                         <div key={s.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50 transition-colors">
                                             <div className="flex-1">
                                                 <p className="font-medium">{s.name}</p>
-                                                <p className="text-sm text-gray-500">{format(new Date(s.scheduled_date), 'MMM d, yyyy')} • {s.start_time}</p>
+                                                <p className="text-sm text-gray-500">{format(new Date(s.start_date), 'MMM d, yyyy')} • {s.start_time}</p>
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <Badge variant="outline">{s.stops_count} stops</Badge>
@@ -271,7 +271,7 @@ export default function CollectorSchedulePage() {
                                         <div key={s.id} className="flex items-center justify-between p-4 rounded-lg border">
                                             <div>
                                                 <p className="font-medium">{s.name}</p>
-                                                <p className="text-sm text-gray-500">{format(new Date(s.scheduled_date), 'MMM d, yyyy')}</p>
+                                                <p className="text-sm text-gray-500">{format(new Date(s.start_date), 'MMM d, yyyy')}</p>
                                             </div>
                                             <CheckCircle2 className="h-5 w-5 text-green-600" />
                                         </div>
