@@ -76,9 +76,15 @@ export function CollectionCalendar({
     const getEventsForDate = (day: number): CalendarEvent[] => {
         const checkDate = new Date(year, month, day);
 
+        // Helper to parse YYYY-MM-DD as local date
+        const parseLocalDate = (dateStr: string) => {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        };
+
         return events.filter((event) => {
-            const startDate = new Date(event.date);
-            const endDate = event.end_date ? new Date(event.end_date) : startDate;
+            const startDate = parseLocalDate(event.date);
+            const endDate = event.end_date ? parseLocalDate(event.end_date) : startDate;
 
             // Check if the current date falls within the event's date range
             return checkDate >= startDate && checkDate <= endDate;

@@ -78,9 +78,15 @@ export function ScheduleCalendar({
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const checkDate = new Date(year, month, day);
 
+        // Helper to parse YYYY-MM-DD as local date
+        const parseLocalDate = (dateStr: string) => {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        };
+
         return schedules.filter((schedule) => {
-            const startDate = new Date(schedule.start_date);
-            const endDate = schedule.end_date ? new Date(schedule.end_date) : startDate;
+            const startDate = parseLocalDate(schedule.start_date);
+            const endDate = schedule.end_date ? parseLocalDate(schedule.end_date) : startDate;
 
             // Check if the current date falls within the schedule's date range
             return checkDate >= startDate && checkDate <= endDate;
