@@ -18,7 +18,8 @@ import {
     Clock,
     AlertTriangle,
     Bell,
-    Mail
+    Mail,
+    Wrench
 } from 'lucide-react';
 import { getAnnouncementById } from '@/lib/actions/announcement';
 import { format } from 'date-fns';
@@ -44,6 +45,8 @@ interface Announcement {
     views_count: number;
     send_email_notification: boolean;
     send_push_notification: boolean;
+    maintenance_start?: string;
+    maintenance_end?: string;
     created_at: string;
     updated_at: string;
     creator: { id: string; full_name: string; email: string } | null;
@@ -115,8 +118,8 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-2xl max-h-[90vh]">
-                <DialogHeader>
+            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+                <DialogHeader className="border-b border-gray-100 pb-4 shrink-0">
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
                         <Megaphone className="h-5 w-5 text-purple-600" />
                         Announcement Details
@@ -128,8 +131,8 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
                     </div>
                 ) : announcement ? (
-                    <ScrollArea className="max-h-[70vh] pr-4">
-                        <div className="space-y-6">
+                    <ScrollArea className="flex-1 pr-4 overflow-y-auto">
+                        <div className="space-y-6 py-2">
                             {/* Header */}
                             <div className="space-y-3">
                                 <div className="flex items-start justify-between gap-4">
@@ -217,6 +220,32 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                                 )}
                             </div>
 
+
+
+                            {/* Maintenance Dates */}
+                            {announcement.type === 'maintenance' && announcement.maintenance_start && (
+                                <div className="bg-orange-50 rounded-lg p-4 space-y-3 border border-orange-100">
+                                    <h4 className="font-medium text-orange-800 flex items-center gap-2">
+                                        <Wrench className="h-4 w-4" />
+                                        Maintenance Schedule
+                                    </h4>
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-gray-600 text-sm">Start Time</div>
+                                        <p className="font-medium text-gray-900">
+                                            {format(new Date(announcement.maintenance_start), 'MMM dd, yyyy \'at\' h:mm a')}
+                                        </p>
+                                    </div>
+                                    {announcement.maintenance_end && (
+                                        <div className="flex items-center justify-between">
+                                            <div className="text-gray-600 text-sm">End Time</div>
+                                            <p className="font-medium text-gray-900">
+                                                {format(new Date(announcement.maintenance_end), 'MMM dd, yyyy \'at\' h:mm a')}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Notification Settings */}
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
                                 <h4 className="text-sm font-medium text-gray-500 mb-3">Notification Settings</h4>
@@ -250,7 +279,7 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                     </div>
                 )}
 
-                <div className="flex justify-end pt-4 border-t border-gray-200">
+                <div className="flex justify-end pt-4 border-t border-gray-200 shrink-0 mt-auto">
                     <Button
                         variant="outline"
                         onClick={onClose}
@@ -259,6 +288,6 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                     </Button>
                 </div>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 }

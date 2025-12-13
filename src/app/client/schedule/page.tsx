@@ -10,6 +10,7 @@ import {
     CollectionCalendarSkeleton,
 } from '@/components/client';
 import { getClientRequests } from '@/lib/actions/requests';
+import { getPublicSchedules } from '@/lib/actions/public-schedule';
 import { cn } from '@/lib/utils';
 import type { RequestStatus } from '@/constants/status';
 import { format } from 'date-fns';
@@ -23,6 +24,7 @@ interface ScheduleEvent {
     date: string;
     status: RequestStatus;
     title: string;
+    details?: any;
 }
 
 interface HistoryItem {
@@ -38,31 +40,60 @@ interface HistoryItem {
     } | null;
 }
 
+interface PublicSchedule {
+    id: string;
+    name: string;
+    description: string | null;
+    start_date: string;
+    start_time: string;
+    status: string;
+    assigned_collector: {
+        full_name: string;
+    } | null;
+}
+
 export default function ClientSchedulePage() {
     const [activeTab, setActiveTab] = useState<ViewTab>('calendar');
     const [events, setEvents] = useState<ScheduleEvent[]>([]);
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const [publicSchedules, setPublicSchedules] = useState<PublicSchedule[]>([]);
+
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const result = await getClientRequests({ limit: 100 });
-
-            if (result.success && result.data) {
-                const requests = result.data.requests;
+            // Fetch public schedules for calendar/list
+            const scheduleResult = await getPublicSchedules();
+            if (scheduleResult.success && scheduleResult.data) {
+                const schedules = scheduleResult.data as PublicSchedule[];
+                setPublicSchedules(schedules);
 
                 // Format for calendar
                 setEvents(
-                    requests.map((req) => ({
-                        id: req.id as string,
-                        date: req.preferred_date as string,
-                        status: req.status as RequestStatus,
-                        title: req.request_number as string,
-                    }))
-                );
+                    schedules.map((sched) => {
+                        // Map schedule status to request status for calendar display
+                        let displayStatus = sched.status;
+                        if (displayStatus === 'active') displayStatus = 'assigned';
 
-                // Format for history (completed/cancelled only)
+                        return {
+                            id: sched.id,
+                            date: sched.start_date,
+                            status: displayStatus as RequestStatus,
+                            title: sched.name,
+                            time_slot: sched.start_time,
+                            details: sched,
+                            type: 'schedule',
+                            description: sched.description || undefined
+                        };
+                    })
+                );
+            }
+
+            // Fetch personal history (completed/cancelled requests)
+            const historyResult = await getClientRequests({ limit: 100 });
+            if (historyResult.success && historyResult.data) {
+                const requests = historyResult.data.requests;
                 setHistory(
                     requests
                         .filter((req) =>
@@ -77,6 +108,7 @@ export default function ClientSchedulePage() {
                             scheduled_date: req.scheduled_date as string | null,
                             completed_at: req.completed_at as string | null,
                             assigned_collector: req.assigned_collector as { full_name: string } | null,
+                            type: 'request',
                         })) as HistoryItem[]
                 );
             }
@@ -93,7 +125,7 @@ export default function ClientSchedulePage() {
 
     const tabs = [
         { id: 'calendar' as const, label: 'Calendar View', icon: Calendar },
-        { id: 'regular' as const, label: 'Regular Schedules', icon: List },
+        { id: 'regular' as const, label: 'Routes List', icon: List },
         { id: 'history' as const, label: 'Collection History', icon: History },
     ];
 
@@ -161,18 +193,40 @@ export default function ClientSchedulePage() {
 
                 {activeTab === 'regular' && (
                     <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                        <div className="p-6 text-center">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-50 mb-4">
-                                <List className="w-8 h-8 text-primary-600" />
+                        {publicSchedules.length > 0 ? (
+                            <div className="divide-y divide-neutral-100">
+                                {publicSchedules.map((schedule) => (
+                                    <div key={schedule.id} className="p-4 hover:bg-neutral-50 flex items-center justify-between">
+                                        <div>
+                                            <h4 className="font-medium text-neutral-900">{schedule.name}</h4>
+                                            <div className="flex items-center gap-2 text-sm text-neutral-500 mt-1">
+                                                <span>{format(new Date(schedule.start_date), 'MMM d, yyyy')}</span>
+                                                <span>•</span>
+                                                <span>{schedule.start_time}</span>
+                                            </div>
+                                            {schedule.assigned_collector?.full_name && (
+                                                <p className="text-xs text-neutral-400 mt-1">
+                                                    Collector: {schedule.assigned_collector.full_name}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <StatusBadge status={schedule.status === 'active' ? 'assigned' : schedule.status as RequestStatus} />
+                                    </div>
+                                ))}
                             </div>
-                            <h3 className="text-lg font-semibold text-neutral-900 mb-2">
-                                No Regular Schedules
-                            </h3>
-                            <p className="text-neutral-500 mb-4 max-w-md mx-auto">
-                                Regular collection schedules assigned to your area will appear here.
-                                Contact your local waste management office for more information.
-                            </p>
-                        </div>
+                        ) : (
+                            <div className="p-6 text-center">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-50 mb-4">
+                                    <List className="w-8 h-8 text-primary-600" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+                                    No Active Schedules
+                                </h3>
+                                <p className="text-neutral-500 mb-4 max-w-md mx-auto">
+                                    There are no active collection schedules at the moment.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
 

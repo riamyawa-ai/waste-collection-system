@@ -24,6 +24,8 @@ interface CalendarEvent {
     title?: string;
     barangay?: string;
     time_slot?: string;
+    type?: 'request' | 'schedule';
+    description?: string;
 }
 
 interface CollectionCalendarProps {
@@ -306,12 +308,18 @@ export function CollectionCalendar({
                                                 )}
                                             </div>
 
-                                            <Link href={`/client/requests/${event.id}`}>
-                                                <Button variant="outline" size="sm">
-                                                    <Eye className="w-4 h-4 mr-1" />
-                                                    View
-                                                </Button>
-                                            </Link>
+                                            {event.type === 'schedule' ? (
+                                                <div className="mt-2 text-sm text-neutral-600 bg-neutral-50 p-2 rounded border border-neutral-100">
+                                                    {event.description || 'No additional details.'}
+                                                </div>
+                                            ) : (
+                                                <Link href={`/client/requests/${event.id}`}>
+                                                    <Button variant="outline" size="sm">
+                                                        <Eye className="w-4 h-4 mr-1" />
+                                                        View
+                                                    </Button>
+                                                </Link>
+                                            )}
                                         </div>
                                     </div>
                                 ))
