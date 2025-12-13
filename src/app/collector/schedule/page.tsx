@@ -8,11 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
-import { Clock, MapPin, CheckCircle2, Truck, Map, Route } from 'lucide-react';
+import { Clock, MapPin, CheckCircle2, Truck, Map, Route, XCircle, AlertTriangle } from 'lucide-react';
 import { SCHEDULE_STATUS_COLORS, SCHEDULE_STATUS_LABELS } from '@/constants/status';
 import { ViewScheduleModal } from '@/components/collector/ViewScheduleModal';
 import { ScheduleCalendar } from '@/components/collector/ScheduleCalendar';
+import { acceptSchedule, declineSchedule } from '@/lib/actions/collector';
+import { toast } from 'sonner';
 
 interface Schedule {
     id: string;
@@ -27,12 +33,31 @@ interface Schedule {
     stops_count: number;
 }
 
+const DECLINE_REASONS = [
+    { value: 'capacity', label: 'Already at capacity' },
+    { value: 'outside_area', label: 'Outside service area' },
+    { value: 'schedule_conflict', label: 'Schedule conflict' },
+    { value: 'vehicle_issue', label: 'Vehicle/equipment issue' },
+    { value: 'personal', label: 'Personal emergency' },
+    { value: 'other', label: 'Other' },
+];
+
 export default function CollectorSchedulePage() {
     const [schedules, setSchedules] = useState<Schedule[]>([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [isLoading, setIsLoading] = useState(true);
     const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(null);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
+
+    // Decline dialog state
+    const [showDeclineDialog, setShowDeclineDialog] = useState(false);
+    const [scheduleToDecline, setScheduleToDecline] = useState<Schedule | null>(null);
+    const [declineReason, setDeclineReason] = useState('');
+    const [declineOtherReason, setDeclineOtherReason] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    // No collector available modal
+    const [showNoCollectorModal, setShowNoCollectorModal] = useState(false);
 
     const fetchSchedules = useCallback(async () => {
         setIsLoading(true);
@@ -76,6 +101,56 @@ export default function CollectorSchedulePage() {
         fetchSchedules();
     }, [fetchSchedules]);
 
+    const handleAccept = async (schedule: Schedule) => {
+        setIsProcessing(true);
+        const result = await acceptSchedule(schedule.id);
+        if (result.error) {
+            toast.error(result.error);
+        } else {
+            toast.success('Schedule accepted!');
+            fetchSchedules();
+        }
+        setIsProcessing(false);
+    };
+
+    const handleDeclineClick = (schedule: Schedule) => {
+        setScheduleToDecline(schedule);
+        setDeclineReason('');
+        setDeclineOtherReason('');
+        setShowDeclineDialog(true);
+    };
+
+    const handleDeclineSubmit = async () => {
+        if (!scheduleToDecline) return;
+
+        const reason = declineReason === 'other'
+            ? declineOtherReason
+            : DECLINE_REASONS.find(r => r.value === declineReason)?.label || declineReason;
+
+        if (!reason) {
+            toast.error('Please provide a reason');
+            return;
+        }
+
+        setIsProcessing(true);
+        const result = await declineSchedule(scheduleToDecline.id, reason);
+
+        if (result.error) {
+            toast.error(result.error);
+        } else {
+            setShowDeclineDialog(false);
+
+            if (result.reassignmentFailed) {
+                setShowNoCollectorModal(true);
+            } else {
+                toast.success(result.message || 'Schedule declined');
+            }
+
+            fetchSchedules();
+        }
+        setIsProcessing(false);
+    };
+
     const getStatusBadge = (status: string) => {
         const colors = SCHEDULE_STATUS_COLORS[status as keyof typeof SCHEDULE_STATUS_COLORS] || SCHEDULE_STATUS_COLORS.draft;
         return <Badge className={`${colors.bg} ${colors.text}`}>{SCHEDULE_STATUS_LABELS[status as keyof typeof SCHEDULE_STATUS_LABELS] || status}</Badge>;
@@ -84,6 +159,11 @@ export default function CollectorSchedulePage() {
     const handleScheduleClick = (schedule: { id: string }) => {
         setSelectedScheduleId(schedule.id);
         setShowScheduleModal(true);
+    };
+
+    // Check if schedule can be accepted/declined
+    const canRespondToSchedule = (status: string) => {
+        return status === 'active';
     };
 
     // Get schedules for calendar (current month only)
@@ -98,7 +178,7 @@ export default function CollectorSchedulePage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const upcomingSchedules = schedules
-        .filter(s => s.status === 'active' && new Date(s.start_date) >= today)
+        .filter(s => ['active', 'accepted'].includes(s.status) && new Date(s.start_date) >= today)
         .slice(0, 5);
 
     // Get completed schedules
@@ -108,7 +188,7 @@ export default function CollectorSchedulePage() {
 
     return (
         <div className="space-y-6 p-6">
-            <PageHeader title="My Schedule" description="View your assigned collection schedules" />
+            <PageHeader title="My Schedule" description="View and manage your assigned collection schedules" />
 
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* Calendar - Takes up 2 columns */}
@@ -157,9 +237,36 @@ export default function CollectorSchedulePage() {
                                         <MapPin className="h-3 w-3" />
                                         <span>{upcomingSchedules[0].stops_count} stops</span>
                                     </div>
+
+                                    {/* Action Buttons */}
+                                    {canRespondToSchedule(upcomingSchedules[0].status) && (
+                                        <div className="flex gap-2 mt-3">
+                                            <Button
+                                                size="sm"
+                                                className="flex-1 bg-green-600 hover:bg-green-700"
+                                                onClick={() => handleAccept(upcomingSchedules[0])}
+                                                disabled={isProcessing}
+                                            >
+                                                <CheckCircle2 className="h-4 w-4 mr-1" />
+                                                Accept
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                className="flex-1"
+                                                onClick={() => handleDeclineClick(upcomingSchedules[0])}
+                                                disabled={isProcessing}
+                                            >
+                                                <XCircle className="h-4 w-4 mr-1" />
+                                                Decline
+                                            </Button>
+                                        </div>
+                                    )}
+
                                     <Button
                                         size="sm"
-                                        className="w-full mt-2 bg-green-600 hover:bg-green-700"
+                                        variant="outline"
+                                        className="w-full mt-2"
                                         onClick={() => handleScheduleClick(upcomingSchedules[0])}
                                     >
                                         <Map className="h-4 w-4 mr-1" />
@@ -203,6 +310,31 @@ export default function CollectorSchedulePage() {
                                             <div className="flex items-center gap-3">
                                                 <Badge variant="outline">{s.stops_count} stops</Badge>
                                                 {getStatusBadge(s.status)}
+
+                                                {/* Accept/Decline buttons for active schedules */}
+                                                {canRespondToSchedule(s.status) && (
+                                                    <>
+                                                        <Button
+                                                            size="sm"
+                                                            className="bg-green-600 hover:bg-green-700"
+                                                            onClick={() => handleAccept(s)}
+                                                            disabled={isProcessing}
+                                                        >
+                                                            <CheckCircle2 className="h-4 w-4 mr-1" />
+                                                            Accept
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="destructive"
+                                                            onClick={() => handleDeclineClick(s)}
+                                                            disabled={isProcessing}
+                                                        >
+                                                            <XCircle className="h-4 w-4 mr-1" />
+                                                            Decline
+                                                        </Button>
+                                                    </>
+                                                )}
+
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
@@ -253,6 +385,67 @@ export default function CollectorSchedulePage() {
                 }}
                 scheduleId={selectedScheduleId}
             />
+
+            {/* Decline Dialog */}
+            <Dialog open={showDeclineDialog} onOpenChange={setShowDeclineDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Decline Schedule</DialogTitle>
+                        <DialogDescription>
+                            Please select a reason for declining this schedule. It will be reassigned to another available collector.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <RadioGroup value={declineReason} onValueChange={setDeclineReason} className="space-y-2">
+                        {DECLINE_REASONS.map((r) => (
+                            <div key={r.value} className="flex items-center space-x-2">
+                                <RadioGroupItem value={r.value} id={`decline-${r.value}`} />
+                                <Label htmlFor={`decline-${r.value}`}>{r.label}</Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
+                    {declineReason === 'other' && (
+                        <Textarea
+                            value={declineOtherReason}
+                            onChange={(e) => setDeclineOtherReason(e.target.value)}
+                            placeholder="Specify your reason..."
+                            className="mt-2"
+                        />
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowDeclineDialog(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDeclineSubmit}
+                            disabled={isProcessing || !declineReason}
+                        >
+                            {isProcessing ? 'Declining...' : 'Decline Schedule'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* No Collector Available Modal */}
+            <Dialog open={showNoCollectorModal} onOpenChange={setShowNoCollectorModal}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-amber-600">
+                            <AlertTriangle className="h-5 w-5" />
+                            No Available Collectors
+                        </DialogTitle>
+                        <DialogDescription className="pt-2">
+                            There are no other collectors available at this time to take over this schedule.
+                            Staff has been notified and will assign a replacement as soon as one becomes available.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button onClick={() => setShowNoCollectorModal(false)}>
+                            Understood
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

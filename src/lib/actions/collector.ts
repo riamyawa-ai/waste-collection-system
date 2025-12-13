@@ -456,3 +456,204 @@ export async function getAssignedRequests(filters?: {
 
     return { data, total: count };
 }
+
+/**
+ * Accept an assigned schedule
+ */
+export async function acceptSchedule(scheduleId: string) {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { error: 'Unauthorized' };
+    }
+
+    // Verify schedule is assigned to this collector and is active
+    const { data: schedule } = await supabase
+        .from('collection_schedules')
+        .select('*')
+        .eq('id', scheduleId)
+        .eq('assigned_collector_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+    if (!schedule) {
+        return { error: 'Schedule not found or not assigned to you' };
+    }
+
+    // Update status to accepted
+    const { data, error } = await supabase
+        .from('collection_schedules')
+        .update({
+            status: 'accepted',
+            accepted_at: new Date().toISOString(),
+        })
+        .eq('id', scheduleId)
+        .select()
+        .single();
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    revalidatePath('/collector/schedule');
+    revalidatePath('/collector/dashboard');
+    return { data };
+}
+
+/**
+ * Decline an assigned schedule with reason and attempt auto-reassignment
+ */
+export async function declineSchedule(scheduleId: string, reason: string) {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { error: 'Unauthorized' };
+    }
+
+    // Verify schedule is assigned to this collector
+    const { data: schedule } = await supabase
+        .from('collection_schedules')
+        .select('*')
+        .eq('id', scheduleId)
+        .eq('assigned_collector_id', user.id)
+        .in('status', ['active', 'accepted'])
+        .single();
+
+    if (!schedule) {
+        return { error: 'Schedule not found or not assigned to you' };
+    }
+
+    // Find another available clocked-in collector
+    const today = new Date().toISOString().split('T')[0];
+
+    const { data: availableCollectors } = await supabase
+        .from('collector_attendance')
+        .select('collector_id, collector:profiles!collector_attendance_collector_id_fkey(id, full_name)')
+        .eq('date', today)
+        .is('logout_time', null)
+        .neq('collector_id', user.id);
+
+    let reassignedTo = null;
+    let reassignmentFailed = false;
+
+    if (availableCollectors && availableCollectors.length > 0) {
+        // Assign to first available collector (could be enhanced with load balancing)
+        reassignedTo = availableCollectors[0].collector_id;
+
+        // Update schedule with new collector
+        const { error: updateError } = await supabase
+            .from('collection_schedules')
+            .update({
+                assigned_collector_id: reassignedTo,
+                status: 'active',
+                declined_by: user.id,
+                decline_reason: reason,
+                declined_at: new Date().toISOString(),
+            })
+            .eq('id', scheduleId);
+
+        if (updateError) {
+            return { error: updateError.message };
+        }
+
+        // Create notification for new collector
+        await supabase.from('notifications').insert({
+            user_id: reassignedTo,
+            type: 'schedule_assigned',
+            title: 'New Schedule Assignment',
+            message: `You have been assigned a new schedule: ${schedule.name}`,
+            data: { schedule_id: scheduleId },
+        });
+    } else {
+        // No available collectors, mark as needs_reassignment and notify staff
+        reassignmentFailed = true;
+
+        const { error: updateError } = await supabase
+            .from('collection_schedules')
+            .update({
+                assigned_collector_id: null,
+                status: 'needs_reassignment',
+                declined_by: user.id,
+                decline_reason: reason,
+                declined_at: new Date().toISOString(),
+            })
+            .eq('id', scheduleId);
+
+        if (updateError) {
+            return { error: updateError.message };
+        }
+
+        // Notify staff about failed reassignment
+        const { data: staffUsers } = await supabase
+            .from('profiles')
+            .select('id')
+            .in('role', ['staff', 'admin']);
+
+        if (staffUsers) {
+            const notifications = staffUsers.map(staff => ({
+                user_id: staff.id,
+                type: 'schedule_needs_reassignment',
+                title: 'Schedule Needs Reassignment',
+                message: `Schedule "${schedule.name}" was declined and no collectors are available for reassignment.`,
+                data: { schedule_id: scheduleId },
+            }));
+
+            await supabase.from('notifications').insert(notifications);
+        }
+    }
+
+    revalidatePath('/collector/schedule');
+    revalidatePath('/collector/dashboard');
+    revalidatePath('/staff/schedule');
+
+    if (reassignmentFailed) {
+        return {
+            data: null,
+            error: null,
+            reassignmentFailed: true,
+            message: 'Schedule declined. No available collectors found. Staff has been notified.'
+        };
+    }
+
+    return {
+        data: null,
+        error: null,
+        message: 'Schedule declined and reassigned to another collector.'
+    };
+}
+
+/**
+ * Get clocked-in collectors for schedule assignment
+ */
+export async function getClockedInCollectors() {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { error: 'Unauthorized' };
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const { data, error } = await supabase
+        .from('collector_attendance')
+        .select(`
+            collector_id,
+            login_time,
+            collector:profiles!collector_attendance_collector_id_fkey(id, full_name, email, phone)
+        `)
+        .eq('date', today)
+        .is('logout_time', null);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    // Extract collector profiles
+    const collectors = data?.map(a => a.collector).filter(Boolean) || [];
+
+    return { data: collectors };
+}
+

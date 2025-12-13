@@ -62,7 +62,6 @@ export async function generateCollectionReport(period: string): Promise<ActionRe
                 request_number,
                 status,
                 barangay,
-                waste_type,
                 preferred_date,
                 completed_at,
                 client:client_id(full_name),
@@ -119,7 +118,6 @@ export async function generateCollectionReport(period: string): Promise<ActionRe
                     requestNumber: r.request_number,
                     status: r.status,
                     barangay: r.barangay,
-                    wasteType: r.waste_type,
                     preferredDate: r.preferred_date,
                     completedAt: r.completed_at,
                     client: (r.client as { full_name?: string } | null)?.full_name || 'Unknown',
@@ -346,7 +344,6 @@ export async function generateRequestReport(period: string): Promise<ActionResul
                 status,
                 priority,
                 barangay,
-                waste_type,
                 preferred_time_slot,
                 created_at,
                 scheduled_date
@@ -376,12 +373,7 @@ export async function generateRequestReport(period: string): Promise<ActionResul
             byPriority[priority] = (byPriority[priority] || 0) + 1;
         });
 
-        // By waste type
-        const byWasteType: Record<string, number> = {};
-        requests?.forEach(r => {
-            const wasteType = r.waste_type || 'mixed';
-            byWasteType[wasteType] = (byWasteType[wasteType] || 0) + 1;
-        });
+
 
         // By time slot
         const byTimeSlot: Record<string, number> = {};
@@ -417,7 +409,6 @@ export async function generateRequestReport(period: string): Promise<ActionResul
                 },
                 byStatus,
                 byPriority,
-                byWasteType,
                 byBarangay,
                 byTimeSlot,
             },

@@ -34,7 +34,11 @@ export interface CreateAnnouncementInput {
     publishImmediately?: boolean;
     sendEmailNotification?: boolean;
     sendPushNotification?: boolean;
-    enableMaintenanceMode?: boolean;
+    // Maintenance-specific fields
+    maintenanceStartDateTime?: string;
+    maintenanceEndDateTime?: string;
+    // Event-specific fields  
+    hasEventImage?: boolean;
 }
 
 export interface UpdateAnnouncementInput {
@@ -238,7 +242,10 @@ export async function createAnnouncement(input: CreateAnnouncementInput): Promis
             is_published: input.publishImmediately || false,
             send_email_notification: input.sendEmailNotification || false,
             send_push_notification: input.sendPushNotification || false,
-            enable_maintenance_mode: input.enableMaintenanceMode || false,
+            // For maintenance type, store the window in metadata
+            maintenance_start: input.maintenanceStartDateTime || null,
+            maintenance_end: input.maintenanceEndDateTime || null,
+            enable_maintenance_mode: input.type === 'maintenance' && !!input.maintenanceStartDateTime,
             created_by: user.id,
         })
         .select()
@@ -253,9 +260,13 @@ export async function createAnnouncement(input: CreateAnnouncementInput): Promis
         await sendAnnouncementNotifications(announcement.id, input.targetAudience, announcement.title);
     }
 
-    // If maintenance mode is enabled with this announcement, sync with system settings
-    if (input.enableMaintenanceMode && input.publishImmediately && input.type === 'maintenance') {
-        await syncMaintenanceModeWithSettings(true, input.content);
+    // If maintenance mode should be activated immediately
+    if (input.type === 'maintenance' && input.publishImmediately && input.maintenanceStartDateTime) {
+        const startTime = new Date(input.maintenanceStartDateTime);
+        const now = new Date();
+        if (startTime <= now) {
+            await syncMaintenanceModeWithSettings(true, input.content);
+        }
     }
 
     revalidatePath('/staff/announcements');

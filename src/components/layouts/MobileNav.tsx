@@ -9,7 +9,6 @@ import {
   X,
   LayoutDashboard,
   FileText,
-
   Bell,
   Settings,
   Recycle,
@@ -21,6 +20,7 @@ import {
   CreditCard,
   MessageSquare,
   Megaphone,
+  User,
 } from "lucide-react";
 
 interface NavItem {
@@ -42,7 +42,7 @@ const navItemsByRole: Record<string, NavItem[]> = {
     { label: "Announcements", href: "/client/announcements", icon: Megaphone },
     { label: "Feedback", href: "/client/feedback", icon: MessageSquare },
     { label: "Notifications", href: "/client/notifications", icon: Bell },
-    { label: "Settings", href: "/client/profile", icon: Settings },
+    { label: "Profile", href: "/client/profile", icon: User },
   ],
   staff: [
     { label: "Dashboard", href: "/staff/dashboard", icon: LayoutDashboard },
@@ -53,7 +53,7 @@ const navItemsByRole: Record<string, NavItem[]> = {
     { label: "Feedback", href: "/staff/feedback", icon: MessageSquare },
     { label: "Schedule", href: "/staff/schedule", icon: Calendar },
     { label: "Notifications", href: "/staff/notifications", icon: Bell },
-    { label: "Profile", href: "/staff/profile", icon: Settings },
+    { label: "Profile", href: "/staff/profile", icon: User },
   ],
   collector: [
     { label: "Dashboard", href: "/collector/dashboard", icon: LayoutDashboard },
@@ -62,17 +62,16 @@ const navItemsByRole: Record<string, NavItem[]> = {
     { label: "Feedback", href: "/collector/feedback", icon: MessageSquare },
     { label: "Announcements", href: "/collector/announcements", icon: Megaphone },
     { label: "Notifications", href: "/collector/notifications", icon: Bell },
-    { label: "Profile", href: "/collector/profile", icon: Settings },
+    { label: "Profile", href: "/collector/profile", icon: User },
   ],
   admin: [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Announcements", href: "/admin/announcements", icon: Megaphone },
     { label: "Reports", href: "/admin/reports", icon: BarChart3 },
-    { label: "System Logs", href: "/admin/logs", icon: Bell },
     { label: "Notifications", href: "/admin/notifications", icon: Bell },
     { label: "Settings", href: "/admin/settings", icon: Settings },
-    { label: "Profile", href: "/admin/profile", icon: Settings },
+    { label: "Profile", href: "/admin/profile", icon: User },
   ],
 };
 
