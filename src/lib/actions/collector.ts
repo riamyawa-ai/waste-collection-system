@@ -517,8 +517,10 @@ export async function acceptSchedule(scheduleId: string) {
 
 /**
  * Decline an assigned schedule with reason and attempt auto-reassignment
+ * FIXED: Uses service role to bypass RLS for reassignment operations
  */
 export async function declineSchedule(scheduleId: string, reason: string) {
+    // User context - for validation only
     const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -539,30 +541,48 @@ export async function declineSchedule(scheduleId: string, reason: string) {
         return { error: 'Schedule not found or not assigned to you' };
     }
 
+    // ============================================================================
+    // CRITICAL FIX: Use service role for reassignment operations
+    // This bypasses RLS policies since we're performing administrative actions
+    // ============================================================================
+    const { createClient: createServiceClient } = await import('@supabase/supabase-js');
+    const supabaseAdmin = createServiceClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        }
+    );
+
     // Find another available clocked-in collector
     const today = new Date().toISOString().split('T')[0];
 
-    const { data: availableCollectors } = await supabase
+    const { data: availableCollectors } = await supabaseAdmin
         .from('collector_attendance')
         .select('collector_id, collector:profiles!collector_attendance_collector_id_fkey(id, full_name)')
         .eq('date', today)
         .is('logout_time', null)
         .neq('collector_id', user.id);
 
-    let reassignedTo = null;
+    let reassignedTo: string | null = null;
     let reassignmentFailed = false;
 
     if (availableCollectors && availableCollectors.length > 0) {
         // Assign to first available collector (could be enhanced with load balancing)
         reassignedTo = availableCollectors[0].collector_id;
 
-        // Update schedule with new collector - status is 'draft' pending their acceptance
-        const { error: updateError } = await supabase
+        // Update schedule with new collector using ADMIN client
+        const { error: updateError } = await supabaseAdmin
             .from('collection_schedules')
             .update({
                 assigned_collector_id: reassignedTo,
                 status: 'draft', // New collector needs to accept
                 decline_reason: reason,
+                declined_by: user.id,
+                declined_at: new Date().toISOString(),
                 confirmed_by_collector: false,
                 confirmed_at: null,
                 accepted_at: null,
@@ -570,38 +590,62 @@ export async function declineSchedule(scheduleId: string, reason: string) {
             .eq('id', scheduleId);
 
         if (updateError) {
+            console.error('Update error:', updateError);
             return { error: updateError.message };
         }
 
         // Create notification for new collector with action required
-        await supabase.from('notifications').insert({
+        await supabaseAdmin.from('notifications').insert({
             user_id: reassignedTo,
             type: 'schedule_assignment' as const,
             title: 'New Schedule Assignment - Action Required',
             message: `You have been assigned schedule: ${schedule.name}. Please review and accept or decline this assignment.`,
             data: { schedule_id: scheduleId },
         });
+
+        // Notify staff about the reassignment
+        const { data: staffUsers } = await supabaseAdmin
+            .from('profiles')
+            .select('id')
+            .in('role', ['staff', 'admin']);
+
+        if (staffUsers) {
+            const staffNotifications = staffUsers.map(staff => ({
+                user_id: staff.id,
+                type: 'schedule_change' as const,
+                title: 'Schedule Reassigned',
+                message: `Schedule "${schedule.name}" was declined and has been reassigned to another collector.`,
+                data: { schedule_id: scheduleId, reassigned_to: reassignedTo },
+            }));
+
+            await supabaseAdmin.from('notifications').insert(staffNotifications);
+        }
+
     } else {
         // No available collectors - set to draft and notify staff
         reassignmentFailed = true;
 
-        const { error: updateError } = await supabase
+        const { error: updateError } = await supabaseAdmin
             .from('collection_schedules')
             .update({
                 assigned_collector_id: null,
                 status: 'draft',
                 decline_reason: reason,
+                declined_by: user.id,
+                declined_at: new Date().toISOString(),
                 confirmed_by_collector: false,
                 confirmed_at: null,
+                accepted_at: null,
             })
             .eq('id', scheduleId);
 
         if (updateError) {
+            console.error('Update error:', updateError);
             return { error: updateError.message };
         }
 
         // Notify staff about failed reassignment
-        const { data: staffUsers } = await supabase
+        const { data: staffUsers } = await supabaseAdmin
             .from('profiles')
             .select('id')
             .in('role', ['staff', 'admin']);
@@ -615,7 +659,7 @@ export async function declineSchedule(scheduleId: string, reason: string) {
                 data: { schedule_id: scheduleId },
             }));
 
-            await supabase.from('notifications').insert(notifications);
+            await supabaseAdmin.from('notifications').insert(notifications);
         }
     }
 
