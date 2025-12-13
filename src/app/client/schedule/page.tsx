@@ -82,7 +82,7 @@ export default function ClientSchedulePage() {
                             status: displayStatus as RequestStatus,
                             title: sched.name,
                             time_slot: sched.start_time,
-                            details: sched,
+                            details: sched, // Ensure full object is passed
                             type: 'schedule',
                             description: sched.description || undefined
                         };

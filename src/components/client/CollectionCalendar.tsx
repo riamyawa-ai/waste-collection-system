@@ -26,6 +26,7 @@ interface CalendarEvent {
     time_slot?: string;
     type?: 'request' | 'schedule';
     description?: string;
+    details?: any;
 }
 
 interface CollectionCalendarProps {
@@ -309,8 +310,19 @@ export function CollectionCalendar({
                                             </div>
 
                                             {event.type === 'schedule' ? (
-                                                <div className="mt-2 text-sm text-neutral-600 bg-neutral-50 p-2 rounded border border-neutral-100">
-                                                    {event.description || 'No additional details.'}
+                                                <div className="mt-2 space-y-2">
+                                                    {/* Schedule Details */}
+                                                    <div className="text-sm text-neutral-600 bg-neutral-50 p-2 rounded border border-neutral-100">
+                                                        {event.description || 'No additional details.'}
+                                                    </div>
+
+                                                    {/* Collector Info */}
+                                                    {(event.details as any)?.assigned_collector?.full_name && (
+                                                        <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                                            <div className="font-medium">Collector:</div>
+                                                            <div>{(event.details as any).assigned_collector.full_name}</div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <Link href={`/client/requests/${event.id}`}>

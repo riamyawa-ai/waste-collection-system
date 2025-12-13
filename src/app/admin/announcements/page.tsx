@@ -528,6 +528,7 @@ export default function AdminAnnouncementsPage() {
                     setShowCreateModal(false);
                     loadData();
                 }}
+                userRole="admin"
             />
 
             {/* View Modal */}

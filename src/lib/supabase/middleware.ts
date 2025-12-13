@@ -39,7 +39,7 @@ async function checkMaintenanceModeInMiddleware(supabase: ReturnType<typeof crea
   // Check for active maintenance announcements with current time in window
   const { data: maintenanceAnnouncement } = await supabase
     .from('announcements')
-    .select('id, title, content, maintenance_start, maintenance_end')
+    .select('id, title, content, maintenance_start, maintenance_end, maintenance_allowed_roles')
     .eq('type', 'maintenance')
     .eq('is_published', true)
     .lte('maintenance_start', now)
@@ -54,6 +54,7 @@ async function checkMaintenanceModeInMiddleware(supabase: ReturnType<typeof crea
       title: maintenanceAnnouncement.title,
       message: maintenanceAnnouncement.content,
       endTime: maintenanceAnnouncement.maintenance_end,
+      allowedRoles: maintenanceAnnouncement.maintenance_allowed_roles as string[] || ['admin'],
     };
   }
 
@@ -76,6 +77,7 @@ async function checkMaintenanceModeInMiddleware(supabase: ReturnType<typeof crea
       title: 'System Maintenance',
       message: maintenanceSettings.message || 'System is under maintenance.',
       endTime: maintenanceSettings.scheduledEnd || null,
+      allowedRoles: ['admin'], // Legacy fallback
     };
   }
 
@@ -159,23 +161,28 @@ export async function updateSession(request: NextRequest) {
   const userRole = (profile?.role as UserRole) || user.user_metadata?.role || USER_ROLES.CLIENT;
 
   // MAINTENANCE MODE CHECK FOR AUTHENTICATED USERS
-  // If maintenance is active and user is NOT admin, force logout
-  if (maintenance?.isActive && userRole !== USER_ROLES.ADMIN) {
-    // Sign out the user
-    await supabase.auth.signOut();
+  // If maintenance is active and user's role is NOT in the allowed list, force logout
+  if (maintenance?.isActive) {
+    const allowedRoles = maintenance.allowedRoles || ['admin'];
 
-    // Redirect to login with maintenance modal
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("maintenance", "true");
-    loginUrl.searchParams.set("forced", "true"); // Indicate they were logged out
+    // Check if user has permission
+    if (!allowedRoles.includes(userRole)) {
+      // Sign out the user
+      await supabase.auth.signOut();
 
-    const redirectResponse = NextResponse.redirect(loginUrl);
+      // Redirect to login with maintenance modal
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("maintenance", "true");
+      loginUrl.searchParams.set("forced", "true"); // Indicate they were logged out
 
-    // Clear auth cookies
-    redirectResponse.cookies.delete("sb-access-token");
-    redirectResponse.cookies.delete("sb-refresh-token");
+      const redirectResponse = NextResponse.redirect(loginUrl);
 
-    return redirectResponse;
+      // Clear auth cookies
+      redirectResponse.cookies.delete("sb-access-token");
+      redirectResponse.cookies.delete("sb-refresh-token");
+
+      return redirectResponse;
+    }
   }
 
   // If user is on a public auth route (login, register), redirect to their dashboard

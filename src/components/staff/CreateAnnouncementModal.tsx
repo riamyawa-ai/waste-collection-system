@@ -30,6 +30,7 @@ interface CreateAnnouncementModalProps {
     open: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    userRole?: string;
 }
 
 const ANNOUNCEMENT_TYPES = [
@@ -48,7 +49,7 @@ const AUDIENCE_OPTIONS = [
     { value: 'staff', label: 'Staff Only' },
 ];
 
-export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnnouncementModalProps) {
+export function CreateAnnouncementModal({ open, onClose, onSuccess, userRole = 'staff' }: CreateAnnouncementModalProps) {
     const [loading, setLoading] = useState(false);
 
     // Form state
@@ -57,7 +58,8 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
     const [type, setType] = useState<'info' | 'success' | 'warning' | 'error' | 'maintenance' | 'event'>('info');
     const [priority, setPriority] = useState<'normal' | 'important' | 'urgent'>('normal');
     const [targetAudience, setTargetAudience] = useState<string[]>(['all']);
-    const [publishDate, setPublishDate] = useState(new Date().toISOString().split('T')[0]);
+    // Use local date string (YYYY-MM-DD) instead of UTC to avoid "yesterday" due to timezone offset
+    const [publishDate, setPublishDate] = useState(new Date().toLocaleDateString('en-CA'));
     const [expiryDate, setExpiryDate] = useState('');
     const [publishImmediately, setPublishImmediately] = useState(true);
     const [sendEmailNotification, setSendEmailNotification] = useState(false);
@@ -72,6 +74,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
     const [maintenanceStartTime, setMaintenanceStartTime] = useState('');
     const [maintenanceEndDate, setMaintenanceEndDate] = useState('');
     const [maintenanceEndTime, setMaintenanceEndTime] = useState('');
+    const [maintenanceAllowedRoles, setMaintenanceAllowedRoles] = useState<string[]>(['admin']);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (acceptedFiles.length > 0) {
@@ -142,6 +145,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                 maintenanceEndDateTime: type === 'maintenance'
                     ? `${maintenanceEndDate}T${maintenanceEndTime}`
                     : undefined,
+                maintenanceAllowedRoles: type === 'maintenance' ? maintenanceAllowedRoles : undefined,
                 // For events, we would upload the image (simplified for now)
                 hasEventImage: type === 'event' && eventImage !== null,
             });
@@ -177,6 +181,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
         setMaintenanceStartTime('');
         setMaintenanceEndDate('');
         setMaintenanceEndTime('');
+        setMaintenanceAllowedRoles(['admin']);
     };
 
     const removeImage = () => {
@@ -230,7 +235,10 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {ANNOUNCEMENT_TYPES.map((t) => (
+                                        {ANNOUNCEMENT_TYPES.filter(t =>
+                                            // Only show maintenance option to admins
+                                            t.value !== 'maintenance' || userRole === 'admin'
+                                        ).map((t) => (
                                             <SelectItem key={t.value} value={t.value}>
                                                 <span className={t.color}>{t.label}</span>
                                             </SelectItem>
@@ -284,8 +292,8 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                     <div
                                         {...getRootProps()}
                                         className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive
-                                                ? 'border-purple-500 bg-purple-50'
-                                                : 'border-gray-300 hover:border-purple-400 hover:bg-purple-50/50'
+                                            ? 'border-purple-500 bg-purple-50'
+                                            : 'border-gray-300 hover:border-purple-400 hover:bg-purple-50/50'
                                             }`}
                                     >
                                         <input {...getInputProps()} />
@@ -299,7 +307,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                             </div>
                         )}
 
-                        {/* Maintenance Date/Time Fields - Only shown for maintenance type */}
+                        {/* Maintenance Settings - Only shown for maintenance type */}
                         {type === 'maintenance' && (
                             <div className="space-y-4 p-4 rounded-lg bg-orange-50 border border-orange-200">
                                 <div className="flex items-center gap-2">
@@ -310,8 +318,8 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                 <Alert className="bg-orange-100 border-orange-300">
                                     <Info className="h-4 w-4 text-orange-600" />
                                     <AlertDescription className="text-orange-800 text-sm">
-                                        During the maintenance window, all non-admin users will be blocked from logging in.
-                                        Users already logged in will be automatically logged out.
+                                        During the maintenance window, access will be restricted based on the allowed roles below.
+                                        Users currently logged in who are not allowed will be automatically logged out.
                                     </AlertDescription>
                                 </Alert>
 
@@ -364,6 +372,36 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                                             className="border-orange-200 focus:border-orange-500 focus:ring-orange-500"
                                         />
                                     </div>
+                                </div>
+
+                                <div>
+                                    <Label className="text-orange-700 font-medium mb-2 block">Allowed Roles During Maintenance</Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['admin', 'staff', 'collector'].map((role) => (
+                                            <button
+                                                key={role}
+                                                onClick={() => {
+                                                    const current = maintenanceAllowedRoles;
+                                                    if (current.includes(role)) {
+                                                        // Prevent removing admin
+                                                        if (role === 'admin') return;
+                                                        setMaintenanceAllowedRoles(current.filter(r => r !== role));
+                                                    } else {
+                                                        setMaintenanceAllowedRoles([...current, role]);
+                                                    }
+                                                }}
+                                                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${maintenanceAllowedRoles.includes(role)
+                                                    ? 'bg-orange-600 text-white border-orange-600'
+                                                    : 'bg-white text-orange-600 border-orange-200 hover:bg-orange-50'
+                                                    }`}
+                                            >
+                                                {role.charAt(0).toUpperCase() + role.slice(1)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-orange-600 mt-1.5">
+                                        Admin is always allowed. Select other roles that should maintain access.
+                                    </p>
                                 </div>
                             </div>
                         )}

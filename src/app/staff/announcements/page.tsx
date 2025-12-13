@@ -509,6 +509,7 @@ export default function AnnouncementsPage() {
                     setShowCreateModal(false);
                     loadData();
                 }}
+                userRole="staff"
             />
 
             {/* View Modal */}

@@ -37,6 +37,7 @@ export interface CreateAnnouncementInput {
     // Maintenance-specific fields
     maintenanceStartDateTime?: string;
     maintenanceEndDateTime?: string;
+    maintenanceAllowedRoles?: string[];
     // Event-specific fields  
     hasEventImage?: boolean;
 }
@@ -55,6 +56,7 @@ export interface UpdateAnnouncementInput {
     sendEmailNotification?: boolean;
     sendPushNotification?: boolean;
     enableMaintenanceMode?: boolean;
+    maintenanceAllowedRoles?: string[];
 }
 
 // ============================================================================
@@ -224,6 +226,22 @@ export async function createAnnouncement(input: CreateAnnouncementInput): Promis
         return { success: false, error: 'Title and content are required' };
     }
 
+    // Check permissions for maintenance mode
+    if (input.type === 'maintenance') {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (profile?.role !== 'admin') {
+            return {
+                success: false,
+                error: 'Only administrators can create maintenance announcements'
+            };
+        }
+    }
+
     const publishDate = input.publishImmediately
         ? new Date().toISOString()
         : input.publishDate;
@@ -245,6 +263,7 @@ export async function createAnnouncement(input: CreateAnnouncementInput): Promis
             // For maintenance type, store the window in metadata
             maintenance_start: input.maintenanceStartDateTime || null,
             maintenance_end: input.maintenanceEndDateTime || null,
+            maintenance_allowed_roles: input.maintenanceAllowedRoles || ['admin'],
             enable_maintenance_mode: input.type === 'maintenance' && !!input.maintenanceStartDateTime,
             created_by: user.id,
         })
@@ -298,6 +317,7 @@ export async function updateAnnouncement(input: UpdateAnnouncementInput): Promis
     if (input.sendEmailNotification !== undefined) updateData.send_email_notification = input.sendEmailNotification;
     if (input.sendPushNotification !== undefined) updateData.send_push_notification = input.sendPushNotification;
     if (input.enableMaintenanceMode !== undefined) updateData.enable_maintenance_mode = input.enableMaintenanceMode;
+    if (input.maintenanceAllowedRoles !== undefined) updateData.maintenance_allowed_roles = input.maintenanceAllowedRoles;
 
     const { error } = await supabase
         .from('announcements')
