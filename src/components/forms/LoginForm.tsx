@@ -42,19 +42,18 @@ export function LoginForm() {
         const maintenanceParam = searchParams.get("maintenance");
         const forcedParam = searchParams.get("forced");
 
-        if (maintenanceParam === "true") {
-            // Load maintenance details
-            const loadMaintenanceDetails = async () => {
-                const result = await checkMaintenanceMode();
-                if (result) {
-                    setMaintenanceMessage(result.message);
-                    setMaintenanceEndTime(result.endTime);
-                    setShowMaintenanceBanner(true);
-                    setWasForced(forcedParam === "true");
-                }
-            };
-            loadMaintenanceDetails();
-        }
+        // Always check for maintenance mode (not just when URL param is present)
+        const loadMaintenanceDetails = async () => {
+            const result = await checkMaintenanceMode();
+            if (result) {
+                setMaintenanceMessage(result.message);
+                setMaintenanceEndTime(result.endTime);
+                setShowMaintenanceBanner(true);
+                // Only set wasForced if explicitly redirected with forced=true
+                setWasForced(maintenanceParam === "true" && forcedParam === "true");
+            }
+        };
+        loadMaintenanceDetails();
     }, [searchParams]);
 
     const {

@@ -404,10 +404,17 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                                 <SelectContent>
                                                     <SelectItem value="unassigned">Unassigned</SelectItem>
                                                     {collectors.map(c => (
-                                                        <SelectItem key={c.id} value={c.id}>
+                                                        <SelectItem
+                                                            key={c.id}
+                                                            value={c.id}
+                                                            disabled={!c.isOnDuty}
+                                                        >
                                                             <div className="flex items-center gap-2">
                                                                 <span className={`w-2 h-2 rounded-full ${c.isOnDuty ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                                                {c.full_name}
+                                                                <span className={!c.isOnDuty ? 'text-gray-400' : ''}>
+                                                                    {c.full_name}
+                                                                </span>
+                                                                {!c.isOnDuty && <span className="text-xs text-gray-400 ml-1">(Not clocked in)</span>}
                                                             </div>
                                                         </SelectItem>
                                                     ))}
@@ -423,7 +430,19 @@ export function CreateScheduleModal({ open, onClose, onSuccess }: CreateSchedule
                                                 <SelectContent>
                                                     <SelectItem value="none">None</SelectItem>
                                                     {collectors.filter(c => c.id !== collectorId).map(c => (
-                                                        <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>
+                                                        <SelectItem
+                                                            key={c.id}
+                                                            value={c.id}
+                                                            disabled={!c.isOnDuty}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`w-2 h-2 rounded-full ${c.isOnDuty ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                                                <span className={!c.isOnDuty ? 'text-gray-400' : ''}>
+                                                                    {c.full_name}
+                                                                </span>
+                                                                {!c.isOnDuty && <span className="text-xs text-gray-400 ml-1">(Not clocked in)</span>}
+                                                            </div>
+                                                        </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>

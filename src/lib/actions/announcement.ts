@@ -239,20 +239,23 @@ export async function createAnnouncement(input: CreateAnnouncementInput): Promis
         return { success: false, error: 'Title and content are required' };
     }
 
-    // Check permissions for maintenance mode
-    if (input.type === 'maintenance') {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single();
+    // Check if user has permission to create announcements (admin or staff)
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
 
-        if (profile?.role !== 'admin') {
-            return {
-                success: false,
-                error: 'Only administrators can create maintenance announcements'
-            };
-        }
+    if (!profile || !['admin', 'staff'].includes(profile.role)) {
+        return { success: false, error: 'Only staff and administrators can create announcements' };
+    }
+
+    // Check permissions for maintenance mode (only admin)
+    if (input.type === 'maintenance' && profile.role !== 'admin') {
+        return {
+            success: false,
+            error: 'Only administrators can create maintenance announcements'
+        };
     }
 
     const publishDate = input.publishImmediately

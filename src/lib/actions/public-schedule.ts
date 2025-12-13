@@ -19,7 +19,9 @@ export async function getPublicSchedules() {
                 name,
                 description,
                 start_date,
+                end_date,
                 start_time,
+                end_time,
                 status,
                 assigned_collector:profiles!collection_schedules_assigned_collector_id_fkey(full_name),
                 stops_count:schedule_stops(count)

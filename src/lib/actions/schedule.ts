@@ -252,6 +252,11 @@ export async function createSchedule(input: CreateScheduleInput): Promise<Action
         return { success: false, error: 'Missing required fields' };
     }
 
+    // Determine initial status:
+    // - If collector is assigned, status is 'draft' (Pending collector acceptance)
+    // - If no collector is assigned, status is 'active' (Unassigned but ready)
+    const initialStatus = input.collectorId ? 'draft' : 'active';
+
     // Create schedule
     const { data: schedule, error: scheduleError } = await supabase
         .from('collection_schedules')
@@ -268,7 +273,7 @@ export async function createSchedule(input: CreateScheduleInput): Promise<Action
             assigned_collector_id: input.collectorId || null,
             backup_collector_id: input.backupCollectorId || null,
             special_instructions: input.specialInstructions,
-            status: 'active',
+            status: initialStatus,
             created_by: user.id,
         })
         .select()
@@ -310,9 +315,9 @@ export async function createSchedule(input: CreateScheduleInput): Promise<Action
     if (input.collectorId) {
         await supabase.from('notifications').insert({
             user_id: input.collectorId,
-            type: 'schedule_change',
-            title: 'New Schedule Assignment',
-            message: `You have been assigned to schedule: ${input.name}`,
+            type: 'schedule_assignment',
+            title: 'New Schedule Assignment - Action Required',
+            message: `You have been assigned to schedule: ${input.name}. Please review and accept or decline this assignment.`,
             data: { schedule_id: schedule.id },
         });
     }

@@ -26,6 +26,7 @@ interface Schedule {
     description: string | null;
     schedule_type: string;
     start_date: string;
+    end_date: string | null;  // Added for multi-day schedules
     start_time: string;
     end_time: string;
     status: string;

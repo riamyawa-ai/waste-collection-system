@@ -20,6 +20,7 @@ import Link from 'next/link';
 interface CalendarEvent {
     id: string;
     date: string;
+    end_date?: string;  // Added for multi-day schedules
     status: RequestStatus;
     title?: string;
     barangay?: string;
@@ -73,8 +74,15 @@ export function CollectionCalendar({
     };
 
     const getEventsForDate = (day: number): CalendarEvent[] => {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        return events.filter((event) => event.date === dateStr);
+        const checkDate = new Date(year, month, day);
+
+        return events.filter((event) => {
+            const startDate = new Date(event.date);
+            const endDate = event.end_date ? new Date(event.end_date) : startDate;
+
+            // Check if the current date falls within the event's date range
+            return checkDate >= startDate && checkDate <= endDate;
+        });
     };
 
     const isToday = (day: number): boolean => {

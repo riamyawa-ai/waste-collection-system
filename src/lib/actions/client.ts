@@ -164,12 +164,14 @@ export async function getClientAnnouncements(filters: {
             return { success: false, error: 'You must be logged in', data: null };
         }
 
+        const now = new Date().toISOString();
+
         let query = supabase
             .from('announcements')
             .select('*')
             .eq('is_published', true)
-            .or('target_audience.cs.{all},target_audience.cs.{client}')
-            .gte('expiry_date', new Date().toISOString())
+            .lte('publish_date', now)
+            .or(`expiry_date.is.null,expiry_date.gt.${now}`)
             .order('priority', { ascending: false })
             .order('publish_date', { ascending: false });
 
@@ -192,7 +194,13 @@ export async function getClientAnnouncements(filters: {
             return { success: false, error: 'Failed to fetch announcements', data: null };
         }
 
-        return { success: true, data: data || [] };
+        // Filter announcements by target_audience (client should see 'all' or 'client' targeted announcements)
+        const filteredData = (data || []).filter((announcement: { target_audience?: string[] }) => {
+            const audience = announcement.target_audience || [];
+            return audience.includes('all') || audience.includes('client');
+        });
+
+        return { success: true, data: filteredData };
     } catch (error) {
         console.error('Error in getClientAnnouncements:', error);
         return { success: false, error: 'An unexpected error occurred', data: null };

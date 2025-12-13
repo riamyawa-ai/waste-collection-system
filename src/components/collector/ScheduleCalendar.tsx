@@ -23,6 +23,7 @@ interface ScheduleEvent {
     name: string;
     description: string | null;
     start_date: string;
+    end_date: string | null;  // Added for collection duration display
     start_time: string;
     end_time: string;
     status: string;
@@ -75,7 +76,15 @@ export function ScheduleCalendar({
 
     const getSchedulesForDate = (day: number): ScheduleEvent[] => {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        return schedules.filter((schedule) => schedule.start_date === dateStr);
+        const checkDate = new Date(year, month, day);
+
+        return schedules.filter((schedule) => {
+            const startDate = new Date(schedule.start_date);
+            const endDate = schedule.end_date ? new Date(schedule.end_date) : startDate;
+
+            // Check if the current date falls within the schedule's date range
+            return checkDate >= startDate && checkDate <= endDate;
+        });
     };
 
     const isToday = (day: number): boolean => {
