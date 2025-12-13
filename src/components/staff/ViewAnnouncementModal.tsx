@@ -156,7 +156,7 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                             </div>
 
                             {/* Image */}
-                            {announcement.image_url && (
+                            {announcement.image_url ? (
                                 <div className="rounded-lg overflow-hidden border border-gray-200 relative h-48 w-full">
                                     <OptimizedImage
                                         src={announcement.image_url}
@@ -164,6 +164,15 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                                         fill
                                         className="object-cover"
                                     />
+                                </div>
+                            ) : (
+                                <div className="rounded-lg border border-gray-200 border-dashed bg-gray-50 h-32 w-full flex items-center justify-center text-gray-400">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="p-2 rounded-full bg-gray-100">
+                                            <Eye className="h-5 w-5 text-gray-400" />
+                                        </div>
+                                        <p className="text-sm">No image attached</p>
+                                    </div>
                                 </div>
                             )}
 
@@ -175,13 +184,15 @@ export function ViewAnnouncementModal({ open, onClose, announcementId }: ViewAnn
                             {/* Meta Info */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                                    <div className="flex items-center gap-2 text-gray-500 mb-2">
+                                    <div className={`flex items-center gap-2 mb-2 ${announcement.type === 'maintenance' ? 'text-orange-600' : 'text-gray-500'}`}>
                                         <Users className="h-4 w-4" />
-                                        <span className="text-sm">Target Audience</span>
+                                        <span className="text-sm">
+                                            {announcement.type === 'maintenance' ? 'Blocked Roles (No Access)' : 'Target Audience'}
+                                        </span>
                                     </div>
                                     <p className="text-gray-900 font-medium">
                                         {announcement.target_audience.includes('all')
-                                            ? 'All Users'
+                                            ? (announcement.type === 'maintenance' ? 'All Users (Except Admin)' : 'All Users')
                                             : announcement.target_audience.map(a =>
                                                 a.charAt(0).toUpperCase() + a.slice(1)
                                             ).join(', ')}

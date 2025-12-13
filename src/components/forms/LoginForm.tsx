@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PasswordInput } from "@/components/ui/password-input";
 import { RateLimitWarning } from "@/components/ui/rate-limit-warning";
-import { MaintenanceModal } from "@/components/auth/MaintenanceModal";
+
 import { loginSchema, type LoginFormData } from "@/lib/validators/auth";
 import { signIn, type AuthActionResult } from "@/lib/auth/actions";
 import { checkMaintenanceMode } from "@/lib/actions/maintenance";
@@ -32,7 +32,7 @@ export function LoginForm() {
     }>({});
 
     // Maintenance mode state
-    const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+    const [showMaintenanceBanner, setShowMaintenanceBanner] = useState(false);
     const [maintenanceMessage, setMaintenanceMessage] = useState<string>("");
     const [maintenanceEndTime, setMaintenanceEndTime] = useState<string | null>(null);
     const [wasForced, setWasForced] = useState(false);
@@ -49,7 +49,7 @@ export function LoginForm() {
                 if (result) {
                     setMaintenanceMessage(result.message);
                     setMaintenanceEndTime(result.endTime);
-                    setShowMaintenanceModal(true);
+                    setShowMaintenanceBanner(true);
                     setWasForced(forcedParam === "true");
                 }
             };
@@ -91,14 +91,29 @@ export function LoginForm() {
     };
 
     return (
-        <>
-            {/* Maintenance Modal */}
-            <MaintenanceModal
-                open={showMaintenanceModal}
-                message={maintenanceMessage}
-                endTime={maintenanceEndTime}
-                wasForced={wasForced}
-            />
+        <div className="space-y-4">
+            {/* Maintenance Banner */}
+            {showMaintenanceBanner && (
+                <Alert className="border-orange-200 bg-orange-50 text-orange-900">
+                    <AlertCircle className="h-5 w-5 text-orange-600" />
+                    <div className="ml-3">
+                        <AlertDescription className="text-sm font-medium text-orange-800">
+                            {wasForced ? "You have been logged out due to system maintenance." : "System Maintenance In Progress"}
+                        </AlertDescription>
+                        <div className="mt-2 text-sm text-orange-700">
+                            <p className="mb-1">{maintenanceMessage || "The system is currently undergoing scheduled maintenance."}</p>
+                            {maintenanceEndTime && (
+                                <p className="text-xs text-orange-600 font-semibold mt-1">
+                                    Expected completion: {new Date(maintenanceEndTime).toLocaleString(undefined, {
+                                        dateStyle: 'medium',
+                                        timeStyle: 'short'
+                                    })}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </Alert>
+            )}
 
             <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
                 {/* Header */}
@@ -253,6 +268,6 @@ export function LoginForm() {
                     </p>
                 </div>
             </div>
-        </>
+        </div>
     );
 }

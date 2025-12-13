@@ -37,7 +37,6 @@ export interface CreateAnnouncementInput {
     // Maintenance-specific fields
     maintenanceStartDateTime?: string;
     maintenanceEndDateTime?: string;
-    maintenanceAllowedRoles?: string[];
     // Event-specific fields  
     hasEventImage?: boolean;
 }
@@ -56,7 +55,6 @@ export interface UpdateAnnouncementInput {
     sendEmailNotification?: boolean;
     sendPushNotification?: boolean;
     enableMaintenanceMode?: boolean;
-    maintenanceAllowedRoles?: string[];
 }
 
 // ============================================================================
@@ -81,6 +79,21 @@ export async function getAnnouncements(filters: AnnouncementFilters = {}) {
             *,
             creator:created_by(id, full_name)
         `, { count: 'exact' });
+
+    // Filter by target audience (visibility)
+    // Users should see announcements that target 'all' OR their specific role
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    const userRole = profile?.role || 'client';
+
+    // Admin sees everything
+    if (userRole !== 'admin') {
+        query = query.or(`target_audience.cs.{"all"},target_audience.cs.{"${userRole}"}`);
+    }
 
     // Apply filters
     if (filters.search) {
@@ -263,7 +276,7 @@ export async function createAnnouncement(input: CreateAnnouncementInput): Promis
             // For maintenance type, store the window in metadata
             maintenance_start: input.maintenanceStartDateTime || null,
             maintenance_end: input.maintenanceEndDateTime || null,
-            maintenance_allowed_roles: input.maintenanceAllowedRoles || ['admin'],
+            // maintenance_allowed_roles is deprecated in favor of target_audience (Blocklist)
             enable_maintenance_mode: input.type === 'maintenance' && !!input.maintenanceStartDateTime,
             created_by: user.id,
         })
@@ -317,7 +330,7 @@ export async function updateAnnouncement(input: UpdateAnnouncementInput): Promis
     if (input.sendEmailNotification !== undefined) updateData.send_email_notification = input.sendEmailNotification;
     if (input.sendPushNotification !== undefined) updateData.send_push_notification = input.sendPushNotification;
     if (input.enableMaintenanceMode !== undefined) updateData.enable_maintenance_mode = input.enableMaintenanceMode;
-    if (input.maintenanceAllowedRoles !== undefined) updateData.maintenance_allowed_roles = input.maintenanceAllowedRoles;
+    if (input.enableMaintenanceMode !== undefined) updateData.enable_maintenance_mode = input.enableMaintenanceMode;
 
     const { error } = await supabase
         .from('announcements')

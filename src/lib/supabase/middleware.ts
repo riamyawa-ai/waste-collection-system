@@ -39,7 +39,7 @@ async function checkMaintenanceModeInMiddleware(supabase: ReturnType<typeof crea
   // Check for active maintenance announcements with current time in window
   const { data: maintenanceAnnouncement } = await supabase
     .from('announcements')
-    .select('id, title, content, maintenance_start, maintenance_end, maintenance_allowed_roles')
+    .select('id, title, content, maintenance_start, maintenance_end, target_audience')
     .eq('type', 'maintenance')
     .eq('is_published', true)
     .lte('maintenance_start', now)
@@ -54,7 +54,7 @@ async function checkMaintenanceModeInMiddleware(supabase: ReturnType<typeof crea
       title: maintenanceAnnouncement.title,
       message: maintenanceAnnouncement.content,
       endTime: maintenanceAnnouncement.maintenance_end,
-      allowedRoles: maintenanceAnnouncement.maintenance_allowed_roles as string[] || ['admin'],
+      blockedRoles: maintenanceAnnouncement.target_audience as string[] || [],
     };
   }
 
@@ -161,12 +161,17 @@ export async function updateSession(request: NextRequest) {
   const userRole = (profile?.role as UserRole) || user.user_metadata?.role || USER_ROLES.CLIENT;
 
   // MAINTENANCE MODE CHECK FOR AUTHENTICATED USERS
-  // If maintenance is active and user's role is NOT in the allowed list, force logout
-  if (maintenance?.isActive) {
-    const allowedRoles = maintenance.allowedRoles || ['admin'];
+  // If maintenance is active:
+  // LOGIC: target_audience = roles to BLOCK.
+  // Exception: Admin is never blocked.
+  if (maintenance?.isActive && userRole !== USER_ROLES.ADMIN) {
+    const blockedRoles = maintenance.blockedRoles || [];
 
-    // Check if user has permission
-    if (!allowedRoles.includes(userRole)) {
+    // Check if user is blocked
+    // Block if 'all' is targeted OR if user's specific role is targeted
+    const isBlocked = blockedRoles.includes('all') || blockedRoles.includes(userRole);
+
+    if (isBlocked) {
       // Sign out the user
       await supabase.auth.signOut();
 

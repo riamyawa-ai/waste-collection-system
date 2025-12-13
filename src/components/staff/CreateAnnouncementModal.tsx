@@ -74,7 +74,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess, userRole = '
     const [maintenanceStartTime, setMaintenanceStartTime] = useState('');
     const [maintenanceEndDate, setMaintenanceEndDate] = useState('');
     const [maintenanceEndTime, setMaintenanceEndTime] = useState('');
-    const [maintenanceAllowedRoles, setMaintenanceAllowedRoles] = useState<string[]>(['admin']);
+
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (acceptedFiles.length > 0) {
@@ -140,12 +140,12 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess, userRole = '
                 sendPushNotification,
                 // Pass maintenance window info for maintenance type
                 maintenanceStartDateTime: type === 'maintenance'
-                    ? `${maintenanceStartDate}T${maintenanceStartTime}`
+                    ? new Date(`${maintenanceStartDate}T${maintenanceStartTime}`).toISOString()
                     : undefined,
                 maintenanceEndDateTime: type === 'maintenance'
-                    ? `${maintenanceEndDate}T${maintenanceEndTime}`
+                    ? new Date(`${maintenanceEndDate}T${maintenanceEndTime}`).toISOString()
                     : undefined,
-                maintenanceAllowedRoles: type === 'maintenance' ? maintenanceAllowedRoles : undefined,
+                // maintenanceAllowedRoles removed
                 // For events, we would upload the image (simplified for now)
                 hasEventImage: type === 'event' && eventImage !== null,
             });
@@ -181,7 +181,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess, userRole = '
         setMaintenanceStartTime('');
         setMaintenanceEndDate('');
         setMaintenanceEndTime('');
-        setMaintenanceAllowedRoles(['admin']);
+
     };
 
     const removeImage = () => {
@@ -312,14 +312,14 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess, userRole = '
                             <div className="space-y-4 p-4 rounded-lg bg-orange-50 border border-orange-200">
                                 <div className="flex items-center gap-2">
                                     <Wrench className="h-4 w-4 text-orange-600" />
-                                    <Label className="text-orange-800 font-medium">Maintenance Window</Label>
+                                    <Label className="text-orange-800 font-medium">Maintenance Window & Access Control</Label>
                                 </div>
 
                                 <Alert className="bg-orange-100 border-orange-300">
                                     <Info className="h-4 w-4 text-orange-600" />
                                     <AlertDescription className="text-orange-800 text-sm">
-                                        During the maintenance window, access will be restricted based on the allowed roles below.
-                                        Users currently logged in who are not allowed will be automatically logged out.
+                                        <strong>Important:</strong> Users selected in "Target Audience" below will be <strong>BLOCKED</strong> from accessing the system during this window.
+                                        Admins are never blocked.
                                     </AlertDescription>
                                 </Alert>
 
@@ -373,42 +373,14 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess, userRole = '
                                         />
                                     </div>
                                 </div>
-
-                                <div>
-                                    <Label className="text-orange-700 font-medium mb-2 block">Allowed Roles During Maintenance</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {['admin', 'staff', 'collector'].map((role) => (
-                                            <button
-                                                key={role}
-                                                onClick={() => {
-                                                    const current = maintenanceAllowedRoles;
-                                                    if (current.includes(role)) {
-                                                        // Prevent removing admin
-                                                        if (role === 'admin') return;
-                                                        setMaintenanceAllowedRoles(current.filter(r => r !== role));
-                                                    } else {
-                                                        setMaintenanceAllowedRoles([...current, role]);
-                                                    }
-                                                }}
-                                                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${maintenanceAllowedRoles.includes(role)
-                                                    ? 'bg-orange-600 text-white border-orange-600'
-                                                    : 'bg-white text-orange-600 border-orange-200 hover:bg-orange-50'
-                                                    }`}
-                                            >
-                                                {role.charAt(0).toUpperCase() + role.slice(1)}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <p className="text-xs text-orange-600 mt-1.5">
-                                        Admin is always allowed. Select other roles that should maintain access.
-                                    </p>
-                                </div>
                             </div>
                         )}
 
                         {/* Target Audience */}
                         <div>
-                            <Label className="text-gray-700 font-medium mb-3 block">Target Audience</Label>
+                            <Label className="text-gray-700 font-medium mb-3 block">
+                                {type === 'maintenance' ? 'Blocked Roles (Who should be blocked?)' : 'Target Audience'}
+                            </Label>
                             <div className="grid grid-cols-2 gap-2">
                                 {AUDIENCE_OPTIONS.map((option) => (
                                     <button
