@@ -53,6 +53,7 @@ import {
 } from "@/lib/actions/schedule";
 import { CreateScheduleModal } from "@/components/staff/CreateScheduleModal";
 import { ViewScheduleModal } from "@/components/staff/ViewScheduleModal";
+import { EditScheduleModal } from "@/components/staff/EditScheduleModal";
 import { format } from "date-fns";
 import { useEffect } from "react";
 
@@ -90,6 +91,7 @@ export default function SchedulesPage() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
     const [showViewModal, setShowViewModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 25,
@@ -415,6 +417,15 @@ export default function SchedulesPage() {
                                                         View Details
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
+                                                        onClick={() => {
+                                                            setSelectedSchedule(schedule);
+                                                            setShowEditModal(true);
+                                                        }}
+                                                    >
+                                                        <MoreHorizontal className="h-4 w-4 mr-2" />
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
                                                         onClick={() => handleDuplicate(schedule.id)}
                                                     >
                                                         <Copy className="h-4 w-4 mr-2" />
@@ -517,6 +528,23 @@ export default function SchedulesPage() {
                     onClose={() => {
                         setShowViewModal(false);
                         setSelectedSchedule(null);
+                    }}
+                    scheduleId={selectedSchedule.id}
+                />
+            )}
+
+            {/* Edit Schedule Modal */}
+            {selectedSchedule && (
+                <EditScheduleModal
+                    open={showEditModal}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setSelectedSchedule(null);
+                    }}
+                    onSuccess={() => {
+                        setShowEditModal(false);
+                        setSelectedSchedule(null);
+                        loadData();
                     }}
                     scheduleId={selectedSchedule.id}
                 />

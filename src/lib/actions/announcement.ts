@@ -90,8 +90,8 @@ export async function getAnnouncements(filters: AnnouncementFilters = {}) {
 
     const userRole = profile?.role || 'client';
 
-    // Admin sees everything
-    if (userRole !== 'admin') {
+    // Admin and Staff see everything
+    if (userRole !== 'admin' && userRole !== 'staff') {
         query = query.or(`target_audience.cs.{"all"},target_audience.cs.{"${userRole}"}`);
     }
 

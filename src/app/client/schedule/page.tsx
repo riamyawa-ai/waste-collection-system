@@ -46,6 +46,7 @@ interface PublicSchedule {
     description: string | null;
     start_date: string;
     start_time: string;
+    end_time?: string;
     status: string;
     assigned_collector: {
         full_name: string;
@@ -81,7 +82,7 @@ export default function ClientSchedulePage() {
                             date: sched.start_date,
                             status: displayStatus as RequestStatus,
                             title: sched.name,
-                            time_slot: sched.start_time,
+                            time_slot: `${sched.start_time} - ${sched.end_time || ''}`,
                             details: sched, // Ensure full object is passed
                             type: 'schedule',
                             description: sched.description || undefined
@@ -202,7 +203,7 @@ export default function ClientSchedulePage() {
                                             <div className="flex items-center gap-2 text-sm text-neutral-500 mt-1">
                                                 <span>{format(new Date(schedule.start_date), 'MMM d, yyyy')}</span>
                                                 <span>•</span>
-                                                <span>{schedule.start_time}</span>
+                                                <span>{schedule.start_time} - {schedule.end_time}</span>
                                             </div>
                                             {schedule.assigned_collector?.full_name && (
                                                 <p className="text-xs text-neutral-400 mt-1">

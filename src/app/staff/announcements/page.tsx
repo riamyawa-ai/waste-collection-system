@@ -52,6 +52,7 @@ import {
 } from "@/lib/actions/announcement";
 import { CreateAnnouncementModal } from "@/components/staff/CreateAnnouncementModal";
 import { ViewAnnouncementModal } from "@/components/staff/ViewAnnouncementModal";
+import { EditAnnouncementModal } from "@/components/staff/EditAnnouncementModal";
 import { format } from "date-fns";
 
 interface Announcement {
@@ -87,6 +88,7 @@ export default function AnnouncementsPage() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
     const [showViewModal, setShowViewModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 25,
@@ -439,6 +441,15 @@ export default function AnnouncementsPage() {
                                                             <Eye className="h-4 w-4 mr-2" />
                                                             View
                                                         </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                setSelectedAnnouncement(announcement);
+                                                                setShowEditModal(true);
+                                                            }}
+                                                        >
+                                                            <MoreHorizontal className="h-4 w-4 mr-2" />
+                                                            Edit
+                                                        </DropdownMenuItem>
                                                         {!announcement.is_published && (
                                                             <DropdownMenuItem
                                                                 onClick={() => handlePublish(announcement.id)}
@@ -521,6 +532,23 @@ export default function AnnouncementsPage() {
                         setSelectedAnnouncement(null);
                     }}
                     announcementId={selectedAnnouncement.id}
+                />
+            )}
+
+            {/* Edit Modal */}
+            {selectedAnnouncement && (
+                <EditAnnouncementModal
+                    open={showEditModal}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setSelectedAnnouncement(null);
+                    }}
+                    onSuccess={() => {
+                        setShowEditModal(false);
+                        setSelectedAnnouncement(null);
+                        loadData();
+                    }}
+                    announcement={selectedAnnouncement}
                 />
             )}
         </div>

@@ -53,7 +53,7 @@ export function StaffDashboardStats() {
     if (loading) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                {[...Array(6)].map((_, i) => (
+                {[...Array(4)].map((_, i) => (
                     <div key={i} className="h-32 bg-neutral-100 animate-pulse rounded-xl" />
                 ))}
             </div>
@@ -61,7 +61,11 @@ export function StaffDashboardStats() {
     }
 
     if (!stats) {
-        return null;
+        return (
+            <div className="p-4 bg-yellow-50 text-yellow-800 rounded-lg border border-yellow-200">
+                Unable to load dashboard statistics.
+            </div>
+        );
     }
 
     const getCollectionValue = () => {
@@ -88,24 +92,27 @@ export function StaffDashboardStats() {
 
     return (
         <div className="space-y-4">
-            {/* Time Frame Selector */}
-            <div className="flex gap-2">
-                {(["today", "week", "month"] as const).map((tf) => (
-                    <button
-                        key={tf}
-                        onClick={() => setTimeFrame(tf)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${timeFrame === tf
-                            ? "bg-primary-600 text-white"
-                            : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-                            }`}
-                    >
-                        {tf.charAt(0).toUpperCase() + tf.slice(1)}
-                    </button>
-                ))}
+            {/* Header and Time Frame Selector */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 className="text-lg font-semibold text-neutral-900">Overview</h2>
+                <div className="flex gap-2 bg-neutral-100 p-1 rounded-lg">
+                    {(["today", "week", "month"] as const).map((tf) => (
+                        <button
+                            key={tf}
+                            onClick={() => setTimeFrame(tf)}
+                            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${timeFrame === tf
+                                ? "bg-white text-primary-600 shadow-sm"
+                                : "text-neutral-500 hover:text-neutral-900"
+                                }`}
+                        >
+                            {tf.charAt(0).toUpperCase() + tf.slice(1)}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                     title="Pending Requests"
                     value={stats.pendingRequests}
