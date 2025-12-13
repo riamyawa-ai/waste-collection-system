@@ -186,8 +186,8 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-2xl max-h-[90vh] bg-white border-green-200">
-                <DialogHeader className="border-b border-green-100 pb-4">
+            <DialogContent className="max-w-2xl max-h-[90vh] bg-white border-green-200 flex flex-col overflow-hidden">
+                <DialogHeader className="border-b border-green-100 pb-4 shrink-0">
                     <DialogTitle className="text-xl font-bold flex items-center gap-2 text-green-800">
                         <div className="p-2 rounded-lg bg-green-100">
                             <Megaphone className="h-5 w-5 text-green-600" />
@@ -196,7 +196,7 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                     </DialogTitle>
                 </DialogHeader>
 
-                <ScrollArea className="max-h-[70vh] pr-4">
+                <ScrollArea className="flex-1 pr-4 overflow-y-auto">
                     <div className="space-y-6 py-2">
                         {/* Title */}
                         <div>
@@ -461,18 +461,18 @@ export function CreateAnnouncementModal({ open, onClose, onSuccess }: CreateAnno
                 </ScrollArea>
 
                 {/* Actions */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-green-100">
+                <div className="flex justify-end gap-3 pt-4 border-t border-green-100 shrink-0 mt-auto">
                     <Button
                         variant="outline"
                         onClick={onClose}
-                        className="border-gray-300"
+                        className="border-gray-300 px-6"
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
                         disabled={loading || !title || !content}
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        className="bg-green-600 hover:bg-green-700 text-white px-6"
                     >
                         {loading ? 'Creating...' : publishImmediately ? 'Publish Now' : 'Schedule'}
                     </Button>

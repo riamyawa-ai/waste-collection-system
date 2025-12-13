@@ -31,6 +31,8 @@ interface Schedule {
     status: string;
     special_instructions: string | null;
     stops_count: number;
+    confirmed_by_collector?: boolean;
+    confirmed_at?: string | null;
 }
 
 const DECLINE_REASONS = [
@@ -161,9 +163,9 @@ export default function CollectorSchedulePage() {
         setShowScheduleModal(true);
     };
 
-    // Check if schedule can be accepted/declined
-    const canRespondToSchedule = (status: string) => {
-        return status === 'active';
+    // Check if schedule can be accepted/declined (not yet confirmed)
+    const canRespondToSchedule = (schedule: Schedule) => {
+        return ['draft', 'active'].includes(schedule.status) && !schedule.confirmed_by_collector;
     };
 
     // Get schedules for calendar (current month only)
@@ -239,7 +241,7 @@ export default function CollectorSchedulePage() {
                                     </div>
 
                                     {/* Action Buttons */}
-                                    {canRespondToSchedule(upcomingSchedules[0].status) && (
+                                    {canRespondToSchedule(upcomingSchedules[0]) && (
                                         <div className="flex gap-2 mt-3">
                                             <Button
                                                 size="sm"
@@ -312,7 +314,7 @@ export default function CollectorSchedulePage() {
                                                 {getStatusBadge(s.status)}
 
                                                 {/* Accept/Decline buttons for active schedules */}
-                                                {canRespondToSchedule(s.status) && (
+                                                {canRespondToSchedule(s) && (
                                                     <>
                                                         <Button
                                                             size="sm"
