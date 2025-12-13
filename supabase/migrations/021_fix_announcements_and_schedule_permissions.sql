@@ -3,6 +3,22 @@
 -- Adds pending_collector status for schedules created by staff
 
 -- ============================================================================
+-- 0. ADD SCHEDULE_ASSIGNMENT TO NOTIFICATION TYPE ENUM
+-- ============================================================================
+
+DO $$ 
+BEGIN
+    -- Check if 'schedule_assignment' already exists in notification_type
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_enum 
+        WHERE enumlabel = 'schedule_assignment' 
+        AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'notification_type')
+    ) THEN
+        ALTER TYPE notification_type ADD VALUE 'schedule_assignment';
+    END IF;
+END $$;
+
+-- ============================================================================
 -- 1. UPDATE ANNOUNCEMENTS RLS POLICY
 -- Allow staff to create and manage announcements (not just admin)
 -- ============================================================================
@@ -66,6 +82,24 @@ CREATE POLICY "Staff and admin can view all announcements"
 
 ALTER TABLE collection_schedules 
   ADD COLUMN IF NOT EXISTS collector_confirmed_at TIMESTAMPTZ;
+
+-- ============================================================================
+-- 3. ADD DELETE POLICY FOR STAFF (missing from original schema)
+-- ============================================================================
+
+DROP POLICY IF EXISTS "Staff can delete schedules" ON collection_schedules;
+CREATE POLICY "Staff can delete schedules"
+  ON collection_schedules FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role IN ('admin', 'staff')
+    )
+  );
+
+-- Grant DELETE permission
+GRANT DELETE ON collection_schedules TO authenticated;
 
 -- ============================================================================
 -- 3. ENSURE PUBLIC READ ACCESS FOR PUBLISHED ANNOUNCEMENTS
